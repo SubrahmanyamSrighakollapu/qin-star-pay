@@ -1,0 +1,172 @@
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import { Table } from '@/components/ui/Table';
+import { Button } from '@/components/ui/Button';
+import { Pagination } from '@/components/ui/Pagination';
+import { ColumnDefinition } from '@/types/common';
+import { LedgerEntry, PaginationState } from '@/types/domain';
+import { formatCurrency, formatDate } from '@/utils/formatters';
+import { Eye, ArrowUpRight, ArrowDownLeft, ExternalLink } from 'lucide-react';
+
+export interface LedgerTableProps {
+  entries: LedgerEntry[];
+  pagination: PaginationState;
+  onPageChange: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
+  onViewDetails: (entry: LedgerEntry) => void;
+  isLoading?: boolean;
+}
+
+export const LedgerTable: React.FC<LedgerTableProps> = ({
+  entries,
+  pagination,
+  onPageChange,
+  onPageSizeChange,
+  onViewDetails,
+  isLoading = false,
+}) => {
+  const columns: ColumnDefinition<LedgerEntry>[] = [
+    {
+      key: 'id',
+      header: 'Ledger ID',
+      render: (row) => (
+        <span className="font-mono font-bold text-[var(--primary)] text-xs">{row.id}</span>
+      ),
+    },
+    {
+      key: 'createdAt',
+      header: 'Date & Time',
+      render: (row) => (
+        <span className="text-xs text-[var(--text-secondary)] whitespace-nowrap">
+          {formatDate(row.createdAt)}
+        </span>
+      ),
+    },
+    {
+      key: 'entityName',
+      header: 'Entity / Wallet',
+      render: (row) => (
+        <div>
+          <div className="font-semibold text-xs text-[var(--text-primary)]">{row.entityName}</div>
+          <div className="text-[11px] font-mono text-slate-500">{row.walletId}</div>
+        </div>
+      ),
+    },
+    {
+      key: 'entryType',
+      header: 'Entry Type',
+      align: 'center',
+      render: (row) => (
+        <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-800 border border-slate-200">
+          {row.entryType}
+        </span>
+      ),
+    },
+    {
+      key: 'direction',
+      header: 'Direction',
+      align: 'center',
+      render: (row) => (
+        <span
+          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
+            row.direction === 'CREDIT'
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+              : 'bg-rose-50 text-rose-700 border border-rose-200'
+          }`}
+        >
+          {row.direction === 'CREDIT' ? (
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          ) : (
+            <ArrowDownLeft className="w-3.5 h-3.5" />
+          )}
+          {row.direction}
+        </span>
+      ),
+    },
+    {
+      key: 'referenceId',
+      header: 'Reference / Txn',
+      render: (row) => (
+        <div>
+          {row.transactionId ? (
+            <Link
+              href={`/transactions/${row.transactionId}`}
+              className="font-mono text-xs font-bold text-[var(--primary)] hover:underline inline-flex items-center gap-1"
+            >
+              <span>{row.transactionId}</span>
+              <ExternalLink className="w-3 h-3" />
+            </Link>
+          ) : (
+            <span className="font-mono text-xs text-slate-700">{row.referenceId || '—'}</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'openingBalance',
+      header: 'Opening Bal',
+      align: 'right',
+      render: (row) => (
+        <span className="font-mono text-xs text-slate-600">{formatCurrency(row.openingBalance)}</span>
+      ),
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      align: 'right',
+      render: (row) => (
+        <span
+          className={`font-mono font-extrabold text-xs ${
+            row.direction === 'CREDIT' ? 'text-emerald-600' : 'text-rose-600'
+          }`}
+        >
+          {row.direction === 'CREDIT' ? '+' : '-'}{formatCurrency(row.amount)}
+        </span>
+      ),
+    },
+    {
+      key: 'closingBalance',
+      header: 'Closing Bal',
+      align: 'right',
+      render: (row) => (
+        <span className="font-mono font-bold text-xs text-slate-900">
+          {formatCurrency(row.closingBalance)}
+        </span>
+      ),
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="overflow-x-auto border border-[var(--border)] rounded-[var(--radius-xl)] bg-white shadow-xs">
+        <Table
+          columns={columns}
+          data={entries}
+          keyExtractor={(row) => row.id}
+          isLoading={isLoading}
+          renderActions={(row) => (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onViewDetails(row)}
+              leftIcon={<Eye className="w-3.5 h-3.5" />}
+            >
+              Details
+            </Button>
+          )}
+        />
+      </div>
+
+      <Pagination
+        currentPage={pagination.page}
+        totalPages={pagination.totalPages}
+        totalItems={pagination.totalItems}
+        pageSize={pagination.pageSize}
+        onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
+      />
+    </div>
+  );
+};

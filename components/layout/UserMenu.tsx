@@ -1,0 +1,179 @@
+'use client';
+
+import React, { useState, useRef, useEffect } from 'react';
+import { User, KeyRound, Settings, LogOut, ChevronDown, Shield, RefreshCw } from 'lucide-react';
+import { UserContext, UserRole, MOCK_CURRENT_USER } from '@/config/roles';
+import { StatusBadge } from '@/components/ui/StatusBadge';
+import { useToast } from '@/components/ui/Toast';
+import { cn } from '@/utils/cn';
+
+export interface UserMenuProps {
+  currentUser?: UserContext;
+  onRoleChange?: (newRole: UserRole) => void;
+}
+
+const availableRoles: UserRole[] = [
+  'SUPER_ADMIN',
+  'OPERATIONS',
+  'ACCOUNTS',
+  'KYC',
+  'SUPPORT',
+  'SALES',
+];
+
+export const UserMenu: React.FC<UserMenuProps> = ({
+  currentUser = MOCK_CURRENT_USER,
+  onRoleChange,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [showRoleSwitcher, setShowRoleSwitcher] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { toastInfo, toastSuccess } = useToast();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        setShowRoleSwitcher(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    toastSuccess('Signed out successfully.');
+    setIsOpen(false);
+  };
+
+  return (
+    <div ref={containerRef} className="relative inline-block text-left">
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer"
+        aria-label="User menu"
+      >
+        <div className="w-8 h-8 rounded-full bg-[var(--primary)] text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+          {currentUser.name.slice(0, 2).toUpperCase()}
+        </div>
+
+        <div className="hidden md:flex flex-col text-left">
+          <span className="text-xs font-semibold text-[var(--text-primary)] leading-tight">
+            {currentUser.name}
+          </span>
+          <span className="text-[10px] font-bold text-[var(--primary)] tracking-wide">
+            {currentUser.role}
+          </span>
+        </div>
+
+        <ChevronDown className="w-4 h-4 text-[var(--text-muted)] hidden md:block" />
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-64 bg-white border border-[var(--border)] rounded-[var(--radius-xl)] shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          {/* User Header Info */}
+          <div className="p-4 bg-[var(--bg-secondary)] border-b border-[var(--border-subtle)] space-y-1">
+            <div className="font-semibold text-xs text-[var(--text-primary)]">{currentUser.name}</div>
+            <div className="text-[11px] text-[var(--text-muted)] truncate">{currentUser.email}</div>
+            <div className="pt-1">
+              <StatusBadge status="ACTIVE" label={`ROLE: ${currentUser.role}`} size="sm" />
+            </div>
+          </div>
+
+          {/* Menu Options */}
+          <div className="py-1 text-xs text-[var(--text-secondary)]">
+            <button
+              type="button"
+              onClick={() => {
+                toastInfo('My Profile: User account settings view');
+                setIsOpen(false);
+              }}
+              className="w-full px-4 py-2 flex items-center gap-2.5 hover:bg-slate-50 transition-colors text-left cursor-pointer"
+            >
+              <User className="w-4 h-4 text-[var(--text-muted)]" />
+              <span>My Profile</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                toastInfo('Change Password: Password reset modal requested');
+                setIsOpen(false);
+              }}
+              className="w-full px-4 py-2 flex items-center gap-2.5 hover:bg-slate-50 transition-colors text-left cursor-pointer"
+            >
+              <KeyRound className="w-4 h-4 text-[var(--text-muted)]" />
+              <span>Change Password</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                toastInfo('System Settings: Platform options requested');
+                setIsOpen(false);
+              }}
+              className="w-full px-4 py-2 flex items-center gap-2.5 hover:bg-slate-50 transition-colors text-left cursor-pointer"
+            >
+              <Settings className="w-4 h-4 text-[var(--text-muted)]" />
+              <span>System Settings</span>
+            </button>
+
+            {/* Dev Role Switcher Helper */}
+            {onRoleChange && (
+              <div className="border-t border-[var(--border-subtle)] my-1 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowRoleSwitcher((prev) => !prev)}
+                  className="w-full px-4 py-2 flex items-center justify-between hover:bg-slate-50 transition-colors text-left cursor-pointer text-blue-700 font-semibold"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Shield className="w-4 h-4 text-blue-600" />
+                    <span>Dev Role Switcher</span>
+                  </div>
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </button>
+
+                {showRoleSwitcher && (
+                  <div className="px-4 py-2 bg-slate-50 grid grid-cols-2 gap-1 text-[11px]">
+                    {availableRoles.map((role) => (
+                      <button
+                        key={role}
+                        type="button"
+                        onClick={() => {
+                          onRoleChange(role);
+                          setIsOpen(false);
+                          setShowRoleSwitcher(false);
+                        }}
+                        className={cn(
+                          'px-2 py-1 rounded text-left font-medium transition-colors cursor-pointer',
+                          currentUser.role === role
+                            ? 'bg-[var(--primary)] text-white font-bold'
+                            : 'hover:bg-slate-200 text-slate-700'
+                        )}
+                      >
+                        {role}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Logout Button */}
+          <div className="border-t border-[var(--border-subtle)] p-1 bg-slate-50">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full px-3 py-2 flex items-center gap-2.5 text-xs text-rose-700 font-semibold hover:bg-rose-100/60 rounded-md transition-colors text-left cursor-pointer"
+            >
+              <LogOut className="w-4 h-4 text-rose-600" />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

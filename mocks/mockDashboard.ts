@@ -1,0 +1,102 @@
+import { FullDashboardData } from '@/types/dashboard';
+
+export const initialMockDashboardData: FullDashboardData = {
+  metrics: {
+    availableBalance: 9953681.66,
+    totalPayIn: 4275000.0,
+    totalPayInTrend: 8.4,
+    totalPayOut: 3120000.0,
+    totalPayOutTrend: -2.1,
+    pendingSettlement: 375000.0,
+    successfulTransactions: 12842,
+    failedTransactions: 736,
+    successRate: 94.58,
+    totalTransactions: 13578,
+  },
+  statusDistribution: [
+    { name: 'Success', value: 12842, count: 12842, percentage: 94.58, color: '#10B981' },
+    { name: 'Failed', value: 736, count: 736, percentage: 5.42, color: '#EF4444' },
+  ],
+  payInVsPayOut: [
+    { name: 'Pay-In', amount: 4275000.0, count: 8450, color: '#1E40AF' },
+    { name: 'Pay-Out', amount: 3120000.0, count: 5128, color: '#F59E0B' },
+  ],
+  channelStats: [
+    { channel: 'Web Portal', count: 8450, amount: 4275000.0 },
+    { channel: 'Mobile App', count: 2740, amount: 1850000.0 },
+    { channel: 'API Integration', count: 2388, amount: 1270000.0 },
+  ],
+  providerStats: [
+    { providerName: 'Provider A (Primary Gateway)', volume: 6240, successRate: 98.7, totalAmount: 3500000.0 },
+    { providerName: 'Provider B (Payout Switch)', volume: 4120, successRate: 91.2, totalAmount: 2400000.0 },
+    { providerName: 'Provider C (Bank Direct IMPS)', volume: 3218, successRate: 78.4, totalAmount: 1495000.0 },
+  ],
+  trendData: [
+    { date: '01 Sep', amount: 4200000.0, payinAmount: 2500000.0, payoutAmount: 1700000.0, count: 1250 },
+    { date: '02 Sep', amount: 5100000.0, payinAmount: 3100000.0, payoutAmount: 2000000.0, count: 1480 },
+    { date: '03 Sep', amount: 4700000.0, payinAmount: 2800000.0, payoutAmount: 1900000.0, count: 1320 },
+    { date: '04 Sep', amount: 5600000.0, payinAmount: 3400000.0, payoutAmount: 2200000.0, count: 1610 },
+    { date: '05 Sep', amount: 6200000.0, payinAmount: 3800000.0, payoutAmount: 2400000.0, count: 1790 },
+    { date: '06 Sep', amount: 5900000.0, payinAmount: 3500000.0, payoutAmount: 2400000.0, count: 1650 },
+    { date: '07 Sep', amount: 7395000.0, payinAmount: 4275000.0, payoutAmount: 3120000.0, count: 2110 },
+  ],
+  providerHealth: [
+    {
+      id: 'ph_1',
+      providerName: 'Provider A (Primary Gateway)',
+      payInStatus: 'OPERATIONAL',
+      payOutStatus: 'OPERATIONAL',
+      successRate: 98.7,
+      lastChecked: '1 min ago',
+    },
+    {
+      id: 'ph_2',
+      providerName: 'Provider B (Payout Switch)',
+      payInStatus: 'OPERATIONAL',
+      payOutStatus: 'DEGRADED',
+      successRate: 91.2,
+      lastChecked: '2 mins ago',
+    },
+    {
+      id: 'ph_3',
+      providerName: 'Provider C (Bank Direct IMPS)',
+      payInStatus: 'DOWN',
+      payOutStatus: 'OPERATIONAL',
+      successRate: 78.4,
+      lastChecked: '3 mins ago',
+    },
+  ],
+  balanceOverview: {
+    masterBalance: 15000000.0,
+    availableBalance: 9953681.66,
+    holdBalance: 245000.0,
+    pendingSettlement: 375000.0,
+  },
+  alerts: [
+    {
+      id: 'alt_1',
+      title: '12 Failed Payouts Require Review',
+      message: 'IMPS transfers flagged with provider timeout error.',
+      type: 'DANGER',
+      timestamp: '10 mins ago',
+      actionPath: '/transactions/payout',
+    },
+    {
+      id: 'alt_2',
+      title: '6 KYC Applications Pending Approval',
+      message: 'New merchant onboarding documents awaiting review.',
+      type: 'WARNING',
+      timestamp: '30 mins ago',
+      actionPath: '/kyc',
+    },
+    {
+      id: 'alt_3',
+      title: 'Provider B Payout Degraded',
+      message: 'Payout success rate dropped below 92% threshold.',
+      type: 'WARNING',
+      timestamp: '1 hour ago',
+      actionPath: '/integrations/providers',
+    },
+  ],
+  lastRefreshedAt: new Date().toISOString(),
+};
