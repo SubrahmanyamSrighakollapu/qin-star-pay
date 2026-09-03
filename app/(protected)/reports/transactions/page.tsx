@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Card } from '@/components/ui/Card';
 import { Table } from '@/components/ui/Table';
@@ -9,13 +8,17 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
+import { Tooltip } from '@/components/ui/Tooltip';
 import { Pagination } from '@/components/ui/Pagination';
+import { useModal } from '@/hooks/useModal';
 import { reportService, ReportListResult } from '@/services/reportService';
-import { Transaction, TransactionReportSummary, ReportFilters, ReportDateRange, PaginationState } from '@/types/domain';
+import { TransactionReportRecord, TransactionReportSummary, ReportFilters, ReportDateRange, PaginationState } from '@/types/domain';
+import { ColumnDefinition } from '@/types/common';
 import { formatCurrency, formatDate } from '@/utils/formatters';
 import { ReportDateRangePicker } from '@/components/features/reports/ReportDateRangePicker';
 import { ReportExportMenu } from '@/components/features/reports/ReportExportMenu';
-import { Search, Filter, RotateCcw, Eye, ArrowUpRight, ArrowDownLeft, Activity } from 'lucide-react';
+import { TransactionReportDrawer } from '@/components/features/reports/TransactionReportDrawer';
+import { Search, Filter, RotateCcw, Eye, Activity } from 'lucide-react';
 
 export default function TransactionReportPage() {
   const [activeMode, setActiveMode] = useState<'ALL' | 'LIVE' | 'UNSETTLED' | 'ORDERS'>('ALL');
@@ -24,9 +27,12 @@ export default function TransactionReportPage() {
   const [transactionType, setTransactionType] = useState<'ALL' | 'PAY_IN' | 'PAY_OUT'>('ALL');
   const [status, setStatus] = useState('ALL');
 
-  const [data, setData] = useState<ReportListResult<Transaction, TransactionReportSummary> | null>(null);
+  const [data, setData] = useState<ReportListResult<TransactionReportRecord, TransactionReportSummary> | null>(null);
   const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize: 10, totalItems: 0, totalPages: 1 });
   const [isLoading, setIsLoading] = useState(true);
+
+  // Detail Drawer
+  const detailsDrawer = useModal<TransactionReportRecord>();
 
   const loadReport = () => {
     setIsLoading(true);
@@ -68,17 +74,26 @@ export default function TransactionReportPage() {
   const handleExportCsv = () => {
     if (!data?.items) return;
     const exportRows = data.items.map((t) => ({
-      'Transaction ID': t.id,
-      'Type': t.type,
-      'Order ID': t.orderId || 'N/A',
-      'Merchant Name': t.merchantName,
-      'Amount (INR)': t.amount,
-      'Fee (INR)': t.fee,
-      'Net Amount (INR)': t.netAmount,
+      'Retailer Name': t.retailerName,
+      'Retailer ID': t.retailerId,
+      'Mobile Number': t.mobileNumber,
+      'Transaction ID': t.transactionId,
+      'API Reference ID': t.apiReferenceId,
+      'Transaction / Service Type': t.serviceType,
       'Status': t.status,
+      'Failure / Response Message': t.responseMessage,
+      'Request Date & Time': formatDate(t.requestedAt),
+      'Updated Date & Time': formatDate(t.updatedAt),
+      'Transaction Amount (INR)': t.transactionAmount,
+      'Transaction Charges (INR)': t.transactionCharges,
+      'GST / Tax (INR)': t.gstAmount,
+      'Total Amount (INR)': t.totalAmount,
+      'Settlement Status': t.settlementStatus,
+      'Settlement Date': t.settlementDate ? formatDate(t.settlementDate) : 'N/A',
       'Payment Mode': t.paymentMode,
-      'Provider': t.provider || 'N/A',
-      'Created At': t.createdAt,
+      'RRN / UTR Number': t.rrnOrUtr || 'N/A',
+      'Bank Reference Number': t.bankReferenceNumber || 'N/A',
+      'Remarks': t.remarks || 'N/A',
     }));
     reportService.exportToCsv(`Transaction_Report_${activeMode}`, exportRows);
   };
@@ -95,64 +110,162 @@ export default function TransactionReportPage() {
     successRate: 100,
   };
 
-  const columns = [
+  // 20 Required Columns (Strict Order per client mandate)
+  const columns: ColumnDefinition<TransactionReportRecord>[] = [
     {
-      key: 'id',
-      header: 'Transaction ID / Order',
-      render: (row: Transaction) => (
-        <div>
-          <span className="font-mono font-bold text-[var(--primary)] text-xs block">{row.id}</span>
-          <span className="font-mono text-[11px] text-slate-500">{row.orderId || row.referenceId || 'Direct'}</span>
-        </div>
+      key: 'retailerName',
+      header: 'Retailer Name',
+      minWidth: '160px',
+      render: (row) => <div className="font-semibold text-xs text-slate-900 whitespace-nowrap">{row.retailerName}</div>,
+    },
+    {
+      key: 'retailerId',
+      header: 'Retailer ID',
+      minWidth: '120px',
+      render: (row) => <span className="font-mono text-xs text-slate-600 font-semibold">{row.retailerId}</span>,
+    },
+    {
+      key: 'mobileNumber',
+      header: 'Mobile Number',
+      minWidth: '130px',
+      render: (row) => <span className="font-mono text-xs text-slate-700">{row.mobileNumber}</span>,
+    },
+    {
+      key: 'transactionId',
+      header: 'Transaction ID',
+      minWidth: '160px',
+      render: (row) => <span className="font-mono font-extrabold text-xs text-[var(--primary)]">{row.transactionId}</span>,
+    },
+    {
+      key: 'apiReferenceId',
+      header: 'API Reference ID',
+      minWidth: '160px',
+      render: (row) => (
+        <Tooltip content={row.apiReferenceId}>
+          <span className="font-mono text-xs text-slate-600 truncate max-w-[150px] block">{row.apiReferenceId}</span>
+        </Tooltip>
       ),
     },
     {
-      key: 'type',
-      header: 'Type',
-      render: (row: Transaction) => (
-        <span
-          className={`inline-flex items-center gap-1 font-bold text-xs ${
-            row.type === 'PAY_IN' ? 'text-emerald-700' : 'text-rose-700'
-          }`}
-        >
-          {row.type === 'PAY_IN' ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownLeft className="w-3.5 h-3.5" />}
-          {row.type}
-        </span>
-      ),
-    },
-    {
-      key: 'merchantName',
-      header: 'Merchant / Retailer',
-      render: (row: Transaction) => (
-        <div>
-          <div className="font-semibold text-xs text-slate-900">{row.merchantName}</div>
-          <div className="text-[11px] text-slate-400">{row.channel || 'API Gateway'}</div>
-        </div>
-      ),
-    },
-    {
-      key: 'amount',
-      header: 'Amount',
-      align: 'right' as const,
-      render: (row: Transaction) => (
-        <span className="font-mono font-extrabold text-xs text-slate-900">
-          {formatCurrency(row.amount)}
+      key: 'serviceType',
+      header: 'Transaction / Service Type',
+      minWidth: '170px',
+      render: (row) => (
+        <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-50 text-blue-900 border border-blue-200 whitespace-nowrap">
+          {row.serviceType}
         </span>
       ),
     },
     {
       key: 'status',
       header: 'Status',
-      align: 'center' as const,
-      render: (row: Transaction) => <StatusBadge status={row.status} size="sm" />,
+      minWidth: '110px',
+      align: 'center',
+      render: (row) => <StatusBadge status={row.status} size="sm" />,
     },
     {
-      key: 'createdAt',
-      header: 'Date & Time',
-      render: (row: Transaction) => (
-        <span className="text-xs text-slate-600 font-mono whitespace-nowrap">
-          {formatDate(row.createdAt)}
+      key: 'responseMessage',
+      header: 'Failure / Response Message',
+      minWidth: '220px',
+      render: (row) => (
+        <Tooltip content={row.responseMessage}>
+          <span className={`text-xs truncate max-w-[200px] block ${row.status === 'FAILED' ? 'text-rose-700 font-semibold' : 'text-slate-700'}`}>
+            {row.responseMessage}
+          </span>
+        </Tooltip>
+      ),
+    },
+    {
+      key: 'requestedAt',
+      header: 'Request Date & Time',
+      minWidth: '160px',
+      render: (row) => <span className="font-mono text-xs text-slate-700 whitespace-nowrap">{formatDate(row.requestedAt)}</span>,
+    },
+    {
+      key: 'updatedAt',
+      header: 'Updated Date & Time',
+      minWidth: '160px',
+      render: (row) => <span className="font-mono text-xs text-slate-700 whitespace-nowrap">{formatDate(row.updatedAt)}</span>,
+    },
+    {
+      key: 'transactionAmount',
+      header: 'Transaction Amount',
+      minWidth: '140px',
+      align: 'right',
+      render: (row) => <span className="font-mono font-bold text-xs text-slate-900">{formatCurrency(row.transactionAmount)}</span>,
+    },
+    {
+      key: 'transactionCharges',
+      header: 'Transaction Charges',
+      minWidth: '140px',
+      align: 'right',
+      render: (row) => <span className="font-mono text-xs text-slate-700">{formatCurrency(row.transactionCharges)}</span>,
+    },
+    {
+      key: 'gstAmount',
+      header: 'GST / Tax',
+      minWidth: '110px',
+      align: 'right',
+      render: (row) => <span className="font-mono text-xs text-slate-700">{formatCurrency(row.gstAmount)}</span>,
+    },
+    {
+      key: 'totalAmount',
+      header: 'Total Amount',
+      minWidth: '140px',
+      align: 'right',
+      render: (row) => <span className="font-mono font-extrabold text-xs text-purple-900">{formatCurrency(row.totalAmount)}</span>,
+    },
+    {
+      key: 'settlementStatus',
+      header: 'Settlement Status',
+      minWidth: '130px',
+      align: 'center',
+      render: (row) => <StatusBadge status={row.settlementStatus} size="sm" />,
+    },
+    {
+      key: 'settlementDate',
+      header: 'Settlement Date',
+      minWidth: '160px',
+      render: (row) => (
+        <span className="font-mono text-xs text-slate-700 whitespace-nowrap">
+          {row.settlementDate ? formatDate(row.settlementDate) : '-'}
         </span>
+      ),
+    },
+    {
+      key: 'paymentMode',
+      header: 'Payment Mode',
+      minWidth: '120px',
+      render: (row) => (
+        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-800 border border-slate-300">
+          {row.paymentMode}
+        </span>
+      ),
+    },
+    {
+      key: 'rrnOrUtr',
+      header: 'RRN / UTR Number',
+      minWidth: '150px',
+      render: (row) => <span className="font-mono text-xs text-slate-700 font-semibold">{row.rrnOrUtr || '-'}</span>,
+    },
+    {
+      key: 'bankReferenceNumber',
+      header: 'Bank Reference Number',
+      minWidth: '160px',
+      render: (row) => (
+        <Tooltip content={row.bankReferenceNumber || '-'}>
+          <span className="font-mono text-xs text-slate-700 truncate max-w-[140px] block">{row.bankReferenceNumber || '-'}</span>
+        </Tooltip>
+      ),
+    },
+    {
+      key: 'remarks',
+      header: 'Remarks',
+      minWidth: '180px',
+      render: (row) => (
+        <Tooltip content={row.remarks || '-'}>
+          <span className="text-xs text-slate-600 truncate max-w-[160px] block">{row.remarks || '-'}</span>
+        </Tooltip>
       ),
     },
   ];
@@ -160,7 +273,7 @@ export default function TransactionReportPage() {
   return (
     <PageContainer
       title="Transaction Report"
-      description="Analytical transaction volumes, success ratios, unsettled queues, and exportable reports."
+      description="Analytical transaction volumes, success ratios, clearance pipeline, and exportable reports with 20 essential transaction fields."
       actions={
         <ReportExportMenu onExportCsv={handleExportCsv} reportTitle="Transaction Report" disabled={!data?.items?.length} />
       }
@@ -212,7 +325,7 @@ export default function TransactionReportPage() {
               setActiveMode('ALL');
               setPagination((prev) => ({ ...prev, page: 1 }));
             }}
-            className={`pb-3 px-4 border-b-2 whitespace-nowrap transition-colors ${
+            className={`pb-3 px-4 border-b-2 whitespace-nowrap transition-colors cursor-pointer ${
               activeMode === 'ALL'
                 ? 'border-[var(--primary)] text-[var(--primary)] font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -225,7 +338,7 @@ export default function TransactionReportPage() {
               setActiveMode('LIVE');
               setPagination((prev) => ({ ...prev, page: 1 }));
             }}
-            className={`pb-3 px-4 border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+            className={`pb-3 px-4 border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
               activeMode === 'LIVE'
                 ? 'border-[var(--primary)] text-[var(--primary)] font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -239,7 +352,7 @@ export default function TransactionReportPage() {
               setActiveMode('UNSETTLED');
               setPagination((prev) => ({ ...prev, page: 1 }));
             }}
-            className={`pb-3 px-4 border-b-2 whitespace-nowrap transition-colors ${
+            className={`pb-3 px-4 border-b-2 whitespace-nowrap transition-colors cursor-pointer ${
               activeMode === 'UNSETTLED'
                 ? 'border-[var(--primary)] text-[var(--primary)] font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -252,7 +365,7 @@ export default function TransactionReportPage() {
               setActiveMode('ORDERS');
               setPagination((prev) => ({ ...prev, page: 1 }));
             }}
-            className={`pb-3 px-4 border-b-2 whitespace-nowrap transition-colors ${
+            className={`pb-3 px-4 border-b-2 whitespace-nowrap transition-colors cursor-pointer ${
               activeMode === 'ORDERS'
                 ? 'border-[var(--primary)] text-[var(--primary)] font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -276,7 +389,7 @@ export default function TransactionReportPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2 border-t border-slate-100">
               <Input
                 label="Search Query"
-                placeholder="Search Transaction ID, Order, UTR..."
+                placeholder="Search Retailer, Txn ID, API Ref, UTR, Mobile..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 leftIcon={<Search className="w-4 h-4 text-slate-400" />}
@@ -303,6 +416,7 @@ export default function TransactionReportPage() {
                   { value: 'FAILED', label: 'Failed' },
                   { value: 'PENDING', label: 'Pending' },
                   { value: 'PROCESSING', label: 'Processing' },
+                  { value: 'REVERSED', label: 'Reversed' },
                 ]}
               />
             </div>
@@ -333,19 +447,22 @@ export default function TransactionReportPage() {
           </form>
         </Card>
 
-        {/* Data Table */}
+        {/* Data Table with Horizontal Scrolling & Clear Column Widths */}
         <div className="overflow-x-auto border border-[var(--border)] rounded-[var(--radius-xl)] bg-white shadow-xs">
           <Table
             columns={columns}
             data={data?.items || []}
-            keyExtractor={(row) => row.id}
+            keyExtractor={(row) => row.transactionId}
             isLoading={isLoading}
             renderActions={(row) => (
-              <Link href={`/transactions/${row.id}`}>
-                <Button variant="outline" size="sm" leftIcon={<Eye className="w-3.5 h-3.5" />}>
-                  View
-                </Button>
-              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => detailsDrawer.open(row)}
+                leftIcon={<Eye className="w-3.5 h-3.5" />}
+              >
+                View
+              </Button>
             )}
           />
         </div>
@@ -357,6 +474,13 @@ export default function TransactionReportPage() {
           pageSize={pagination.pageSize}
           onPageChange={(page) => setPagination((prev) => ({ ...prev, page }))}
           onPageSizeChange={(pageSize) => setPagination((prev) => ({ ...prev, page: 1, pageSize }))}
+        />
+
+        {/* Transaction Detail Drawer */}
+        <TransactionReportDrawer
+          isOpen={detailsDrawer.isOpen}
+          onClose={detailsDrawer.close}
+          record={detailsDrawer.data}
         />
       </div>
     </PageContainer>

@@ -26,6 +26,7 @@ export type DebitRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'PROCESSE
 export type SettlementStatus =
   | 'PENDING'
   | 'ELIGIBLE'
+  | 'NOT_ELIGIBLE'
   | 'QUEUED'
   | 'PROCESSING'
   | 'SETTLED'
@@ -162,6 +163,37 @@ export interface TransactionReportSummary {
   pendingCount: number;
   pendingAmount: number;
   successRate: number;
+}
+
+export interface TransactionReportRecord {
+  retailerName: string;
+  retailerId: string;
+  mobileNumber: string;
+
+  transactionId: string;
+  apiReferenceId: string;
+
+  serviceType: string;
+  status: TransactionStatus;
+  responseMessage: string;
+
+  requestedAt: string;
+  updatedAt: string;
+
+  transactionAmount: number;
+  transactionCharges: number;
+  gstAmount: number;
+  totalAmount: number;
+
+  settlementStatus: SettlementStatus;
+  settlementDate?: string;
+
+  paymentMode: string;
+
+  rrnOrUtr?: string;
+  bankReferenceNumber?: string;
+
+  remarks?: string;
 }
 
 export interface LedgerReportSummary {
@@ -1016,6 +1048,7 @@ export interface Transaction {
   merchantName: string;
   distributorName?: string;
   retailerName?: string;
+  retailerId?: string;
   type: 'PAY_IN' | 'PAY_OUT' | 'SETTLEMENT';
   amount: number;
   fee: number;

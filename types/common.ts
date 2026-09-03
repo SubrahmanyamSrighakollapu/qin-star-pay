@@ -36,8 +36,11 @@ export interface ColumnDefinition<T> {
   header: ReactNode;
   render?: (row: T, index: number) => ReactNode;
   width?: string;
+  minWidth?: string;
   align?: TableAlign;
   sortable?: boolean;
+  className?: string;
+  headerClassName?: string;
 }
 
 export interface BreadcrumbItem {

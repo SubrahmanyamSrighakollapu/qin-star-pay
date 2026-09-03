@@ -1,5 +1,6 @@
 import {
-  Transaction,
+  TransactionReportRecord,
+  SettlementStatus,
   LedgerEntry,
   Settlement,
   WalletAccount,
@@ -35,15 +36,66 @@ export const reportService = {
     mode: 'ALL' | 'LIVE' | 'UNSETTLED' | 'ORDERS' = 'ALL',
     page = 1,
     pageSize = 10
-  ): Promise<ApiResponse<ReportListResult<Transaction, TransactionReportSummary>>> {
+  ): Promise<ApiResponse<ReportListResult<TransactionReportRecord, TransactionReportSummary>>> {
     if (APP_CONFIG.useMockData) {
       await new Promise((res) => setTimeout(res, 200));
 
       const txRes = await transactionService.getTransactions({}, 1, 100);
-      let items = txRes.data?.items || [];
+      const rawItems = txRes.data?.items || [];
+
+      let items: TransactionReportRecord[] = rawItems.map((t, idx) => {
+        const gst = t.gst ?? Number((t.fee * 0.18).toFixed(2));
+        const total = Number((t.amount + t.fee + gst).toFixed(2));
+        const retailerId = t.retailerId || `RET_${1001 + (idx % 5)}`;
+        const retailerName = t.retailerName || t.merchantName || 'Metro Store #12';
+        const mobileNumber = t.customerMobile || `98765${43210 + idx}`;
+        const transactionId = t.transactionRef || t.id;
+        const apiReferenceId = t.referenceId || t.orderId || `API_REF_${t.id}`;
+        const serviceType = t.service || `${t.type === 'PAY_IN' ? 'Pay-In' : 'Pay-Out'} (${t.paymentMode})`;
+        const responseMessage = t.status === 'SUCCESS'
+          ? 'Transaction processed successfully'
+          : (t.failureReason || t.failureCode || 'Provider processing error');
+        
+        let settlementStatus: SettlementStatus = 'PENDING';
+        if (t.status === 'SUCCESS') {
+          settlementStatus = idx % 2 === 0 ? 'SETTLED' : 'ELIGIBLE';
+        } else if (t.status === 'FAILED') {
+          settlementStatus = 'NOT_ELIGIBLE';
+        }
+
+        const settlementDate = settlementStatus === 'SETTLED' ? (t.updatedAt || t.createdAt) : undefined;
+        const rrnOrUtr = t.utr || (t.status === 'SUCCESS' ? `UTR991823${idx + 10}` : undefined);
+        const bankReferenceNumber = (t.providerResponse?.providerRef as string) || (rrnOrUtr ? `BKREF_${rrnOrUtr}` : undefined);
+        const remarks = t.status === 'SUCCESS'
+          ? `Settled in batch STB_20260903_00${(idx % 3) + 1}`
+          : (t.status === 'FAILED' ? 'Reversed after bank clearance failure' : 'Awaiting provider clearance');
+
+        return {
+          retailerName,
+          retailerId,
+          mobileNumber,
+          transactionId,
+          apiReferenceId,
+          serviceType,
+          status: t.status,
+          responseMessage,
+          requestedAt: t.createdAt,
+          updatedAt: t.updatedAt || t.createdAt,
+          transactionAmount: t.amount,
+          transactionCharges: t.fee,
+          gstAmount: gst,
+          totalAmount: total,
+          settlementStatus,
+          settlementDate,
+          paymentMode: t.paymentMode,
+          rrnOrUtr,
+          bankReferenceNumber,
+          remarks,
+        };
+      });
 
       if (filters?.transactionType && filters.transactionType !== 'ALL') {
-        items = items.filter((t) => t.type === filters.transactionType);
+        items = items.filter((t) => t.serviceType.toUpperCase().includes(filters.transactionType!));
       }
 
       if (filters?.status && filters.status !== 'ALL') {
@@ -54,35 +106,38 @@ export const reportService = {
         const q = filters.searchQuery.trim().toLowerCase();
         items = items.filter(
           (t) =>
-            t.id.toLowerCase().includes(q) ||
-            t.merchantName.toLowerCase().includes(q) ||
-            (t.orderId && t.orderId.toLowerCase().includes(q)) ||
-            (t.utr && t.utr.toLowerCase().includes(q))
+            t.transactionId.toLowerCase().includes(q) ||
+            t.retailerName.toLowerCase().includes(q) ||
+            t.retailerId.toLowerCase().includes(q) ||
+            t.mobileNumber.toLowerCase().includes(q) ||
+            t.apiReferenceId.toLowerCase().includes(q) ||
+            (t.rrnOrUtr && t.rrnOrUtr.toLowerCase().includes(q)) ||
+            (t.bankReferenceNumber && t.bankReferenceNumber.toLowerCase().includes(q))
         );
       }
 
       if (mode === 'LIVE') {
         items = items.slice(0, 5);
       } else if (mode === 'UNSETTLED') {
-        items = items.filter((t) => t.status === 'SUCCESS' && t.type === 'PAY_IN');
+        items = items.filter((t) => t.status === 'SUCCESS' && t.settlementStatus !== 'SETTLED');
       } else if (mode === 'ORDERS') {
-        items = items.filter((t) => !!t.orderId);
+        items = items.filter((t) => !!t.apiReferenceId);
       }
 
       const totalTransactions = items.length;
-      const totalAmount = items.reduce((acc, t) => acc + t.amount, 0);
+      const totalAmount = items.reduce((acc, t) => acc + t.transactionAmount, 0);
 
       const successfulItems = items.filter((t) => t.status === 'SUCCESS');
       const successfulCount = successfulItems.length;
-      const successfulAmount = successfulItems.reduce((acc, t) => acc + t.amount, 0);
+      const successfulAmount = successfulItems.reduce((acc, t) => acc + t.transactionAmount, 0);
 
       const failedItems = items.filter((t) => t.status === 'FAILED');
       const failedCount = failedItems.length;
-      const failedAmount = failedItems.reduce((acc, t) => acc + t.amount, 0);
+      const failedAmount = failedItems.reduce((acc, t) => acc + t.transactionAmount, 0);
 
       const pendingItems = items.filter((t) => t.status === 'PENDING' || t.status === 'PROCESSING');
       const pendingCount = pendingItems.length;
-      const pendingAmount = pendingItems.reduce((acc, t) => acc + t.amount, 0);
+      const pendingAmount = pendingItems.reduce((acc, t) => acc + t.transactionAmount, 0);
 
       const successRate = totalTransactions > 0 ? Math.round((successfulCount / totalTransactions) * 1000) / 10 : 100;
 
@@ -113,7 +168,7 @@ export const reportService = {
       };
     }
 
-    return { success: false, data: null as unknown as ReportListResult<Transaction, TransactionReportSummary>, timestamp: new Date().toISOString() };
+    return { success: false, data: null as unknown as ReportListResult<TransactionReportRecord, TransactionReportSummary>, timestamp: new Date().toISOString() };
   },
 
   /**

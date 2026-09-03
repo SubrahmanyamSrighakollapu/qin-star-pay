@@ -45,21 +45,22 @@ export function Table<T>({
             {columns.map((col) => (
               <th
                 key={col.key}
-                style={{ width: col.width }}
+                style={{ width: col.width, minWidth: col.minWidth }}
                 className={cn(
-                  'px-4 py-3 font-semibold select-none',
+                  'px-4 py-3 font-semibold select-none whitespace-nowrap',
                   col.align === 'center'
                     ? 'text-center'
                     : col.align === 'right'
                     ? 'text-right'
-                    : 'text-left'
+                    : 'text-left',
+                  col.headerClassName
                 )}
               >
                 {col.header}
               </th>
             ))}
             {renderActions && (
-              <th className="px-4 py-3 text-right font-semibold select-none">{actionHeader}</th>
+              <th className="px-4 py-3 text-right font-semibold select-none whitespace-nowrap">{actionHeader}</th>
             )}
           </tr>
         </thead>
@@ -80,13 +81,15 @@ export function Table<T>({
                   return (
                     <td
                       key={col.key}
+                      style={{ width: col.width, minWidth: col.minWidth }}
                       className={cn(
                         'px-4 py-3.5 align-middle text-xs font-normal tabular-nums',
                         col.align === 'center'
                           ? 'text-center'
                           : col.align === 'right'
                           ? 'text-right'
-                          : 'text-left'
+                          : 'text-left',
+                        col.className
                       )}
                     >
                       {col.render ? col.render(row, index) : (cellValue as ReactNode) ?? '-'}
