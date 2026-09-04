@@ -86,10 +86,10 @@ export const RetailerRecentTransactions: React.FC<RetailerRecentTransactionsProp
 
                     <td className="py-3 px-3">
                       <span
-                        className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border ${
+                        className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-md border ${
                           tx.type === 'PAY_IN'
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            : 'bg-blue-50 text-blue-700 border-blue-200'
+                            ? 'bg-blue-50 text-[var(--primary)] border-blue-200/80'
+                            : 'bg-orange-50 text-[var(--secondary)] border-orange-200/80'
                         }`}
                       >
                         {tx.type}

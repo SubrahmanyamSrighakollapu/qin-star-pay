@@ -20,6 +20,8 @@ import { transactionService } from '@/services/transactionService';
 import { retailerService } from '@/services/retailerService';
 import { reportService } from '@/services/reportService';
 import { TransactionDetailsDrawer } from '@/components/features/transactions/TransactionDetailsDrawer';
+import { FinancialMetricCard } from '@/components/features/financial/FinancialMetricCard';
+import { TransactionTypeBadge } from '@/components/features/financial/TransactionTypeBadge';
 import { formatCurrency, formatDateTime } from '@/utils/formatters';
 import {
   ArrowLeftRight,
@@ -211,17 +213,7 @@ function DistributorTransactionsContent() {
     {
       key: 'type',
       header: 'Type',
-      render: (t: Transaction) => (
-        <span
-          className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border ${
-            t.type === 'PAY_IN'
-              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-              : 'bg-blue-50 text-blue-700 border-blue-200'
-          }`}
-        >
-          {t.type}
-        </span>
-      ),
+      render: (t: Transaction) => <TransactionTypeBadge type={t.type} size="sm" />,
     },
     {
       key: 'amount',
@@ -277,35 +269,12 @@ function DistributorTransactionsContent() {
 
         {/* 1. Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
-          <Card className="p-3.5 border-l-4 border-l-blue-600">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Today's Txns</span>
-            <span className="text-xl font-extrabold text-slate-900 font-mono mt-0.5 block">{summary.totalCount}</span>
-          </Card>
-
-          <Card className="p-3.5 border-l-4 border-l-emerald-600">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Today's Pay-In</span>
-            <span className="text-xl font-extrabold text-emerald-700 font-mono mt-0.5 block">{formatCurrency(summary.payinVol)}</span>
-          </Card>
-
-          <Card className="p-3.5 border-l-4 border-l-purple-600">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Today's Pay-Out</span>
-            <span className="text-xl font-extrabold text-purple-700 font-mono mt-0.5 block">{formatCurrency(summary.payoutVol)}</span>
-          </Card>
-
-          <Card className="p-3.5 border-l-4 border-l-emerald-500">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Successful</span>
-            <span className="text-xl font-extrabold text-emerald-600 font-mono mt-0.5 block">{summary.successCount}</span>
-          </Card>
-
-          <Card className="p-3.5 border-l-4 border-l-amber-500">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Pending</span>
-            <span className="text-xl font-extrabold text-amber-600 font-mono mt-0.5 block">{summary.pendingCount}</span>
-          </Card>
-
-          <Card className="p-3.5 border-l-4 border-l-rose-600">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Failed</span>
-            <span className="text-xl font-extrabold text-rose-600 font-mono mt-0.5 block">{summary.failedCount}</span>
-          </Card>
+          <FinancialMetricCard label="Today's Txns" value={summary.totalCount} subtext="Network requests" variant="neutral" />
+          <FinancialMetricCard label="Today's Pay-In" value={formatCurrency(summary.payinVol)} subtext="Collections" variant="payin" />
+          <FinancialMetricCard label="Today's Pay-Out" value={formatCurrency(summary.payoutVol)} subtext="Disbursements" variant="payout" />
+          <FinancialMetricCard label="Successful" value={summary.successCount} subtext="Completed" variant="success" />
+          <FinancialMetricCard label="Pending" value={summary.pendingCount} subtext="In flight" variant="warning" />
+          <FinancialMetricCard label="Failed" value={summary.failedCount} subtext="Reversed / Failed" variant="danger" />
         </div>
 
         {/* 2. Filter Toolbar */}

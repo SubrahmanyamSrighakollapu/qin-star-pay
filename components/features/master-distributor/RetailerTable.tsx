@@ -116,7 +116,7 @@ export const RetailerTable: React.FC<RetailerTableProps> = ({
           size="sm"
           label={
             row.approvalStatus === 'PENDING_APPROVAL'
-              ? 'Pending Approval'
+              ? 'Pending Admin Approval'
               : row.approvalStatus === 'REJECTED'
               ? 'Rejected'
               : 'Approved'

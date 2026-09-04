@@ -1,8 +1,9 @@
+'use client';
+
 import React from 'react';
-import { KPICard } from '@/components/ui/KPICard';
+import { FinancialMetricCard } from '@/components/features/financial/FinancialMetricCard';
 import { formatCurrency, formatNumber } from '@/utils/formatters';
-import { Users, Store, CheckCircle2, Clock, ArrowLeftRight, ArrowDownLeft, ArrowUpRight, Wallet, Percent } from 'lucide-react';
-import Link from 'next/link';
+import { Users, Store, CheckCircle2, Clock, ArrowDownLeft, ArrowUpRight, Wallet, Percent, Sparkles } from 'lucide-react';
 
 export interface MasterDistributorKPIGridProps {
   totalDistributors: number;
@@ -31,110 +32,83 @@ export const MasterDistributorKPIGrid: React.FC<MasterDistributorKPIGridProps> =
   todayPayInVolume,
   todayPayOutVolume,
   walletBalance,
+  walletHold = 0,
   todayCommission,
   monthlyCommission,
-  isLoading = false,
 }) => {
   return (
     <div className="space-y-4">
-      {/* Network Structure KPI Row */}
+      {/* 1. Primary Network & Financial Position Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard
-          title="Direct Distributors"
+        <FinancialMetricCard
+          label="Distributors"
           value={formatNumber(totalDistributors)}
-          subtitle="Assigned distribution partners"
-          icon={<Users className="w-5 h-5 text-purple-600" />}
-          accentColor="purple"
-          isLoading={isLoading}
+          subtext="Assigned distribution partners"
+          icon={<Users className="w-3.5 h-3.5" />}
+          variant="primary"
+          isDominant
         />
 
-        <KPICard
-          title="Total Outlets"
+        <FinancialMetricCard
+          label="Total Outlets"
           value={formatNumber(totalRetailers)}
-          subtitle="Retailers in distribution network"
-          icon={<Store className="w-5 h-5 text-[var(--primary)]" />}
-          accentColor="blue"
-          isLoading={isLoading}
+          subtext={`${activeRetailers} active, ${pendingRetailerApprovals} pending`}
+          icon={<Store className="w-3.5 h-3.5" />}
+          variant="neutral"
+          isDominant
         />
 
-        <KPICard
-          title="Active Outlets"
-          value={formatNumber(activeRetailers)}
-          subtitle="Approved & active retail counters"
-          icon={<CheckCircle2 className="w-5 h-5 text-emerald-600" />}
-          accentColor="green"
-          isLoading={isLoading}
+        <FinancialMetricCard
+          label="Available Wallet"
+          value={formatCurrency(walletBalance)}
+          subtext={`Hold: ${formatCurrency(walletHold)}`}
+          icon={<Wallet className="w-3.5 h-3.5" />}
+          variant="payin"
+          isDominant
         />
 
-        <KPICard
-          title="Awaiting Admin Approval"
-          value={formatNumber(pendingRetailerApprovals)}
-          subtitle="Pending platform onboarding review"
-          icon={<Clock className="w-5 h-5 text-amber-600" />}
-          accentColor="gold"
-          isLoading={isLoading}
+        <FinancialMetricCard
+          label="This Month Earnings"
+          value={`+${formatCurrency(monthlyCommission)}`}
+          subtext={`Today: +${formatCurrency(todayCommission)}`}
+          icon={<Sparkles className="w-3.5 h-3.5" />}
+          variant="success"
+          isDominant
         />
       </div>
 
-      {/* Financial & Operational Performance KPI Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <KPICard
-          title="Today's Txns"
-          value={formatNumber(todayTransactionsCount)}
-          subtitle="Processed network count"
-          icon={<ArrowLeftRight className="w-4 h-4 text-blue-600" />}
-          accentColor="blue"
-          isLoading={isLoading}
-        />
-
-        <KPICard
-          title="Today's Pay-In"
+      {/* 2. Operations & Volume Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3">
+        <FinancialMetricCard
+          label="Pay-In Volume"
           value={formatCurrency(todayPayInVolume)}
-          subtitle="Gross collection volume"
-          icon={<ArrowDownLeft className="w-4 h-4 text-emerald-600" />}
-          accentColor="green"
-          isLoading={isLoading}
+          subtext="Today's collections"
+          icon={<ArrowDownLeft className="w-3.5 h-3.5" />}
+          variant="payin"
         />
 
-        <KPICard
-          title="Today's Pay-Out"
+        <FinancialMetricCard
+          label="Pay-Out Volume"
           value={formatCurrency(todayPayOutVolume)}
-          subtitle="Gross disbursal volume"
-          icon={<ArrowUpRight className="w-4 h-4 text-blue-700" />}
-          accentColor="blue"
-          isLoading={isLoading}
+          subtext="Today's disbursements"
+          icon={<ArrowUpRight className="w-3.5 h-3.5" />}
+          variant="payout"
         />
 
-        <KPICard
-          title="MD Wallet"
-          value={formatCurrency(walletBalance)}
-          subtitle="Available Master balance"
-          icon={<Wallet className="w-4 h-4 text-amber-600" />}
-          accentColor="gold"
-          isLoading={isLoading}
-          badge={
-            <Link href="/master-distributor/wallet" className="text-[10px] font-bold text-amber-700 hover:underline">
-              View
-            </Link>
-          }
+        <FinancialMetricCard
+          label="Active Outlets"
+          value={activeRetailers}
+          subtext="Approved retail counters"
+          icon={<CheckCircle2 className="w-3.5 h-3.5" />}
+          variant="success"
         />
 
-        <KPICard
-          title="Today's Earning"
-          value={formatCurrency(todayCommission)}
-          subtitle="Master commission today"
-          icon={<Percent className="w-4 h-4 text-purple-600" />}
-          accentColor="purple"
-          isLoading={isLoading}
-        />
-
-        <KPICard
-          title="MTD Earning"
-          value={formatCurrency(monthlyCommission)}
-          subtitle="Month-to-date commission"
-          icon={<Percent className="w-4 h-4 text-purple-700" />}
-          accentColor="purple"
-          isLoading={isLoading}
+        <FinancialMetricCard
+          label="Pending Approvals"
+          value={pendingRetailerApprovals}
+          subtext="Awaiting platform review"
+          icon={<Clock className="w-3.5 h-3.5" />}
+          variant="warning"
         />
       </div>
     </div>

@@ -5,29 +5,36 @@ import { useSearchParams } from 'next/navigation';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { useAuth } from '@/context/AuthContext';
-import { transactionService, TransactionListResult } from '@/services/transactionService';
+import { transactionService } from '@/services/transactionService';
 import { reportService } from '@/services/reportService';
 import { Transaction, TransactionFilters } from '@/types/domain';
 import { formatCurrency, formatDateTime } from '@/utils/formatters';
 import { TransactionDetailsDrawer } from '@/components/features/transactions/TransactionDetailsDrawer';
+import { PayInReceipt } from '@/components/features/retailer/PayInReceipt';
+import { PayOutReceipt } from '@/components/features/retailer/PayOutReceipt';
+import { Pagination } from '@/components/ui/Pagination';
+
+// Financial Foundation Components
+import { FinancialPageHeader } from '@/components/features/financial/FinancialPageHeader';
+import { FinancialMetricCard } from '@/components/features/financial/FinancialMetricCard';
+import { FinancialEmptyState } from '@/components/features/financial/FinancialEmptyState';
+import { TransactionTypeBadge } from '@/components/features/financial/TransactionTypeBadge';
+
 import {
-  ArrowLeftRight,
   Search,
-  Filter,
   Download,
   Eye,
+  RefreshCw,
+  Printer,
+  X,
+  SlidersHorizontal,
   ArrowDownLeft,
   ArrowUpRight,
   CheckCircle2,
   Clock,
   AlertTriangle,
-  RefreshCw,
-  Printer,
 } from 'lucide-react';
-import { PayInReceipt } from '@/components/features/retailer/PayInReceipt';
-import { PayOutReceipt } from '@/components/features/retailer/PayOutReceipt';
 
 export default function RetailerTransactionsPage() {
   const { session } = useAuth();
@@ -51,7 +58,6 @@ export default function RetailerTransactionsPage() {
   const [searchQuery, setSearchQuery] = useState(txnIdParam);
   const [typeFilter, setTypeFilter] = useState<'ALL' | 'PAY_IN' | 'PAY_OUT'>(typeParam as any);
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [paymentModeFilter, setPaymentModeFilter] = useState('ALL');
 
   // Detail Drawer State
   const [selectedTxn, setSelectedTxn] = useState<Transaction | null>(null);
@@ -99,15 +105,20 @@ export default function RetailerTransactionsPage() {
     }
   }, [txnIdParam, retailerId]);
 
-  // KPI Calculations
-  const payInCount = transactions.filter((t) => t.type === 'PAY_IN').length;
-  const payOutCount = transactions.filter((t) => t.type === 'PAY_OUT').length;
+  // KPI Calculations derived strictly from current scoped transactions dataset
+  const payInVolume = transactions
+    .filter((t) => t.type === 'PAY_IN' && t.status === 'SUCCESS')
+    .reduce((acc, curr) => acc + curr.amount, 0);
+
+  const payOutVolume = transactions
+    .filter((t) => t.type === 'PAY_OUT' && t.status === 'SUCCESS')
+    .reduce((acc, curr) => acc + curr.amount, 0);
+
+  const totalVolume = payInVolume + payOutVolume;
+
   const successCount = transactions.filter((t) => t.status === 'SUCCESS').length;
   const pendingCount = transactions.filter((t) => t.status === 'PENDING').length;
   const failedCount = transactions.filter((t) => t.status === 'FAILED').length;
-  const totalVolume = transactions
-    .filter((t) => t.status === 'SUCCESS')
-    .reduce((acc, curr) => acc + curr.amount, 0);
 
   // CSV Export
   const handleExportCsv = () => {
@@ -131,68 +142,82 @@ export default function RetailerTransactionsPage() {
     reportService.exportToCsv(`Retailer_Transactions_${retailerId}`, exportRows);
   };
 
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setTypeFilter('ALL');
+    setStatusFilter('ALL');
+    setPage(1);
+  };
+
   return (
-    <PageContainer
-      title="Transaction History"
-      description="Inspect and search your counter collection (Pay-In) and disbursement (Pay-Out) transactions."
-      statusBadge={<StatusBadge status="ACTIVE" label="Approved Retailer" />}
-      actions={
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleExportCsv}
-          leftIcon={<Download className="w-4 h-4" />}
-          disabled={transactions.length === 0}
-        >
-          Export CSV
-        </Button>
-      }
-    >
+    <PageContainer>
       <div className="space-y-6 max-w-7xl mx-auto">
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-1">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Volume</span>
-            <p className="text-xl font-extrabold text-slate-900 font-mono">{formatCurrency(totalVolume)}</p>
-            <p className="text-[11px] text-slate-500">{totalItems} Total Recorded</p>
-          </div>
+        {/* Page Header */}
+        <FinancialPageHeader
+          title="Transactions"
+          subtitle="Track Pay-In collections and Pay-Out disbursements from your Retailer account."
+          statusBadge={<StatusBadge status="ACTIVE" label="Approved Retailer" />}
+          actions={
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCsv}
+              leftIcon={<Download className="w-4 h-4" />}
+              disabled={transactions.length === 0}
+            >
+              Export CSV
+            </Button>
+          }
+        />
 
-          <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 shadow-2xs space-y-1">
-            <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1">
-              <ArrowDownLeft className="w-3.5 h-3.5 text-emerald-600" /> Pay-In Collections
-            </span>
-            <p className="text-xl font-extrabold text-emerald-900 font-mono">{payInCount} Txns</p>
-            <p className="text-[11px] text-emerald-700">Counter Collections</p>
-          </div>
-
-          <div className="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50 shadow-2xs space-y-1">
-            <span className="text-[11px] font-bold text-indigo-800 uppercase tracking-wider flex items-center gap-1">
-              <ArrowUpRight className="w-3.5 h-3.5 text-indigo-600" /> Pay-Out Disbursements
-            </span>
-            <p className="text-xl font-extrabold text-indigo-900 font-mono">{payOutCount} Txns</p>
-            <p className="text-[11px] text-indigo-700">Disbursements</p>
-          </div>
-
-          <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-1">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status Breakdown</span>
-            <div className="flex items-center gap-2 text-xs font-mono font-bold pt-1">
-              <span className="text-emerald-700">{successCount} Succ</span>
-              <span className="text-slate-300">•</span>
-              <span className="text-amber-700">{pendingCount} Pend</span>
-              <span className="text-slate-300">•</span>
-              <span className="text-rose-700">{failedCount} Fail</span>
-            </div>
-            <p className="text-[11px] text-slate-500">Filtered Context</p>
-          </div>
+        {/* Compact Financial Summary Strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <FinancialMetricCard
+            label="Total Volume"
+            value={formatCurrency(totalVolume)}
+            variant="primary"
+            isDominant
+          />
+          <FinancialMetricCard
+            label="Pay-In Volume"
+            value={formatCurrency(payInVolume)}
+            variant="payin"
+            icon={<ArrowDownLeft className="w-3.5 h-3.5" />}
+          />
+          <FinancialMetricCard
+            label="Pay-Out Volume"
+            value={formatCurrency(payOutVolume)}
+            variant="payout"
+            icon={<ArrowUpRight className="w-3.5 h-3.5" />}
+          />
+          <FinancialMetricCard
+            label="Successful"
+            value={successCount}
+            variant="success"
+            icon={<CheckCircle2 className="w-3.5 h-3.5" />}
+          />
+          <FinancialMetricCard
+            label="Pending"
+            value={pendingCount}
+            variant="warning"
+            icon={<Clock className="w-3.5 h-3.5" />}
+          />
+          <FinancialMetricCard
+            label="Failed / Reversed"
+            value={failedCount}
+            variant="danger"
+            icon={<AlertTriangle className="w-3.5 h-3.5" />}
+          />
         </div>
 
-        {/* Filter Controls Bar */}
-        <Card>
-          <div className="p-4 flex flex-wrap items-center justify-between gap-4 border-b border-slate-100">
-            <div className="flex flex-wrap items-center gap-3 flex-1">
+        {/* Filter Toolbar & Data Workspace */}
+        <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden">
+          {/* Toolbar */}
+          <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50/50">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
               {/* Search */}
-              <div className="relative min-w-[240px] flex-1 max-w-md">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              <div className="relative flex-1 max-w-md">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -200,13 +225,22 @@ export default function RetailerTransactionsPage() {
                     setSearchQuery(e.target.value);
                     setPage(1);
                   }}
-                  placeholder="Search Txn ID, Ref, UTR, Customer, Mobile..."
-                  className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-200"
+                  placeholder="Search Txn ID, Mobile, Ref, Beneficiary..."
+                  className="w-full pl-9 pr-3.5 py-2 text-xs font-mono border border-slate-300 rounded-xl focus:outline-hidden focus:border-[#0F4C81] focus:ring-2 focus:ring-indigo-100 bg-white"
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
 
-              {/* Type Filter Tabs */}
-              <div className="flex items-center p-1 bg-slate-100 rounded-lg border border-slate-200 text-xs">
+              {/* Type Filter Buttons */}
+              <div className="flex items-center p-1 bg-white border border-slate-200 rounded-xl text-xs">
                 {(['ALL', 'PAY_IN', 'PAY_OUT'] as const).map((t) => (
                   <button
                     key={t}
@@ -214,9 +248,13 @@ export default function RetailerTransactionsPage() {
                       setTypeFilter(t);
                       setPage(1);
                     }}
-                    className={`px-3 py-1 rounded-md font-bold transition-all ${
+                    className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
                       typeFilter === t
-                        ? 'bg-white text-slate-900 shadow-2xs'
+                        ? t === 'PAY_IN'
+                          ? 'bg-[#0F4C81] text-white shadow-2xs'
+                          : t === 'PAY_OUT'
+                          ? 'bg-[#F97316] text-white shadow-2xs'
+                          : 'bg-slate-900 text-white shadow-2xs'
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
@@ -225,14 +263,14 @@ export default function RetailerTransactionsPage() {
                 ))}
               </div>
 
-              {/* Status Filter */}
+              {/* Status Filter Dropdown */}
               <select
                 value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e.target.value);
                   setPage(1);
                 }}
-                className="px-3 py-1.5 text-xs border border-slate-300 rounded-lg bg-white font-medium"
+                className="px-3 py-2 text-xs font-semibold border border-slate-300 rounded-xl bg-white focus:outline-hidden focus:border-[#0F4C81]"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="SUCCESS">SUCCESS</option>
@@ -241,165 +279,216 @@ export default function RetailerTransactionsPage() {
               </select>
             </div>
 
-            <Button variant="ghost" size="sm" onClick={fetchTransactions} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
-              Refresh
-            </Button>
-          </div>
-
-          {/* Transactions Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider font-bold border-b border-slate-200">
-                <tr>
-                  <th className="px-4 py-3">Txn ID / Date</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">Service / Mode</th>
-                  <th className="px-4 py-3">Customer / Beneficiary</th>
-                  <th className="px-4 py-3 text-right">Amount (₹)</th>
-                  <th className="px-4 py-3 text-right">Fee & GST</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">UTR / Ref</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-mono">
-                {loading ? (
-                  <tr>
-                    <td colSpan={9} className="py-8 text-center text-slate-400">
-                      <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-indigo-600" />
-                      Loading retailer transactions...
-                    </td>
-                  </tr>
-                ) : transactions.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="py-8 text-center text-slate-400">
-                      No transactions found for the selected filters.
-                    </td>
-                  </tr>
-                ) : (
-                  transactions.map((txn) => (
-                    <tr key={txn.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="px-4 py-3 font-semibold text-indigo-700">
-                        <div>{txn.transactionRef}</div>
-                        <div className="text-[10px] text-slate-400 font-normal">{formatDateTime(txn.createdAt)}</div>
-                      </td>
-
-                      <td className="px-4 py-3 font-sans">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
-                            txn.type === 'PAY_IN'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : 'bg-indigo-100 text-indigo-800'
-                          }`}
-                        >
-                          {txn.type === 'PAY_IN' ? (
-                            <ArrowDownLeft className="w-3 h-3 text-emerald-600" />
-                          ) : (
-                            <ArrowUpRight className="w-3 h-3 text-indigo-600" />
-                          )}
-                          {txn.type}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-3 font-sans">
-                        <div className="font-semibold text-slate-800">{txn.service || 'Default Service'}</div>
-                        <div className="text-[10px] font-mono text-slate-500">{txn.paymentMode}</div>
-                      </td>
-
-                      <td className="px-4 py-3 font-sans">
-                        <div className="font-medium text-slate-900">
-                          {txn.customerName || txn.beneficiaryName || 'Walk-in Customer'}
-                        </div>
-                        <div className="text-[10px] font-mono text-slate-400">
-                          {txn.accountNumberMasked || txn.customerMobile || 'N/A'}
-                        </div>
-                      </td>
-
-                      <td className="px-4 py-3 text-right font-bold text-slate-900">
-                        {formatCurrency(txn.amount)}
-                      </td>
-
-                      <td className="px-4 py-3 text-right text-slate-600 text-[11px]">
-                        <div>{formatCurrency(txn.fee)}</div>
-                        <div className="text-[10px] text-slate-400">GST: {formatCurrency(txn.gst || 0)}</div>
-                      </td>
-
-                      <td className="px-4 py-3">
-                        <StatusBadge status={txn.status} label={txn.status} size="sm" />
-                      </td>
-
-                      <td className="px-4 py-3 text-slate-600 text-[11px] truncate max-w-[120px]">
-                        {txn.utr || txn.referenceId || 'N/A'}
-                      </td>
-
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedTxn(txn);
-                              setIsDrawerOpen(true);
-                            }}
-                            leftIcon={<Eye className="w-3.5 h-3.5" />}
-                          >
-                            Details
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setReceiptTxn(txn)}
-                            leftIcon={<Printer className="w-3.5 h-3.5" />}
-                          >
-                            Receipt
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          <div className="p-4 border-t border-slate-200 flex items-center justify-between text-xs">
-            <span className="text-slate-500 font-mono">
-              Page {page} of {totalPages} ({totalItems} records)
-            </span>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-                Previous
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={fetchTransactions}
+                leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+                className="text-slate-500"
+              >
+                Refresh
               </Button>
-              <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
-                Next
-              </Button>
+
+              {(searchQuery || typeFilter !== 'ALL' || statusFilter !== 'ALL') && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetFilters}
+                  leftIcon={<X className="w-3.5 h-3.5" />}
+                >
+                  Reset
+                </Button>
+              )}
             </div>
           </div>
-        </Card>
 
-        {/* Transaction Detail Drawer */}
+          {/* Transactions Table Surface (with internal overflow scrolling) */}
+          <div className="overflow-x-auto">
+            {loading ? (
+              <div className="py-16 text-center text-xs text-slate-400 space-y-2">
+                <RefreshCw className="w-6 h-6 animate-spin mx-auto text-[#0F4C81]" />
+                <p>Loading transaction history...</p>
+              </div>
+            ) : transactions.length === 0 ? (
+              <FinancialEmptyState
+                title="No transactions found"
+                description="No matching transaction records found for the selected filter parameters."
+                action={
+                  <Button variant="outline" size="sm" onClick={handleResetFilters}>
+                    Reset Filters
+                  </Button>
+                }
+              />
+            ) : (
+              <table className="w-full text-left border-collapse min-w-[900px]">
+                <thead>
+                  <tr className="border-b border-slate-200/80 bg-slate-50/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th className="py-3 px-4">Transaction / Date</th>
+                    <th className="py-3 px-4">Type</th>
+                    <th className="py-3 px-4">Service & Mode</th>
+                    <th className="py-3 px-4">Customer / Beneficiary</th>
+                    <th className="py-3 px-4 text-right">Amount</th>
+                    <th className="py-3 px-4 text-right">Fee / GST</th>
+                    <th className="py-3 px-4 text-center">Status</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs">
+                  {transactions.map((t) => {
+                    const isPayIn = t.type === 'PAY_IN';
+                    const customerOrBeneficiary = isPayIn
+                      ? t.customerName || t.customerMobile || 'Walk-in Customer'
+                      : t.beneficiaryName || t.accountNumberMasked || 'N/A';
+
+                    return (
+                      <tr
+                        key={t.id}
+                        className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                        onClick={() => {
+                          setSelectedTxn(t);
+                          setIsDrawerOpen(true);
+                        }}
+                      >
+                        {/* Transaction ID & Date */}
+                        <td className="py-3.5 px-4">
+                          <span className="font-mono font-bold text-slate-900 group-hover:text-[#0F4C81] transition-colors block">
+                            {t.transactionRef}
+                          </span>
+                          <span className="text-[11px] text-slate-400 font-mono">
+                            {formatDateTime(t.createdAt)}
+                          </span>
+                        </td>
+
+                        {/* Type Badge */}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <TransactionTypeBadge type={t.type} size="sm" />
+                        </td>
+
+                        {/* Service & Mode */}
+                        <td className="py-3.5 px-4">
+                          <span className="font-semibold text-slate-800 block">
+                            {t.service || (isPayIn ? 'Pay-In Collection' : 'Pay-Out Disbursement')}
+                          </span>
+                          <span className="font-mono text-[10px] text-slate-500">{t.paymentMode}</span>
+                        </td>
+
+                        {/* Customer / Beneficiary */}
+                        <td className="py-3.5 px-4">
+                          <span className="font-semibold text-slate-900 block truncate max-w-[180px]">
+                            {customerOrBeneficiary}
+                          </span>
+                          {isPayIn && t.customerMobile && (
+                            <span className="font-mono text-[11px] text-slate-500">{t.customerMobile}</span>
+                          )}
+                          {!isPayIn && t.accountNumberMasked && (
+                            <span className="font-mono text-[11px] text-slate-500">
+                              {t.accountNumberMasked}
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Amount */}
+                        <td className="py-3.5 px-4 text-right font-mono">
+                          <span className="font-bold text-slate-900 text-sm block">
+                            {formatCurrency(t.amount)}
+                          </span>
+                          <span className="text-[10px] text-slate-400">Net: {formatCurrency(t.netAmount)}</span>
+                        </td>
+
+                        {/* Fee / GST */}
+                        <td className="py-3.5 px-4 text-right font-mono text-slate-600">
+                          <span>{formatCurrency(t.fee || 0)}</span>
+                          {t.gst ? (
+                            <span className="block text-[10px] text-slate-400">+GST {formatCurrency(t.gst)}</span>
+                          ) : null}
+                        </td>
+
+                        {/* Status */}
+                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                          <StatusBadge status={t.status} label={t.status} size="sm" />
+                        </td>
+
+                        {/* Actions */}
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedTxn(t);
+                                setIsDrawerOpen(true);
+                              }}
+                              leftIcon={<Eye className="w-3.5 h-3.5" />}
+                            >
+                              Details
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setReceiptTxn(t)}
+                              leftIcon={<Printer className="w-3.5 h-3.5 text-slate-600" />}
+                              title="Print Receipt"
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* Pagination Footer */}
+          {totalPages > 1 && (
+            <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center">
+              <span className="text-xs text-slate-500 font-mono">
+                Showing {transactions.length} of {totalItems} items
+              </span>
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={(p) => setPage(p)}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Transaction Details Drawer */}
         <TransactionDetailsDrawer
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
           transaction={selectedTxn}
+          onRefresh={fetchTransactions}
         />
 
-        {/* Printable Receipt Modal */}
+        {/* Receipt Modal */}
         {receiptTxn && (
           <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl">
-              <div className="flex items-center justify-between border-b pb-3">
-                <h3 className="font-bold text-slate-900 text-sm">Transaction Receipt</h3>
-                <Button variant="ghost" size="sm" onClick={() => setReceiptTxn(null)}>
-                  Close
-                </Button>
-              </div>
+            <div className="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto relative">
+              <button
+                type="button"
+                onClick={() => setReceiptTxn(null)}
+                className="absolute right-4 top-4 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
               {receiptTxn.type === 'PAY_IN' ? (
-                <PayInReceipt transaction={receiptTxn} />
+                <PayInReceipt
+                  transaction={receiptTxn}
+                  retailerName={session?.name || 'Metro Store #01'}
+                  retailerCode={session?.entityId || 'RET001'}
+                  businessName="Metro Store Retail Solutions"
+                />
               ) : (
-                <PayOutReceipt transaction={receiptTxn} />
+                <PayOutReceipt
+                  transaction={receiptTxn}
+                  retailerName={session?.name || 'Metro Store #01'}
+                  retailerCode={session?.entityId || 'RET001'}
+                  businessName="Metro Store Retail Solutions"
+                />
               )}
             </div>
           </div>

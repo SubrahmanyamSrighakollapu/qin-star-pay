@@ -112,69 +112,83 @@ export default function DistributorWalletPage() {
       </div>
 
       {/* Main Operating Wallet Card */}
-      <div className="p-6 rounded-2xl border border-sky-200 bg-gradient-to-br from-slate-900 via-sky-950 to-slate-900 text-white shadow-lg space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-sky-300">
-                Distributor Operating Wallet
-              </span>
+      <div className="rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-white via-indigo-50/30 to-slate-50 p-6 md:p-8 shadow-xs relative overflow-hidden space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-[#0F4C81]">
+              <div className="w-6 h-6 rounded-lg bg-indigo-100 text-[#0F4C81] flex items-center justify-center">
+                <Wallet className="w-3.5 h-3.5" />
+              </div>
+              <span>DISTRIBUTOR OPERATING WALLET</span>
               <StatusBadge status={wallet?.status || 'ACTIVE'} size="sm" />
             </div>
-            <h2 className="text-xl font-bold font-mono text-white mt-1">
-              {wallet?.walletId || `wlt_${distributorId}`}
-            </h2>
-            <p className="text-xs text-sky-200 mt-0.5">{wallet?.entityName || 'North Zone Distributor'}</p>
+            <div>
+              <span className="text-xs text-slate-500 font-medium">Available Balance</span>
+              <div className="text-4xl md:text-5xl font-extrabold font-mono text-[#0F4C81] tracking-tight">
+                {formatCurrency(wallet?.availableBalance || 85200.0)}
+              </div>
+            </div>
+            <p className="text-xs text-slate-500 font-medium">
+              Account Ref: <span className="font-mono text-slate-700 font-semibold">{wallet?.walletId || `wlt_${distributorId}`}</span> • Spendable operating balance
+            </p>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md">
-            <Wallet className="w-8 h-8 text-sky-200" />
+          <div className="flex items-center gap-3 shrink-0">
+            <Link href="/distributor/wallet/ledger">
+              <Button variant="primary" size="md" className="bg-[#0F4C81] hover:bg-indigo-900 text-white font-bold px-5" leftIcon={<FileText className="w-4 h-4" />}>
+                View Operating Ledger
+              </Button>
+            </Link>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4 border-t border-sky-800/60">
-          <div>
-            <p className="text-xs font-medium text-sky-200">Available Balance</p>
-            <h3 className="text-3xl font-extrabold text-white mt-1 font-mono tabular-nums">
-              {formatCurrency(wallet?.availableBalance || 85200.0)}
-            </h3>
-            <p className="text-[11px] text-sky-300 mt-0.5">Ready for operations & earnings withdrawal</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-6 border-t border-indigo-100">
+          <div className="p-4 rounded-xl bg-white border border-indigo-100 space-y-1">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-slate-500 font-semibold">Available Balance</span>
+              <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Spendable</span>
+            </div>
+            <p className="text-xl font-bold font-mono text-[#0F4C81]">{formatCurrency(wallet?.availableBalance || 85200.0)}</p>
+            <p className="text-[10px] text-slate-400">Ready for operations & settlements</p>
           </div>
 
-          <div>
-            <p className="text-xs font-medium text-sky-200 flex items-center gap-1">
-              <Lock className="w-3.5 h-3.5 text-amber-400" /> Hold / Lien Balance
-            </p>
-            <h3 className="text-2xl font-bold text-amber-300 mt-1 font-mono tabular-nums">
-              {formatCurrency(wallet?.holdBalance || 0.0)}
-            </h3>
-            <p className="text-[11px] text-sky-300 mt-0.5">Reserved for pending disputes/lien</p>
+          <div className="p-4 rounded-xl bg-white border border-amber-200/80 space-y-1">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-amber-800 font-semibold flex items-center gap-1">
+                <Lock className="w-3.5 h-3.5 text-amber-600" /> Hold / Lien
+              </span>
+              <span className="text-[10px] font-mono font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded">Reserved</span>
+            </div>
+            <p className="text-xl font-bold font-mono text-amber-700">{formatCurrency(wallet?.holdBalance || 0.0)}</p>
+            <p className="text-[10px] text-slate-400">Reserved for pending lien</p>
           </div>
 
-          <div>
-            <p className="text-xs font-medium text-sky-200 flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5 text-blue-300" /> Pending Settlement
-            </p>
-            <h3 className="text-2xl font-bold text-blue-200 mt-1 font-mono tabular-nums">
-              {formatCurrency(wallet?.pendingSettlement || 2450.0)}
-            </h3>
-            <p className="text-[11px] text-sky-300 mt-0.5">Unsettled retailer commissions</p>
+          <div className="p-4 rounded-xl bg-white border border-blue-100 space-y-1">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-blue-800 font-semibold flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-blue-600" /> Pending Settlement
+              </span>
+              <span className="text-[10px] font-mono font-bold text-blue-800 bg-blue-50 px-2 py-0.5 rounded">Scheduled</span>
+            </div>
+            <p className="text-xl font-bold font-mono text-blue-700">{formatCurrency(wallet?.pendingSettlement || 2450.0)}</p>
+            <p className="text-[10px] text-slate-400">Unsettled retailer margin</p>
           </div>
 
-          <div>
-            <p className="text-xs font-medium text-sky-200">Ledger Closing Balance</p>
-            <h3 className="text-2xl font-bold text-emerald-300 mt-1 font-mono tabular-nums">
-              {formatCurrency(wallet?.ledgerBalance || 87650.0)}
-            </h3>
-            <p className="text-[11px] text-sky-300 mt-0.5">Reconciled with total ledger entries</p>
+          <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-1">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-slate-600 font-semibold">Ledger Balance</span>
+              <span className="text-[10px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">Total Reconciled</span>
+            </div>
+            <p className="text-xl font-bold font-mono text-slate-900">{formatCurrency(wallet?.ledgerBalance || 87650.0)}</p>
+            <p className="text-[10px] text-slate-400">Ledger-posted accounting sum</p>
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-xs text-sky-200/80 pt-2 border-t border-sky-800/40">
-          <span className="flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" /> Authenticated Distributor context (ID: {distributorId})
+        <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-indigo-100/60">
+          <span className="flex items-center gap-1.5 font-medium">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" /> Distributor wallet balance is ledger-backed & immutable.
           </span>
-          <span>Last Updated: {wallet?.updatedAt ? formatDateTime(wallet.updatedAt) : 'Just now'}</span>
+          <span>Last Reconciled: {wallet?.updatedAt ? formatDateTime(wallet.updatedAt) : 'Just now'}</span>
         </div>
       </div>
 

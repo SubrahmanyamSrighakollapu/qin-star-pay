@@ -23,7 +23,7 @@ export default function RetailerNotificationsPage() {
         <div className="space-y-2">
           <h2 className="text-xl font-bold text-slate-900">Retailer Notification Center</h2>
           <p className="text-xs text-slate-500 max-w-md mx-auto">
-            Operational alerts, Pay-In/Pay-Out notifications, and wallet balance threshold alerts for your outlet.
+            Operational alerts, Pay-In/Pay-Out notifications, and wallet balance threshold alerts for your Retailer account.
           </p>
         </div>
 

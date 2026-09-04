@@ -91,14 +91,14 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       </Drawer>
 
       {/* Main Workspace Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-workspace-atmospheric">
         <Header
           onToggleSidebar={handleHeaderToggle}
           currentUser={currentUser}
           onRoleChange={handleRoleChange}
         />
 
-        <main className="flex-1 overflow-y-auto min-h-0 bg-[var(--bg-app)]">{children}</main>
+        <main className="flex-1 overflow-y-auto min-h-0 bg-workspace-atmospheric">{children}</main>
       </div>
     </div>
   );

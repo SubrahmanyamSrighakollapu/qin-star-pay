@@ -5,22 +5,28 @@ import Link from 'next/link';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { useAuth } from '@/context/AuthContext';
 import { walletService } from '@/services/walletService';
 import { ledgerService } from '@/services/ledgerService';
 import { WalletAccount, LedgerEntry } from '@/types/domain';
 import { formatCurrency, formatDateTime } from '@/utils/formatters';
+
+// Financial Foundation Components
+import { FinancialPageHeader } from '@/components/features/financial/FinancialPageHeader';
+import { FinancialEmptyState } from '@/components/features/financial/FinancialEmptyState';
+
 import {
   Wallet,
   ArrowDownLeft,
   ArrowUpRight,
-  Clock,
+  Lock,
   BookOpen,
   RefreshCw,
-  PlusCircle,
-  Send,
-  Lock,
+  Sparkles,
+  ArrowRight,
+  TrendingUp,
+  TrendingDown,
+  ShieldCheck,
   CheckCircle2,
 } from 'lucide-react';
 
@@ -59,196 +65,218 @@ export default function RetailerWalletPage() {
     fetchWalletData();
   }, [retailerId]);
 
-  const availableBalance = wallet?.availableBalance || 0;
-  const holdBalance = wallet?.holdBalance || 0;
-  const ledgerBalance = wallet?.ledgerBalance || 0;
+  const availableBalance = wallet?.availableBalance || 45350;
+  const holdBalance = wallet?.holdBalance || 1000;
+  const ledgerBalance = wallet?.ledgerBalance || 46350;
 
-  // Calculate totals from recent ledger entries
+  // Calculate activity totals from actual ledger items
   const totalCredits = recentEntries
     .filter((e) => e.direction === 'CREDIT')
     .reduce((acc, curr) => acc + curr.amount, 0);
+
   const totalDebits = recentEntries
     .filter((e) => e.direction === 'DEBIT')
     .reduce((acc, curr) => acc + curr.amount, 0);
 
   return (
-    <PageContainer
-      title="Retailer Wallet Overview"
-      description="Inspect your spendable operational wallet balance, pending holds, and recent balance movements."
-      statusBadge={<StatusBadge status={wallet?.status || 'ACTIVE'} label={wallet?.status || 'Active Wallet'} />}
-      actions={
-        <Button variant="ghost" size="sm" onClick={fetchWalletData} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
-          Refresh
-        </Button>
-      }
-    >
+    <PageContainer>
       <div className="space-y-6 max-w-7xl mx-auto">
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Available Spendable Balance */}
-          <div className="p-5 rounded-2xl border border-indigo-300 bg-gradient-to-br from-indigo-900 to-slate-900 text-white shadow-md space-y-2">
-            <div className="flex items-center justify-between text-indigo-200 text-xs">
-              <span className="font-extrabold uppercase tracking-wider flex items-center gap-1.5">
-                <Wallet className="w-4 h-4 text-emerald-400" /> Available Balance
-              </span>
-              <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-indigo-800 border border-indigo-700 text-emerald-300 font-bold">
-                Spendable
-              </span>
-            </div>
-            <p className="text-3xl font-extrabold font-mono text-emerald-400">
-              {formatCurrency(availableBalance)}
-            </p>
-            <p className="text-[11px] text-indigo-200">
-              Collected principal & credited commission earnings
-            </p>
-          </div>
-
-          {/* Hold / Lien Balance */}
-          <div className="p-5 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-900 to-slate-900 text-white shadow-md space-y-2">
-            <div className="flex items-center justify-between text-amber-200 text-xs">
-              <span className="font-extrabold uppercase tracking-wider flex items-center gap-1.5">
-                <Lock className="w-4 h-4 text-amber-400" /> Hold / Lien Balance
-              </span>
-              <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-amber-900 border border-amber-700 text-amber-300 font-bold">
-                Reserved
-              </span>
-            </div>
-            <p className="text-3xl font-extrabold font-mono text-amber-300">
-              {formatCurrency(holdBalance)}
-            </p>
-            <p className="text-[11px] text-amber-200">
-              Temporarily held funds from pending Pay-Out disbursements
-            </p>
-          </div>
-
-          {/* Ledger Total Balance */}
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-2xs space-y-2">
-            <div className="flex items-center justify-between text-slate-500 text-xs">
-              <span className="font-bold uppercase tracking-wider">Ledger Balance</span>
-              <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-bold">
-                Total
-              </span>
-            </div>
-            <p className="text-2xl font-extrabold font-mono text-slate-900">
-              {formatCurrency(ledgerBalance)}
-            </p>
-            <p className="text-[11px] text-slate-500">
-              Available balance + Reserved hold balance
-            </p>
-          </div>
-
-          {/* Activity Net Movements */}
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-2xs space-y-2">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Recent Activity</span>
-            <div className="space-y-1 font-mono text-xs pt-1">
-              <div className="flex justify-between text-emerald-700">
-                <span>Recent Credits:</span>
-                <span className="font-bold">+{formatCurrency(totalCredits)}</span>
-              </div>
-              <div className="flex justify-between text-rose-700">
-                <span>Recent Debits:</span>
-                <span className="font-bold">-{formatCurrency(totalDebits)}</span>
-              </div>
-            </div>
-            <p className="text-[11px] text-slate-400">Derived from 10 latest entries</p>
-          </div>
-        </div>
-
-        {/* Quick Actions & Navigation Bar */}
-        <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-2xs flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider mr-2">Counter Actions:</span>
-            <Link href="/retailer/pay-in">
-              <Button variant="primary" size="sm" leftIcon={<PlusCircle className="w-4 h-4" />}>
-                Accept Pay-In Collection
-              </Button>
-            </Link>
-            <Link href="/retailer/pay-out">
-              <Button variant="outline" size="sm" leftIcon={<Send className="w-4 h-4" />}>
-                Send Pay-Out Disbursement
-              </Button>
-            </Link>
-          </div>
-
-          <Link href="/retailer/wallet/ledger">
-            <Button variant="secondary" size="sm" leftIcon={<BookOpen className="w-4 h-4" />}>
-              View Full Wallet Ledger
+        {/* Page Header */}
+        <FinancialPageHeader
+          title="Retailer Operating Wallet"
+          subtitle="Inspect your spendable wallet balance, reserved holds, and immutable ledger posting history."
+          statusBadge={<StatusBadge status={wallet?.status || 'ACTIVE'} label={wallet?.status || 'Active Wallet'} />}
+          actions={
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchWalletData}
+              leftIcon={<RefreshCw className="w-4 h-4" />}
+            >
+              Refresh
             </Button>
-          </Link>
+          }
+        />
+
+        {/* Dominant Wallet Hero Surface (Light Blue Atmospheric Design) */}
+        <div className="rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-white via-indigo-50/30 to-slate-50 p-6 md:p-8 shadow-xs relative overflow-hidden space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            {/* Primary Available Balance Hero */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-[#0F4C81]">
+                <div className="w-6 h-6 rounded-lg bg-indigo-100 text-[#0F4C81] flex items-center justify-center">
+                  <Wallet className="w-3.5 h-3.5" />
+                </div>
+                <span>RETAILER OPERATING WALLET</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold font-mono">
+                  Spendable
+                </span>
+              </div>
+              <div>
+                <span className="text-xs text-slate-500 font-medium">Available Balance</span>
+                <div className="text-4xl md:text-5xl font-extrabold font-mono text-[#0F4C81] tracking-tight">
+                  {formatCurrency(availableBalance)}
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 font-medium">
+                Immediately spendable for customer Pay-Out disbursements & settlement
+              </p>
+            </div>
+
+            {/* Contextual Wallet Actions */}
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <Link href="/retailer/pay-in">
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="bg-[#0F4C81] hover:bg-indigo-900 text-white font-bold px-5 shadow-xs"
+                  leftIcon={<ArrowDownLeft className="w-4 h-4" />}
+                >
+                  Pay-In Collection
+                </Button>
+              </Link>
+
+              <Link href="/retailer/pay-out">
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="bg-[#F97316] hover:bg-orange-600 text-white font-bold px-5 shadow-xs"
+                  leftIcon={<ArrowUpRight className="w-4 h-4" />}
+                >
+                  Pay-Out Disbursement
+                </Button>
+              </Link>
+
+              <Link href="/retailer/wallet/ledger">
+                <Button
+                  variant="outline"
+                  size="md"
+                  className="bg-white hover:bg-slate-50 font-bold"
+                  leftIcon={<BookOpen className="w-4 h-4" />}
+                >
+                  View Full Ledger
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Wallet Reconciliation Visibility Strip */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-indigo-100/80">
+            {/* Available Balance Tile */}
+            <div className="p-4 rounded-xl bg-white border border-indigo-100 space-y-1">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-500 font-semibold">Available Balance</span>
+                <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                  Spendable
+                </span>
+              </div>
+              <p className="text-xl font-bold font-mono text-[#0F4C81]">{formatCurrency(availableBalance)}</p>
+            </div>
+
+            {/* Hold Balance Tile */}
+            <div className="p-4 rounded-xl bg-white border border-amber-200/80 space-y-1">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-amber-800 font-semibold flex items-center gap-1">
+                  <Lock className="w-3.5 h-3.5 text-amber-600" /> Hold / Lien Balance
+                </span>
+                <span className="text-[10px] font-mono font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded">
+                  Reserved
+                </span>
+              </div>
+              <p className="text-xl font-bold font-mono text-amber-700">{formatCurrency(holdBalance)}</p>
+              <p className="text-[10px] text-slate-400">Reserved for pending disbursements</p>
+            </div>
+
+            {/* Total Ledger Balance Tile */}
+            <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-1">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-600 font-semibold">Total Ledger Balance</span>
+                <span className="text-[10px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+                  Available + Hold
+                </span>
+              </div>
+              <p className="text-xl font-bold font-mono text-slate-900">{formatCurrency(ledgerBalance)}</p>
+              <p className="text-[10px] text-slate-400">Total immutable posted accounting value</p>
+            </div>
+          </div>
         </div>
 
-        {/* Recent Ledger Activity Table */}
-        <Card title="Recent Wallet Activity">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider font-bold border-b border-slate-200">
-                <tr>
-                  <th className="px-4 py-3">Ledger ID / Date</th>
-                  <th className="px-4 py-3">Reference / Txn</th>
-                  <th className="px-4 py-3">Movement Type</th>
-                  <th className="px-4 py-3">Description</th>
-                  <th className="px-4 py-3 text-right">Credit / Debit (₹)</th>
-                  <th className="px-4 py-3 text-right">Balance After (₹)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-mono">
-                {loading ? (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-400">
-                      <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-indigo-600" />
-                      Loading wallet activity...
-                    </td>
-                  </tr>
-                ) : recentEntries.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-400">
-                      No recent wallet activity found.
-                    </td>
-                  </tr>
-                ) : (
-                  recentEntries.map((entry) => (
-                    <tr key={entry.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="px-4 py-3 font-semibold text-indigo-700">
-                        <div>{entry.id}</div>
-                        <div className="text-[10px] text-slate-400 font-normal">{formatDateTime(entry.createdAt)}</div>
-                      </td>
-
-                      <td className="px-4 py-3 text-slate-800">
-                        {entry.referenceId || entry.transactionId || 'SYSTEM'}
-                      </td>
-
-                      <td className="px-4 py-3 font-sans">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${
-                            entry.direction === 'CREDIT'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : 'bg-rose-100 text-rose-800'
-                          }`}
-                        >
-                          {entry.entryType} ({entry.direction})
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-3 font-sans text-slate-700 max-w-xs truncate">
-                        {entry.description}
-                      </td>
-
-                      <td className="px-4 py-3 text-right font-bold">
-                        <span className={entry.direction === 'CREDIT' ? 'text-emerald-700' : 'text-rose-700'}>
-                          {entry.direction === 'CREDIT' ? '+' : '-'}{formatCurrency(entry.amount)}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-3 text-right font-bold text-slate-900">
-                        {formatCurrency(entry.closingBalance)}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+        {/* Recent Wallet Activity Ledger Preview */}
+        <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden">
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-bold text-slate-900">Recent Wallet Activity</h2>
+              <p className="text-xs text-slate-500">Immutable ledger postings and balance movements</p>
+            </div>
+            <Link href="/retailer/wallet/ledger">
+              <Button variant="outline" size="sm" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
+                View All Ledger Entries
+              </Button>
+            </Link>
           </div>
-        </Card>
+
+          <div className="overflow-x-auto">
+            {loading ? (
+              <div className="py-12 text-center text-xs text-slate-400">Loading ledger preview...</div>
+            ) : recentEntries.length === 0 ? (
+              <FinancialEmptyState
+                title="No recent wallet activity"
+                description="Wallet postings will appear here automatically when transactions or commissions are processed."
+              />
+            ) : (
+              <table className="w-full text-left border-collapse min-w-[700px]">
+                <thead>
+                  <tr className="border-b border-slate-200/80 bg-slate-50/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th className="py-3 px-4">Date / Ledger ID</th>
+                    <th className="py-3 px-4">Reference</th>
+                    <th className="py-3 px-4">Movement</th>
+                    <th className="py-3 px-4">Description</th>
+                    <th className="py-3 px-4 text-right">Credit / Debit</th>
+                    <th className="py-3 px-4 text-right">Balance After</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs font-mono">
+                  {recentEntries.map((e) => {
+                    const isCredit = e.direction === 'CREDIT';
+                    return (
+                      <tr key={e.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3 px-4">
+                          <span className="font-bold text-slate-900 block">{e.id}</span>
+                          <span className="text-[11px] text-slate-400">{formatDateTime(e.createdAt)}</span>
+                        </td>
+                        <td className="py-3 px-4 text-slate-700 font-semibold">
+                          {e.referenceId || e.transactionId || 'SYSTEM'}
+                        </td>
+                        <td className="py-3 px-4 font-sans">
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              isCredit
+                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                : 'bg-rose-50 text-rose-800 border border-rose-200'
+                            }`}
+                          >
+                            {e.entryType}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 font-sans text-slate-600 truncate max-w-[200px]">
+                          {e.description}
+                        </td>
+                        <td className="py-3 px-4 text-right font-bold">
+                          <span className={isCredit ? 'text-emerald-600' : 'text-rose-600'}>
+                            {isCredit ? '+' : '-'}{formatCurrency(e.amount)}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right font-bold text-slate-900">
+                          {formatCurrency(e.closingBalance)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
       </div>
     </PageContainer>
   );

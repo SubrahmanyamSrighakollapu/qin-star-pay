@@ -17,6 +17,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Retailer, RetailerPlan } from '@/types/domain';
 import { retailerService, CreateRetailerInput, UpdateRetailerInput } from '@/services/retailerService';
 import { retailerPlanService } from '@/services/retailerPlanService';
+import { FinancialMetricCard } from '@/components/features/financial/FinancialMetricCard';
 import { DistributorRetailerFormModal } from '@/components/features/distributor/DistributorRetailerFormModal';
 import { DistributorRetailerDetailDrawer } from '@/components/features/distributor/DistributorRetailerDetailDrawer';
 import { formatCurrency, formatDateTime } from '@/utils/formatters';
@@ -321,49 +322,56 @@ export default function DistributorRetailersPage() {
   return (
     <PageContainer
       title="Retailers"
-      description="Manage retailers in your network and monitor approval, transactions, wallet and commission activity."
-      statusBadge={<StatusBadge status="ACTIVE" label="Distributor Scoped" />}
+      description="Manage retailers assigned to your Distributor account."
       actions={
-        <Button variant="primary" size="sm" leftIcon={<Plus className="w-4 h-4" />} onClick={handleOpenCreateModal}>
-          Add Retailer
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={loadData} leftIcon={<RefreshCw className="w-4 h-4" />}>
+            Refresh
+          </Button>
+          <Button variant="primary" size="sm" leftIcon={<Plus className="w-4 h-4" />} onClick={handleOpenCreateModal}>
+            Add Retailer
+          </Button>
+        </div>
       }
     >
       <div className="space-y-6">
         {/* 1. Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-4 flex items-center justify-between border-l-4 border-l-blue-600">
-            <div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Retailers</span>
-              <span className="text-2xl font-extrabold text-slate-900 font-mono mt-1 block">{summary.total}</span>
-            </div>
-            <Store className="w-8 h-8 text-blue-600/30" />
-          </Card>
+          <FinancialMetricCard
+            label="Total Outlets"
+            value={summary.total}
+            subtext="Mapped retail counters"
+            icon={<Store className="w-3.5 h-3.5" />}
+            variant="primary"
+            isDominant
+          />
 
-          <Card className="p-4 flex items-center justify-between border-l-4 border-l-emerald-600">
-            <div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Active Retailers</span>
-              <span className="text-2xl font-extrabold text-emerald-700 font-mono mt-1 block">{summary.active}</span>
-            </div>
-            <CheckCircle2 className="w-8 h-8 text-emerald-600/30" />
-          </Card>
+          <FinancialMetricCard
+            label="Active Outlets"
+            value={summary.active}
+            subtext="Approved & active status"
+            icon={<CheckCircle2 className="w-3.5 h-3.5" />}
+            variant="success"
+            isDominant
+          />
 
-          <Card className="p-4 flex items-center justify-between border-l-4 border-l-amber-500">
-            <div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Pending Approval</span>
-              <span className="text-2xl font-extrabold text-amber-700 font-mono mt-1 block">{summary.pending}</span>
-              <span className="text-[10px] text-amber-700 font-medium block">Awaiting Admin Approval</span>
-            </div>
-            <Clock className="w-8 h-8 text-amber-500/30" />
-          </Card>
+          <FinancialMetricCard
+            label="Pending Approval"
+            value={summary.pending}
+            subtext="Awaiting Admin Approval"
+            icon={<Clock className="w-3.5 h-3.5" />}
+            variant="warning"
+            isDominant
+          />
 
-          <Card className="p-4 flex items-center justify-between border-l-4 border-l-slate-400">
-            <div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Inactive / Rejected</span>
-              <span className="text-2xl font-extrabold text-slate-700 font-mono mt-1 block">{summary.inactive}</span>
-            </div>
-            <AlertTriangle className="w-8 h-8 text-slate-400/30" />
-          </Card>
+          <FinancialMetricCard
+            label="Inactive / Rejected"
+            value={summary.inactive}
+            subtext="Suspended or rejected"
+            icon={<AlertTriangle className="w-3.5 h-3.5" />}
+            variant="neutral"
+            isDominant
+          />
         </div>
 
         {/* 2. Filter & Controls Bar */}

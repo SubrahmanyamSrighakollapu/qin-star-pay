@@ -66,7 +66,8 @@ export function Table<T>({
         </thead>
         <tbody className="divide-y divide-[var(--border-subtle)] text-[var(--text-primary)]">
           {data.map((row, index) => {
-            const key = keyExtractor(row, index);
+            const rawKey = keyExtractor(row, index);
+            const key = rawKey != null && rawKey !== '' ? String(rawKey) : `table-row-${index}`;
             return (
               <tr
                 key={key}

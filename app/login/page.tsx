@@ -25,7 +25,7 @@ export default function LoginPage() {
   const [fieldErrors, setFieldErrors] = useState<{ identifier?: string; password?: string }>({});
 
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
-  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
+  const [showDemoAccounts, setShowDemoAccounts] = useState(true);
 
   // Automatic redirect if user is already authenticated
   useEffect(() => {

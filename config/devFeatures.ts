@@ -16,5 +16,5 @@ export const DEV_FEATURES = {
   /**
    * Quick demo credential fill panel on login screen.
    */
-  showDemoCredentials: false,
+  showDemoCredentials: true,
 };

@@ -84,7 +84,7 @@ export const DistributorTable: React.FC<DistributorTableProps> = ({
           size="sm"
           label={
             row.approvalStatus === 'PENDING_APPROVAL'
-              ? 'Pending Approval'
+              ? 'Pending Admin Approval'
               : row.approvalStatus === 'REJECTED'
               ? 'Rejected'
               : 'Approved'

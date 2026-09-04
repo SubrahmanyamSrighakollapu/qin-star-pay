@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { KPICard } from '@/components/ui/KPICard';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/Button';
 import { Drawer } from '@/components/ui/Drawer';
@@ -14,6 +13,13 @@ import {
   ScopedCommissionSummary,
 } from '@/services/commissionService';
 import { formatCurrency, formatDateTime } from '@/utils/formatters';
+
+// Financial Foundation Components
+import { FinancialPageHeader } from '@/components/features/financial/FinancialPageHeader';
+import { FinancialMetricCard } from '@/components/features/financial/FinancialMetricCard';
+import { FinancialEmptyState } from '@/components/features/financial/FinancialEmptyState';
+import { TransactionTypeBadge } from '@/components/features/financial/TransactionTypeBadge';
+
 import {
   Percent,
   Search,
@@ -26,8 +32,11 @@ import {
   DollarSign,
   ArrowUpRight,
   ArrowDownRight,
-  ChevronRight,
-  Layers,
+  Eye,
+  Award,
+  X,
+  ShieldCheck,
+  Sparkles,
 } from 'lucide-react';
 
 export default function RetailerCommissionsPage() {
@@ -85,87 +94,145 @@ export default function RetailerCommissionsPage() {
     fetchCommissions();
   }, [fetchCommissions]);
 
-  return (
-    <PageContainer
-      title="Commission Earnings"
-      description="Track real-time commission earnings credited to your wallet from customer Pay-In & Pay-Out operations."
-      statusBadge={<StatusBadge status="ACTIVE" label="Approved Retailer" />}
-      actions={
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={fetchCommissions}
-          isLoading={loading}
-          leftIcon={<RefreshCw className="w-4 h-4" />}
-        >
-          Refresh
-        </Button>
-      }
-    >
-      <div className="space-y-6">
-        {/* KPI Summary Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-          <KPICard
-            title="Today's Earnings"
-            value={formatCurrency(summary.todayCommission)}
-            icon={<TrendingUp className="w-4 h-4 text-emerald-600" />}
-            trend={{ value: 'Real-time', isPositive: true }}
-          />
-          <KPICard
-            title="Yesterday"
-            value={formatCurrency(summary.yesterdayCommission)}
-            icon={<Calendar className="w-4 h-4 text-slate-600" />}
-          />
-          <KPICard
-            title="This Month"
-            value={formatCurrency(summary.thisMonthCommission)}
-            icon={<DollarSign className="w-4 h-4 text-indigo-600" />}
-          />
-          <KPICard
-            title="Previous Month"
-            value={formatCurrency(summary.previousMonthCommission)}
-            icon={<FileText className="w-4 h-4 text-slate-600" />}
-          />
-          <KPICard
-            title="Credited Total"
-            value={formatCurrency(summary.creditedCommission)}
-            icon={<CheckCircle2 className="w-4 h-4 text-emerald-600" />}
-          />
-          <KPICard
-            title="Pending"
-            value={formatCurrency(summary.pendingCommission)}
-            icon={<Clock className="w-4 h-4 text-amber-600" />}
-          />
-        </div>
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('ALL');
+    setPage(1);
+  };
 
-        {/* Filters & Controls */}
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
-          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-            {/* Search */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search by Transaction ID or Reference..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setPage(1);
-                }}
-                className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-              />
+  return (
+    <PageContainer>
+      <div className="space-y-6 max-w-7xl mx-auto">
+        {/* Page Header */}
+        <FinancialPageHeader
+          title="Commission Earnings"
+          subtitle="Track real-time commission earnings credited to your wallet from customer Pay-In & Pay-Out operations."
+          statusBadge={<StatusBadge status="ACTIVE" label="Approved Retailer" />}
+          actions={
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchCommissions}
+              isLoading={loading}
+              leftIcon={<RefreshCw className="w-4 h-4" />}
+            >
+              Refresh
+            </Button>
+          }
+        />
+
+        {/* Earnings Hero Surface & Assigned Plan Context Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          {/* Main Earnings Summary Hero (~68% width) */}
+          <div className="lg:col-span-8 p-6 rounded-2xl bg-gradient-to-br from-white via-emerald-50/20 to-slate-50 border border-emerald-200/80 shadow-xs space-y-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-900 block">
+                    RETAILER EARNINGS
+                  </span>
+                  <span className="text-[11px] text-slate-500">Real-time credited margin</span>
+                </div>
+              </div>
+              <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                This Month: +{formatCurrency(summary.thisMonthCommission)}
+              </span>
             </div>
 
-            {/* Status Filter */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500 font-medium">Status:</span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+              <div className="p-3 rounded-xl bg-white border border-slate-200/80 space-y-0.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Today</span>
+                <p className="text-lg font-bold font-mono text-emerald-700">+{formatCurrency(summary.todayCommission)}</p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-white border border-slate-200/80 space-y-0.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Yesterday</span>
+                <p className="text-lg font-bold font-mono text-slate-800">+{formatCurrency(summary.yesterdayCommission)}</p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-white border border-slate-200/80 space-y-0.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Credited Total</span>
+                <p className="text-lg font-bold font-mono text-emerald-700">+{formatCurrency(summary.creditedCommission)}</p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-white border border-slate-200/80 space-y-0.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Pending</span>
+                <p className="text-lg font-bold font-mono text-amber-700">+{formatCurrency(summary.pendingCommission)}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Read-Only Assigned Retailer Commercial Plan (~32% width) */}
+          <div className="lg:col-span-4 p-6 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <Award className="w-4 h-4 text-[#0F4C81]" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-900">
+                    Assigned Plan Context
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                  Read Only
+                </span>
+              </div>
+              <p className="text-sm font-extrabold text-slate-900">Standard Retailer Plan</p>
+              <p className="text-[11px] text-slate-500">Commercial rates applied automatically to your transactions.</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 font-mono text-xs">
+              <div className="p-2.5 rounded-lg bg-indigo-50/50 border border-indigo-100 space-y-0.5">
+                <span className="text-[10px] font-sans text-indigo-900 block font-semibold">Pay-In Rate</span>
+                <span className="font-bold text-[#0F4C81]">0.25% Percentage</span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-orange-50/50 border border-orange-100 space-y-0.5">
+                <span className="text-[10px] font-sans text-orange-900 block font-semibold">Pay-Out Rate</span>
+                <span className="font-bold text-[#F97316]">₹5.00 Fixed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Commission Table Workspace */}
+        <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden">
+          {/* Controls Bar */}
+          <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50/50">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+              {/* Search */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <input
+                  type="text"
+                  placeholder="Search by Transaction ID or Reference..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-full pl-9 pr-3.5 py-2 text-xs font-mono border border-slate-300 rounded-xl focus:outline-hidden focus:border-[#0F4C81] focus:ring-2 focus:ring-indigo-100 bg-white"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Status Filter */}
               <select
                 value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e.target.value);
                   setPage(1);
                 }}
-                className="text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="px-3 py-2 text-xs font-semibold border border-slate-300 rounded-xl bg-white focus:outline-hidden focus:border-[#0F4C81]"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="CREDITED">Credited</option>
@@ -173,77 +240,92 @@ export default function RetailerCommissionsPage() {
                 <option value="REVERSED">Reversed</option>
               </select>
             </div>
-          </div>
-        </div>
 
-        {/* Commission Table */}
-        <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+            <div className="flex items-center gap-2">
+              {(searchQuery || statusFilter !== 'ALL') && (
+                <Button variant="outline" size="sm" onClick={handleResetFilters} leftIcon={<X className="w-3.5 h-3.5" />}>
+                  Reset
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Table Surface (Scrolls internally) */}
           <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
-                <tr>
-                  <th className="px-4 py-3 whitespace-nowrap">Transaction ID</th>
-                  <th className="px-4 py-3 whitespace-nowrap">Type / Service</th>
-                  <th className="px-4 py-3 whitespace-nowrap text-right">Transaction Amount</th>
-                  <th className="px-4 py-3 whitespace-nowrap text-center">Commission Rule</th>
-                  <th className="px-4 py-3 whitespace-nowrap text-right">Earned Commission</th>
-                  <th className="px-4 py-3 whitespace-nowrap text-center">Status</th>
-                  <th className="px-4 py-3 whitespace-nowrap">Earned Date</th>
-                  <th className="px-4 py-3 whitespace-nowrap text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-medium">
-                {loading ? (
-                  <tr>
-                    <td colSpan={8} className="px-4 py-8 text-center text-slate-400">
-                      <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-indigo-600" />
-                      Loading commission earnings...
-                    </td>
+            {loading ? (
+              <div className="py-16 text-center text-xs text-slate-400 space-y-2">
+                <RefreshCw className="w-6 h-6 animate-spin mx-auto text-[#0F4C81]" />
+                <p>Loading commission earnings...</p>
+              </div>
+            ) : commissions.length === 0 ? (
+              <FinancialEmptyState
+                title="No commission records found"
+                description="Commission earnings will appear after eligible successful transactions."
+                action={
+                  <Button variant="outline" size="sm" onClick={handleResetFilters}>
+                    Reset Filters
+                  </Button>
+                }
+              />
+            ) : (
+              <table className="w-full text-left border-collapse min-w-[850px]">
+                <thead>
+                  <tr className="border-b border-slate-200/80 bg-slate-50/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th className="py-3 px-4">Transaction Ref / ID</th>
+                    <th className="py-3 px-4">Type / Service</th>
+                    <th className="py-3 px-4 text-right">Principal Amount</th>
+                    <th className="py-3 px-4 text-center">Applied Rule / Rate</th>
+                    <th className="py-3 px-4 text-right">Earned Commission</th>
+                    <th className="py-3 px-4 text-center">Status</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
-                ) : commissions.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
-                      No commission earnings found matching the criteria.
-                    </td>
-                  </tr>
-                ) : (
-                  commissions.map((comm) => {
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs font-mono">
+                  {commissions.map((comm) => {
                     const isPayIn = comm.serviceType.toLowerCase().includes('pay-in') || comm.serviceType.toLowerCase().includes('upi');
-                    const ruleLabel = isPayIn ? `${comm.mdCommissionRate} Slab` : `${comm.mdCommissionRate} Fixed`;
 
                     return (
-                      <tr key={comm.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="font-mono text-slate-900 font-semibold">{comm.transactionRef}</span>
-                          <span className="block text-[10px] text-slate-400 font-mono">{comm.id}</span>
+                      <tr
+                        key={comm.id}
+                        className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                        onClick={() => {
+                          setSelectedCommission(comm);
+                          setIsDrawerOpen(true);
+                        }}
+                      >
+                        {/* Transaction ID */}
+                        <td className="py-3.5 px-4">
+                          <span className="font-bold text-slate-900 group-hover:text-[#0F4C81] transition-colors block">
+                            {comm.transactionRef}
+                          </span>
+                          <span className="text-[11px] text-slate-400">{formatDateTime(comm.createdDate)}</span>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="flex items-center gap-1.5">
-                            {isPayIn ? (
-                              <ArrowDownRight className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                            ) : (
-                              <ArrowUpRight className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                            )}
-                            <div>
-                              <span className="font-semibold text-slate-800">
-                                {isPayIn ? 'Pay-In Collection' : 'Pay-Out Disbursement'}
-                              </span>
-                              <span className="block text-[10px] text-slate-500">{comm.serviceType}</span>
-                            </div>
-                          </div>
+
+                        {/* Type / Service */}
+                        <td className="py-3.5 px-4 font-sans whitespace-nowrap">
+                          <TransactionTypeBadge type={isPayIn ? 'PAY_IN' : 'PAY_OUT'} size="sm" />
+                          <span className="block text-[10px] text-slate-500 mt-0.5">{comm.serviceType}</span>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-right font-mono text-slate-900 font-semibold">
+
+                        {/* Principal Amount */}
+                        <td className="py-3.5 px-4 text-right font-bold text-slate-900">
                           {formatCurrency(comm.transactionAmount)}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-center">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                            {ruleLabel}
+
+                        {/* Applied Rule / Rate */}
+                        <td className="py-3.5 px-4 text-center font-sans">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-indigo-50 text-[#0F4C81] border border-indigo-200">
+                            {comm.mdCommissionRate}
                           </span>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-right font-mono font-bold text-emerald-600">
+
+                        {/* Earned Commission */}
+                        <td className="py-3.5 px-4 text-right font-bold text-emerald-600 text-sm">
                           +{formatCurrency(comm.mdCommissionAmount)}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-center">
+
+                        {/* Status */}
+                        <td className="py-3.5 px-4 text-center whitespace-nowrap font-sans">
                           <StatusBadge
                             status={
                               comm.status === 'CREDITED'
@@ -253,175 +335,148 @@ export default function RetailerCommissionsPage() {
                                 : 'PENDING'
                             }
                             label={comm.status}
+                            size="sm"
                           />
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-slate-600 font-mono">
-                          {formatDateTime(comm.createdDate)}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-right">
+
+                        {/* Actions */}
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap font-sans" onClick={(event) => event.stopPropagation()}>
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
                             onClick={() => {
                               setSelectedCommission(comm);
                               setIsDrawerOpen(true);
                             }}
+                            leftIcon={<Eye className="w-3.5 h-3.5" />}
                           >
                             Details
                           </Button>
                         </td>
                       </tr>
                     );
-                  })
-                )}
-              </tbody>
-            </table>
+                  })}
+                </tbody>
+              </table>
+            )}
           </div>
 
           {/* Pagination */}
-          {!loading && commissions.length > 0 && (
-            <div className="p-4 border-t border-slate-100">
+          {totalPages > 1 && (
+            <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center">
+              <span className="text-xs text-slate-500 font-mono">
+                Showing {commissions.length} of {totalItems} items
+              </span>
               <Pagination
                 currentPage={page}
                 totalPages={totalPages}
                 onPageChange={(p) => setPage(p)}
-                totalItems={totalItems}
-                pageSize={10}
               />
             </div>
           )}
         </div>
-      </div>
 
-      {/* Commission Detail Drawer */}
-      <Drawer
-        isOpen={isDrawerOpen}
-        onClose={() => {
-          setIsDrawerOpen(false);
-          setSelectedCommission(null);
-        }}
-        size="lg"
-        title={
-          <div className="flex items-center gap-2">
-            <span>Commission Detail</span>
-            {selectedCommission && (
-              <span className="font-mono text-xs px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
-                +{formatCurrency(selectedCommission.mdCommissionAmount)}
-              </span>
-            )}
-          </div>
-        }
-        description={selectedCommission ? `Transaction Ref: ${selectedCommission.transactionRef}` : ''}
-        footer={
-          <Button
-            variant="outline"
-            onClick={() => {
-              setIsDrawerOpen(false);
-              setSelectedCommission(null);
-            }}
-            fullWidth
-          >
-            Close
-          </Button>
-        }
-      >
-        {selectedCommission && (
-          <div className="space-y-6">
-            {/* Header Banner */}
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
-              <div>
-                <p className="text-xs text-slate-500 font-medium">Posting Status</p>
-                <div className="mt-1">
-                  <StatusBadge
-                    status={
-                      selectedCommission.status === 'CREDITED'
-                        ? 'SUCCESS'
-                        : selectedCommission.status === 'REVERSED'
-                        ? 'FAILED'
-                        : 'PENDING'
-                    }
-                    label={selectedCommission.status}
-                  />
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-slate-500 font-medium">Earned Retailer Margin</p>
-                <p className="text-xl font-bold text-emerald-600 font-mono mt-0.5">
-                  +{formatCurrency(selectedCommission.mdCommissionAmount)}
-                </p>
-              </div>
-            </div>
-
-            {/* Calculation Breakdown */}
-            <div className="p-4 rounded-xl border border-indigo-100 bg-indigo-50/40 space-y-3">
-              <h4 className="text-xs font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-1.5">
-                <Percent className="w-4 h-4 text-indigo-600" /> Plan Rule & Earning Breakdown
-              </h4>
-
-              <div className="grid grid-cols-2 gap-3 text-xs">
+        {/* Commission Detail Drawer */}
+        <Drawer
+          isOpen={isDrawerOpen}
+          onClose={() => {
+            setIsDrawerOpen(false);
+            setSelectedCommission(null);
+          }}
+          size="lg"
+          title="Commission Earning Detail"
+          description={selectedCommission ? `Transaction Ref: ${selectedCommission.transactionRef}` : ''}
+          footer={
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDrawerOpen(false);
+                setSelectedCommission(null);
+              }}
+              fullWidth
+            >
+              Close
+            </Button>
+          }
+        >
+          {selectedCommission && (
+            <div className="space-y-6">
+              {/* Header Banner */}
+              <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/60 flex items-center justify-between">
                 <div>
-                  <p className="text-slate-500">Transaction ID:</p>
-                  <p className="font-bold text-slate-900 mt-0.5 font-mono">
-                    {selectedCommission.transactionRef}
-                  </p>
+                  <p className="text-xs text-emerald-900 font-bold uppercase tracking-wider">Posting Status</p>
+                  <div className="mt-1">
+                    <StatusBadge
+                      status={
+                        selectedCommission.status === 'CREDITED'
+                          ? 'SUCCESS'
+                          : selectedCommission.status === 'REVERSED'
+                          ? 'FAILED'
+                          : 'PENDING'
+                      }
+                      label={selectedCommission.status}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <p className="text-slate-500">Service Category:</p>
-                  <p className="font-semibold text-slate-900 mt-0.5">
-                    {selectedCommission.serviceType}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-slate-500">Principal Volume:</p>
-                  <p className="font-bold text-slate-900 mt-0.5 font-mono">
-                    {formatCurrency(selectedCommission.transactionAmount)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-slate-500">Assigned Retailer Plan Rule:</p>
-                  <p className="font-semibold text-indigo-700 mt-0.5 font-mono">
-                    {selectedCommission.mdCommissionRate}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-slate-500">Credited Commission:</p>
-                  <p className="font-bold text-emerald-600 mt-0.5 font-mono">
+                <div className="text-right">
+                  <p className="text-xs text-emerald-900 font-bold uppercase tracking-wider">Retailer Margin</p>
+                  <p className="text-xl font-bold text-emerald-700 font-mono mt-0.5">
                     +{formatCurrency(selectedCommission.mdCommissionAmount)}
                   </p>
                 </div>
-                <div>
-                  <p className="text-slate-500">Ledger Reference:</p>
-                  <p className="font-mono text-slate-800 mt-0.5">
-                    {selectedCommission.walletReferenceId || 'LEDG_COMM_AUTOCREDIT'}
-                  </p>
+              </div>
+
+              {/* Calculation Breakdown */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3 font-mono text-xs">
+                <h4 className="font-bold text-slate-900 font-sans text-xs uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                  <Percent className="w-4 h-4 text-[#0F4C81]" /> Transaction Snapshot Rule
+                </h4>
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <span className="text-slate-400 text-[10px] block font-sans">Transaction Ref</span>
+                    <span className="font-bold text-slate-900">{selectedCommission.transactionRef}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 text-[10px] block font-sans">Service Category</span>
+                    <span className="font-semibold text-slate-900 font-sans">{selectedCommission.serviceType}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 text-[10px] block font-sans">Principal Amount</span>
+                    <span className="font-bold text-slate-900">{formatCurrency(selectedCommission.transactionAmount)}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 text-[10px] block font-sans">Snapshot Commercial Rate</span>
+                    <span className="font-bold text-[#0F4C81]">{selectedCommission.mdCommissionRate}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 text-[10px] block font-sans">Earned Commission</span>
+                    <span className="font-bold text-emerald-600">+{formatCurrency(selectedCommission.mdCommissionAmount)}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 text-[10px] block font-sans">Wallet Reference</span>
+                    <span className="text-slate-700">{selectedCommission.walletReferenceId || 'LEDG_COMM_CREDIT'}</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Security Notice */}
-            <div className="p-3 bg-emerald-50/60 border border-emerald-200 rounded-lg text-xs text-emerald-900 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>
-                Commissions are calculated directly from transaction snapshot rules and credited straight to your operational wallet.
-              </span>
-            </div>
-
-            {/* Timestamps */}
-            <div className="p-4 rounded-lg border border-slate-200 bg-white space-y-2 text-xs text-slate-700">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Earned Date & Time:</span>
-                <span className="font-medium font-mono">{formatDateTime(selectedCommission.createdDate)}</span>
-              </div>
-              {selectedCommission.creditedDate && (
+              {/* Timestamps */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2 text-xs text-slate-700 font-mono">
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Wallet Credited Date:</span>
-                  <span className="font-medium font-mono">{formatDateTime(selectedCommission.creditedDate)}</span>
+                  <span className="text-slate-500 font-sans">Earned Timestamp:</span>
+                  <span className="font-semibold">{formatDateTime(selectedCommission.createdDate)}</span>
                 </div>
-              )}
+                {selectedCommission.creditedDate && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-sans">Wallet Credit Timestamp:</span>
+                    <span className="font-semibold text-emerald-700">{formatDateTime(selectedCommission.creditedDate)}</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </Drawer>
+          )}
+        </Drawer>
+      </div>
     </PageContainer>
   );
 }

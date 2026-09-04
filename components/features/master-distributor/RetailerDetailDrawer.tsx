@@ -149,7 +149,7 @@ export const RetailerDetailDrawer: React.FC<RetailerDetailDrawerProps> = ({
                   status={retailer.approvalStatus || 'APPROVED'}
                   label={
                     retailer.approvalStatus === 'PENDING_APPROVAL'
-                      ? 'Pending Approval'
+                      ? 'Pending Admin Approval'
                       : retailer.approvalStatus === 'REJECTED'
                       ? 'Rejected'
                       : 'Approved'
