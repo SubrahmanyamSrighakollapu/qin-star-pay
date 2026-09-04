@@ -1,7 +1,7 @@
 import { WalletAccount, LedgerEntry, DebitRequest } from '@/types/domain';
 
 export const mockWallets: WalletAccount[] = [
-  // 1. MASTER WALLET
+  // 1. MASTER TREASURY & MASTER DISTRIBUTOR WALLETS
   {
     walletId: 'wlt_master_001',
     entityId: 'ent_master_001',
@@ -15,6 +15,34 @@ export const mockWallets: WalletAccount[] = [
     currency: 'INR',
     status: 'ACTIVE',
     updatedAt: '2026-09-03T10:30:00Z',
+  },
+  {
+    walletId: 'wlt_md_001',
+    entityId: 'md_001',
+    entityType: 'MASTER',
+    entityName: 'Apex Financial Services Master Pvt Ltd',
+    entityCode: 'MD001',
+    availableBalance: 245800.00,
+    ledgerBalance: 250800.00,
+    holdBalance: 5000.00,
+    pendingSettlement: 14500.00,
+    currency: 'INR',
+    status: 'ACTIVE',
+    updatedAt: '2026-09-04T09:30:00Z',
+  },
+  {
+    walletId: 'wlt_md_002',
+    entityId: 'md_002',
+    entityType: 'MASTER',
+    entityName: 'Vanguard Fintech Master Agency',
+    entityCode: 'MD002',
+    availableBalance: 185400.00,
+    ledgerBalance: 185400.00,
+    holdBalance: 0.00,
+    pendingSettlement: 8200.00,
+    currency: 'INR',
+    status: 'ACTIVE',
+    updatedAt: '2026-09-04T08:15:00Z',
   },
 
   // 2. DISTRIBUTOR WALLETS
@@ -157,6 +185,56 @@ export const mockWallets: WalletAccount[] = [
 ];
 
 export const mockLedgerEntries: LedgerEntry[] = [
+  {
+    id: 'led_md_001',
+    walletId: 'wlt_md_001',
+    entityId: 'md_001',
+    entityType: 'MASTER',
+    entityName: 'Apex Financial Services Master Pvt Ltd',
+    transactionId: 'QSP20260904001',
+    referenceId: 'COMM_CREDIT_9901',
+    entryType: 'SETTLEMENT',
+    openingBalance: 244350.00,
+    amount: 1450.00,
+    closingBalance: 245800.00,
+    direction: 'CREDIT',
+    description: 'Real-time Master Distributor commission settlement credit for network Pay-In volume',
+    createdBy: 'Commission Engine',
+    createdAt: '2026-09-04T11:00:00Z',
+  },
+  {
+    id: 'led_md_002',
+    walletId: 'wlt_md_001',
+    entityId: 'md_001',
+    entityType: 'MASTER',
+    entityName: 'Apex Financial Services Master Pvt Ltd',
+    transactionId: 'QSP20260903001',
+    referenceId: 'COMM_CREDIT_9812',
+    entryType: 'SETTLEMENT',
+    openingBalance: 243530.00,
+    amount: 820.00,
+    closingBalance: 244350.00,
+    direction: 'CREDIT',
+    description: 'Master Distributor Pay-In commission credit for Metro Store #01 volume',
+    createdBy: 'Commission Engine',
+    createdAt: '2026-09-03T16:30:00Z',
+  },
+  {
+    id: 'led_md_003',
+    walletId: 'wlt_md_001',
+    entityId: 'md_001',
+    entityType: 'MASTER',
+    entityName: 'Apex Financial Services Master Pvt Ltd',
+    referenceId: 'HOLD_LIEN_0041',
+    entryType: 'HOLD',
+    openingBalance: 248530.00,
+    amount: 5000.00,
+    closingBalance: 243530.00,
+    direction: 'DEBIT',
+    description: 'Security lien hold for pending network dispute settlement',
+    createdBy: 'Accounts Lead',
+    createdAt: '2026-09-02T14:10:00Z',
+  },
   {
     id: 'led_001',
     walletId: 'wlt_master_001',

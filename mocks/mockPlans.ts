@@ -1,0 +1,66 @@
+import { RetailerPlan } from '@/types/domain';
+
+export const mockRetailerPlans: RetailerPlan[] = [
+  {
+    id: 'plan_std_01',
+    code: 'PLAN_STANDARD',
+    name: 'Standard Retailer Plan',
+    description: 'Default commercial plan for standard retail outlets offering competitive Pay-In & Pay-Out rates.',
+    commissionRules: [
+      { serviceType: 'PAY_IN', commissionType: 'PERCENTAGE', value: 0.25 },
+      { serviceType: 'PAY_OUT', commissionType: 'FLAT', value: 5.00 },
+    ],
+    status: 'ACTIVE',
+    effectiveFrom: '2026-01-01T00:00:00Z',
+    assignedRetailersCount: 142,
+    createdBy: 'usr_admin_01',
+    createdAt: '2026-01-01T10:00:00Z',
+    updatedAt: '2026-02-15T12:30:00Z',
+  },
+  {
+    id: 'plan_prm_02',
+    code: 'PLAN_PREMIUM',
+    name: 'Premium Retailer Plan',
+    description: 'High performance retailer plan with higher Pay-In margin and low slab payout flat fee.',
+    commissionRules: [
+      { serviceType: 'PAY_IN', commissionType: 'PERCENTAGE', value: 0.40 },
+      { serviceType: 'PAY_OUT', commissionType: 'FLAT', value: 3.50 },
+    ],
+    status: 'ACTIVE',
+    effectiveFrom: '2026-02-01T00:00:00Z',
+    assignedRetailersCount: 68,
+    createdBy: 'usr_admin_01',
+    createdAt: '2026-02-01T09:00:00Z',
+  },
+  {
+    id: 'plan_pout_03',
+    code: 'PLAN_HIGH_VOLUME_POUT',
+    name: 'High Volume Payout Plan',
+    description: 'Tailored for high payout volume retailers with percentage payout commission.',
+    commissionRules: [
+      { serviceType: 'PAY_IN', commissionType: 'PERCENTAGE', value: 0.20 },
+      { serviceType: 'PAY_OUT', commissionType: 'PERCENTAGE', value: 0.15 },
+    ],
+    status: 'ACTIVE',
+    effectiveFrom: '2026-03-01T00:00:00Z',
+    assignedRetailersCount: 25,
+    createdBy: 'usr_admin_01',
+    createdAt: '2026-03-01T11:00:00Z',
+  },
+  {
+    id: 'plan_legacy_04',
+    code: 'PLAN_LEGACY_2025',
+    name: 'Legacy 2025 Commercial Plan',
+    description: 'Deprecated plan structure preserved for historical reference and inactive outlets.',
+    commissionRules: [
+      { serviceType: 'PAY_IN', commissionType: 'FLAT', value: 2.00 },
+      { serviceType: 'PAY_OUT', commissionType: 'FLAT', value: 7.00 },
+    ],
+    status: 'INACTIVE',
+    effectiveFrom: '2025-01-01T00:00:00Z',
+    effectiveTo: '2025-12-31T23:59:59Z',
+    assignedRetailersCount: 0,
+    createdBy: 'usr_admin_01',
+    createdAt: '2025-01-01T00:00:00Z',
+  },
+];

@@ -79,7 +79,7 @@ export const initialMockDashboardData: FullDashboardData = {
       message: 'IMPS transfers flagged with provider timeout error.',
       type: 'DANGER',
       timestamp: '10 mins ago',
-      actionPath: '/transactions/payout',
+      actionPath: '/admin/transactions/payout',
     },
     {
       id: 'alt_2',
@@ -87,7 +87,7 @@ export const initialMockDashboardData: FullDashboardData = {
       message: 'New merchant onboarding documents awaiting review.',
       type: 'WARNING',
       timestamp: '30 mins ago',
-      actionPath: '/kyc',
+      actionPath: '/admin/kyc',
     },
     {
       id: 'alt_3',
@@ -95,7 +95,7 @@ export const initialMockDashboardData: FullDashboardData = {
       message: 'Payout success rate dropped below 92% threshold.',
       type: 'WARNING',
       timestamp: '1 hour ago',
-      actionPath: '/integrations/providers',
+      actionPath: '/admin/integrations/providers',
     },
   ],
   lastRefreshedAt: new Date().toISOString(),

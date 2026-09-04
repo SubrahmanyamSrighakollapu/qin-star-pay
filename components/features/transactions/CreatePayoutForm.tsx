@@ -110,13 +110,13 @@ export const CreatePayoutForm: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-[var(--border)]">
-            <Link href="/transactions/payout">
+            <Link href="/admin/transactions/payout">
               <Button variant="outline" size="sm">
                 Back to Pay-Out List
               </Button>
             </Link>
 
-            <Link href={`/transactions/${createdTx.id}`}>
+            <Link href={`/admin/transactions/${createdTx.id}`}>
               <Button variant="primary" size="sm" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
                 View Transaction Details
               </Button>

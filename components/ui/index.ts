@@ -21,3 +21,4 @@ export * from './SectionHeader';
 export * from './Breadcrumb';
 export * from './FormField';
 export * from './MaskedValue';
+export * from './Toast';

@@ -15,7 +15,7 @@ export const AdminOverviewCards: React.FC<AdminOverviewCardsProps> = ({ summary 
     {
       title: 'Admin User Management',
       description: 'Manage internal operational staff accounts, status, and role assignments',
-      href: '/administration/users',
+      href: '/admin/administration/users',
       icon: Users,
       badge: `${summary.activeAdminUsers} Active Staff`,
       color: 'bg-blue-50 text-blue-700 border-blue-200',
@@ -23,7 +23,7 @@ export const AdminOverviewCards: React.FC<AdminOverviewCardsProps> = ({ summary 
     {
       title: 'Roles & Permissions',
       description: 'Configure RBAC system roles, custom role definitions, and granular module permissions',
-      href: '/administration/roles',
+      href: '/admin/administration/roles',
       icon: ShieldCheck,
       badge: `${summary.totalRoles} Roles Configured`,
       color: 'bg-purple-50 text-purple-700 border-purple-200',
@@ -31,7 +31,7 @@ export const AdminOverviewCards: React.FC<AdminOverviewCardsProps> = ({ summary 
     {
       title: 'Transaction Limits',
       description: 'Configure min/max, daily, and monthly transaction limit rules with scope precedence',
-      href: '/administration/limits',
+      href: '/admin/administration/limits',
       icon: Gauge,
       badge: `${summary.activeLimitRules} Limit Rules`,
       color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -39,7 +39,7 @@ export const AdminOverviewCards: React.FC<AdminOverviewCardsProps> = ({ summary 
     {
       title: 'Fee & Charge Master',
       description: 'Manage platform commercial fee structures, percentage/flat charges, and GST rates',
-      href: '/administration/fees',
+      href: '/admin/administration/fees',
       icon: Percent,
       badge: `${summary.activeFeeRules} Fee Rules`,
       color: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -47,7 +47,7 @@ export const AdminOverviewCards: React.FC<AdminOverviewCardsProps> = ({ summary 
     {
       title: 'Platform Settings',
       description: 'Configure platform defaults, transaction timeouts, cut-off times, and notifications',
-      href: '/administration/settings',
+      href: '/admin/administration/settings',
       icon: Settings,
       badge: 'System Defaults',
       color: 'bg-slate-100 text-slate-800 border-slate-300',
@@ -55,7 +55,7 @@ export const AdminOverviewCards: React.FC<AdminOverviewCardsProps> = ({ summary 
     {
       title: 'Branding & Identity',
       description: 'Customize platform name, brand colors, login titles, and support contact details',
-      href: '/administration/branding',
+      href: '/admin/administration/branding',
       icon: Palette,
       badge: 'Live Preview',
       color: 'bg-rose-50 text-rose-700 border-rose-200',
@@ -63,7 +63,7 @@ export const AdminOverviewCards: React.FC<AdminOverviewCardsProps> = ({ summary 
     {
       title: 'Security Settings',
       description: 'Session timeout rules, password complexity policies, and MFA enforcement',
-      href: '/administration/security',
+      href: '/admin/administration/security',
       icon: Lock,
       badge: 'Security Controls',
       color: 'bg-indigo-50 text-indigo-700 border-indigo-200',

@@ -32,12 +32,7 @@ export default function Home() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link href="/dev-showcase">
-            <Button variant="outline" size="sm">
-              Component Showcase
-            </Button>
-          </Link>
-          <Link href="/dashboard">
+          <Link href="/admin/dashboard">
             <Button variant="primary" size="sm" rightIcon={<ArrowRight className="w-4 h-4" />}>
               Enter Admin Portal
             </Button>
@@ -64,14 +59,9 @@ export default function Home() {
           </div>
 
           <div className="flex flex-wrap items-center gap-4 pt-2">
-            <Link href="/dashboard">
+            <Link href="/admin/dashboard">
               <Button variant="primary" size="lg" leftIcon={<LayoutDashboard className="w-5 h-5" />} rightIcon={<ArrowRight className="w-4 h-4" />}>
-                Launch Operations Portal (/dashboard)
-              </Button>
-            </Link>
-            <Link href="/dev-showcase">
-              <Button variant="outline" size="lg" leftIcon={<Palette className="w-5 h-5" />}>
-                View UI Component Showcase
+                Launch Operations Portal
               </Button>
             </Link>
           </div>

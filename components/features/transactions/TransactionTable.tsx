@@ -44,7 +44,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
       render: (row) => (
         <div className="flex items-center gap-1.5 group">
           <Link
-            href={`/transactions/${row.id}`}
+            href={`/admin/transactions/${row.id}`}
             className="font-mono font-bold text-[var(--primary)] text-xs hover:underline"
           >
             {row.transactionRef}

@@ -88,7 +88,7 @@ export const TraceSearchDrawer: React.FC<TraceSearchDrawerProps> = ({
               </div>
 
               {result.transaction && (
-                <Link href={`/transactions/${result.transaction.id}`} onClick={onClose}>
+                <Link href={`/admin/transactions/${result.transaction.id}`} onClick={onClose}>
                   <Button variant="outline" size="sm" leftIcon={<ExternalLink className="w-3.5 h-3.5 text-blue-600" />}>
                     Open Transaction Record
                   </Button>

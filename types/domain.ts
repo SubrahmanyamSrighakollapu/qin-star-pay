@@ -1,7 +1,8 @@
 import { TransactionStatus, KYCStatus, UserStatus } from '@/constants/statuses';
+import { ApiResponse } from '@/types/common';
 import { UserRole } from '@/config/roles';
 
-export type { UserRole };
+export type { UserRole, KYCStatus, ApiResponse };
 
 export type EntityType = 'MASTER' | 'DISTRIBUTOR' | 'RETAILER' | 'MERCHANT' | 'BACK_OFFICE';
 
@@ -267,7 +268,9 @@ export interface ReportFilters {
   distributorId?: string;
   retailerId?: string;
   merchantId?: string;
+  type?: string;
   transactionType?: 'ALL' | 'PAY_IN' | 'PAY_OUT';
+  paymentMode?: string;
   status?: string;
   provider?: string;
   service?: string;
@@ -1039,6 +1042,71 @@ export interface CallbackSummaryInfo {
   retryCount?: number;
 }
 
+export interface CommissionSnapshot {
+  retailerPlanId?: string;
+  retailerPlanCode?: string;
+  retailerPlanName?: string;
+  retailerPlanReference?: string;
+  retailerCommissionType?: 'PERCENTAGE' | 'FLAT';
+  retailerCommissionRate?: string | number;
+  retailerCommissionAmount?: number;
+
+  distributorId?: string;
+  distributorName?: string;
+  distributorCommissionRate?: string | number;
+  distributorCommissionAmount?: number;
+
+  masterDistributorId?: string;
+  masterDistributorName?: string;
+  masterDistributorCommissionRate?: string | number;
+  masterDistributorCommissionAmount?: number;
+
+  grossCommercialRevenue?: number;
+  totalHierarchyCommission?: number;
+  platformRetainedRevenue?: number;
+}
+
+export interface PayInAccountingSnapshot {
+  principalAmount: number;
+  customerCharge: number;
+  gstAmount: number;
+  customerTotal: number;
+  grossCommercialRevenue: number;
+  retailerCommissionAmount: number;
+  distributorCommissionAmount: number;
+  masterDistributorCommissionAmount: number;
+  totalHierarchyCommission: number;
+  platformRetainedRevenue: number;
+  retailerPrincipalWalletCredit: number;
+  retailerCommissionWalletCredit: number;
+  retailerWalletCredit: number;
+  taxLiability: number;
+  settlementPrincipal: number;
+  grossSettlementReceivable: number;
+  netSettlementAmount: number;
+}
+
+export interface PayOutAccountingSnapshot {
+  principalAmount: number;
+  customerCharge: number;
+  gstAmount: number;
+  grossCommercialRevenue: number;
+  retailerCommissionAmount: number;
+  distributorCommissionAmount: number;
+  masterDistributorCommissionAmount: number;
+  totalHierarchyCommission: number;
+  platformRetainedRevenue: number;
+  walletPrincipalDebit: number;
+  walletFeeDebit: number;
+  walletTaxDebit: number;
+  totalWalletDebit: number;
+  walletCommissionCredit: number;
+  netWalletMovement: number;
+  taxLiability: number;
+  beneficiaryTransferAmount: number;
+  settlementAmount: number;
+}
+
 export interface Transaction {
   id: string;
   transactionRef: string;
@@ -1047,8 +1115,11 @@ export interface Transaction {
   utr?: string;
   merchantName: string;
   distributorName?: string;
+  distributorId?: string;
   retailerName?: string;
   retailerId?: string;
+  masterDistributorId?: string;
+
   type: 'PAY_IN' | 'PAY_OUT' | 'SETTLEMENT';
   amount: number;
   fee: number;
@@ -1073,6 +1144,9 @@ export interface Transaction {
   timeline?: TransactionTimelineEvent[];
   providerResponse?: Record<string, unknown>;
   callbackSummary?: CallbackSummaryInfo;
+  commissionSnapshot?: CommissionSnapshot;
+  accountingSnapshot?: PayInAccountingSnapshot;
+  payOutAccountingSnapshot?: PayOutAccountingSnapshot;
   createdAt: string;
   updatedAt?: string;
 }
@@ -1481,4 +1555,143 @@ export interface AdminSummary {
   configuredPermissionsCount: number;
   activeLimitRules: number;
   activeFeeRules: number;
+}
+
+/* ==========================================================================
+   Phase 15: Hierarchy, Multi-Role, Retailer Plan & Mock Auth Types
+   ========================================================================== */
+
+export type ApprovalStatus = 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED';
+export type RetailerApprovalStatus = ApprovalStatus;
+export type AccountStatus = 'INACTIVE' | 'ACTIVE' | 'SUSPENDED';
+export type PlanStatus = 'ACTIVE' | 'INACTIVE';
+export type CommissionType = 'FLAT' | 'PERCENTAGE';
+export type CommissionServiceType = 'PAY_IN' | 'PAY_OUT';
+
+export interface ApprovalMetadata {
+  approvalStatus: ApprovalStatus;
+  submittedAt?: string;
+  approvedByUserId?: string;
+  approvedAt?: string;
+  rejectedByUserId?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
+  approvalRemarks?: string;
+}
+
+export interface CommissionRule {
+  serviceType: CommissionServiceType;
+  commissionType: CommissionType;
+  value: number;
+}
+
+export interface MasterDistributor {
+  id: string;
+  code: string;
+  userId: string;
+  name: string;
+  businessName: string;
+  email: string;
+  mobile: string;
+  status: AccountStatus;
+  walletId: string;
+  commissionConfig?: Record<string, any>;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface Distributor {
+  id: string;
+  code: string;
+  masterDistributorId: string;
+  userId: string;
+  name: string;
+  businessName: string;
+  email: string;
+  mobile: string;
+  businessType?: string;
+  registrationNumber?: string;
+  gstNumber?: string;
+  panNumberMasked?: string;
+  kycStatus?: KYCStatus;
+  approvalStatus?: ApprovalStatus;
+  status: AccountStatus;
+  walletId: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  commissionConfig?: Record<string, any>;
+  createdByUserId?: string;
+  createdByRole?: UserRole;
+  createdByEntityId?: string;
+  approvedByUserId?: string;
+  approvedAt?: string;
+  rejectedByUserId?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
+  approvalRemarks?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface Retailer {
+  id: string;
+  code: string;
+  masterDistributorId: string;
+  distributorId: string;
+  userId: string;
+  planId: string;
+  name: string;
+  businessName: string;
+  email: string;
+  mobile: string;
+  kycStatus: KYCStatus;
+  approvalStatus: ApprovalStatus;
+  accountStatus: AccountStatus;
+  walletId: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  createdByUserId: string;
+  createdByRole: UserRole;
+  createdByEntityId: string;
+  approvedByUserId?: string;
+  approvedAt?: string;
+  rejectedByUserId?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
+  approvalRemarks?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface RetailerPlan {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  commissionRules: CommissionRule[];
+  status: PlanStatus;
+  effectiveFrom: string;
+  effectiveTo?: string;
+  assignedRetailersCount: number;
+  createdBy: string;
+  createdAt: string;
+  updatedBy?: string;
+  updatedAt?: string;
+}
+
+export interface MockAccount {
+  userId: string;
+  username: string;
+  name: string;
+  email: string;
+  mobile: string;
+  role: UserRole;
+  entityId?: string;
+  approvalStatus?: RetailerApprovalStatus;
+  accountStatus?: AccountStatus;
+  permissions: string[];
 }

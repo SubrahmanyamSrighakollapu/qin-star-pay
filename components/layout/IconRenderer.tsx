@@ -14,6 +14,7 @@ import {
   Terminal,
   Settings,
   Circle,
+  Network,
 } from 'lucide-react';
 
 export interface IconRendererProps {
@@ -35,6 +36,7 @@ const iconMap: Record<string, React.ElementType> = {
   Plug,
   Terminal,
   Settings,
+  Network,
 };
 
 export const IconRenderer: React.FC<IconRendererProps> = ({ name, className = 'w-4 h-4' }) => {

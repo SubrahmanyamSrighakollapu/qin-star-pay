@@ -92,7 +92,7 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({
         <div>
           {row.transactionId ? (
             <Link
-              href={`/transactions/${row.transactionId}`}
+              href={`/admin/transactions/${row.transactionId}`}
               className="font-mono text-xs font-bold text-[var(--primary)] hover:underline inline-flex items-center gap-1"
             >
               <span>{row.transactionId}</span>

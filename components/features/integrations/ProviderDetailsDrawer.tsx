@@ -171,7 +171,7 @@ export const ProviderDetailsDrawer: React.FC<ProviderDetailsDrawerProps> = ({
             {/* Cross-Module Navigational Links */}
             <Card title="Cross-Module Operational Links" subtitle="Filtered logs & reports for this provider">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <Link href="/reports/api-performance">
+                <Link href="/admin/reports/api-performance">
                   <div className="p-3 bg-white border border-slate-200 rounded-lg hover:border-[var(--primary)] transition-colors cursor-pointer space-y-1">
                     <span className="text-[11px] text-slate-400 font-semibold block">Performance Analytics</span>
                     <span className="text-xs font-bold text-blue-600 flex items-center gap-1">
@@ -181,7 +181,7 @@ export const ProviderDetailsDrawer: React.FC<ProviderDetailsDrawerProps> = ({
                   </div>
                 </Link>
 
-                <Link href={`/transactions/all?searchQuery=${provider.name}`}>
+                <Link href={`/admin/transactions/all?searchQuery=${provider.name}`}>
                   <div className="p-3 bg-white border border-slate-200 rounded-lg hover:border-[var(--primary)] transition-colors cursor-pointer space-y-1">
                     <span className="text-[11px] text-slate-400 font-semibold block">Gateway Transactions</span>
                     <span className="text-xs font-bold text-blue-600 flex items-center gap-1">
@@ -191,7 +191,7 @@ export const ProviderDetailsDrawer: React.FC<ProviderDetailsDrawerProps> = ({
                   </div>
                 </Link>
 
-                <Link href="/integrations/webhooks">
+                <Link href="/admin/integrations/webhooks">
                   <div className="p-3 bg-white border border-slate-200 rounded-lg hover:border-[var(--primary)] transition-colors cursor-pointer space-y-1">
                     <span className="text-[11px] text-slate-400 font-semibold block">Webhook Config</span>
                     <span className="text-xs font-bold text-blue-600 flex items-center gap-1">

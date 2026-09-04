@@ -3,18 +3,48 @@
  */
 
 export const USER_ROLES = {
+  ADMIN: 'ADMIN',
   SUPER_ADMIN: 'SUPER_ADMIN',
+  MASTER_DISTRIBUTOR: 'MASTER_DISTRIBUTOR',
+  DISTRIBUTOR: 'DISTRIBUTOR',
+  RETAILER: 'RETAILER',
   SALES: 'SALES',
   KYC: 'KYC',
   ACCOUNTS: 'ACCOUNTS',
   OPERATIONS: 'OPERATIONS',
   SUPPORT: 'SUPPORT',
-  DISTRIBUTOR: 'DISTRIBUTOR',
-  RETAILER: 'RETAILER',
   MERCHANT: 'MERCHANT',
 } as const;
 
 export type UserRole = keyof typeof USER_ROLES;
+
+export const ROLE_HIERARCHY_LEVELS: Record<UserRole, number> = {
+  ADMIN: 1,
+  SUPER_ADMIN: 1,
+  MASTER_DISTRIBUTOR: 2,
+  DISTRIBUTOR: 3,
+  RETAILER: 4,
+  OPERATIONS: 2,
+  ACCOUNTS: 2,
+  KYC: 2,
+  SALES: 3,
+  SUPPORT: 3,
+  MERCHANT: 4,
+};
+
+export const USER_ROLE_LABELS: Record<UserRole, string> = {
+  ADMIN: 'Admin',
+  SUPER_ADMIN: 'Super Admin',
+  MASTER_DISTRIBUTOR: 'Master Distributor',
+  DISTRIBUTOR: 'Distributor',
+  RETAILER: 'Retailer',
+  SALES: 'Sales Executive',
+  KYC: 'KYC Analyst',
+  ACCOUNTS: 'Accounts Manager',
+  OPERATIONS: 'Operations Lead',
+  SUPPORT: 'Support Executive',
+  MERCHANT: 'Merchant',
+};
 
 export interface UserContext {
   id: string;
@@ -50,7 +80,7 @@ export function canAccessRoute(
   requiredPermissions?: string[]
 ): boolean {
   if (!user) return false;
-  if (user.role === 'SUPER_ADMIN') return true;
+  if (user.role === 'SUPER_ADMIN' || user.role === 'ADMIN') return true;
 
   if (allowedRoles && allowedRoles.length > 0) {
     if (!allowedRoles.includes(user.role)) {
@@ -65,3 +95,4 @@ export function canAccessRoute(
 
   return true;
 }
+

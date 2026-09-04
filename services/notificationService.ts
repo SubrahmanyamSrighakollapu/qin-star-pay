@@ -307,26 +307,26 @@ export const notificationService = {
    */
   getRelatedRecordRoute(notification: Notification): string {
     if (notification.entityType === 'TRANSACTION' || notification.category === 'TRANSACTION') {
-      return `/transactions/${notification.entityId || 'QSP20260903001'}`;
+      return `/admin/transactions/${notification.entityId || 'QSP20260903001'}`;
     }
     if (notification.entityType === 'SETTLEMENT' || notification.category === 'SETTLEMENT') {
-      return '/settlements';
+      return '/admin/settlements';
     }
     if (notification.entityType === 'CHARGEBACK' || notification.category === 'CHARGEBACK') {
-      return '/chargebacks';
+      return '/admin/chargebacks';
     }
     if (notification.entityType === 'INVOICE' || notification.category === 'INVOICE') {
-      return '/invoices';
+      return '/admin/invoices';
     }
     if (notification.entityType === 'KYC' || notification.category === 'KYC') {
-      return '/kyc';
+      return '/admin/kyc';
     }
     if (notification.entityType === 'WALLET' || notification.category === 'WALLET') {
-      return '/wallet/balances';
+      return '/admin/wallet/balances';
     }
     if (notification.category === 'RECONCILIATION') {
-      return '/settlements';
+      return '/admin/settlements';
     }
-    return '/dashboard';
+    return '/admin/dashboard';
   },
 };

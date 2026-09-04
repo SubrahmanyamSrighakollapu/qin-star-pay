@@ -7,13 +7,22 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useToast } from '@/components/ui/Toast';
 import { cn } from '@/utils/cn';
 
+import { DEV_FEATURES } from '@/config/devFeatures';
+
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+
 export interface UserMenuProps {
   currentUser?: UserContext;
   onRoleChange?: (newRole: UserRole) => void;
 }
 
 const availableRoles: UserRole[] = [
+  'ADMIN',
   'SUPER_ADMIN',
+  'MASTER_DISTRIBUTOR',
+  'DISTRIBUTOR',
+  'RETAILER',
   'OPERATIONS',
   'ACCOUNTS',
   'KYC',
@@ -25,6 +34,8 @@ export const UserMenu: React.FC<UserMenuProps> = ({
   currentUser = MOCK_CURRENT_USER,
   onRoleChange,
 }) => {
+  const router = useRouter();
+  const { logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [showRoleSwitcher, setShowRoleSwitcher] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,9 +53,12 @@ export const UserMenu: React.FC<UserMenuProps> = ({
   }, []);
 
   const handleLogout = () => {
+    logout();
     toastSuccess('Signed out successfully.');
     setIsOpen(false);
+    router.push('/login');
   };
+
 
   return (
     <div ref={containerRef} className="relative inline-block text-left">
@@ -120,7 +134,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
             </button>
 
             {/* Dev Role Switcher Helper */}
-            {onRoleChange && (
+            {DEV_FEATURES.showRolePreviewSwitcher && onRoleChange && (
               <div className="border-t border-[var(--border-subtle)] my-1 pt-1">
                 <button
                   type="button"

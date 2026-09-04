@@ -227,7 +227,7 @@ export const WalletDetailsDrawer: React.FC<WalletDetailsDrawerProps> = ({
               </div>
 
               <div className="pt-2">
-                <Link href={`/wallet/ledger?searchQuery=${wallet.walletId}`}>
+                <Link href={`/admin/wallet/ledger?searchQuery=${wallet.walletId}`}>
                   <Button variant="outline" size="sm" rightIcon={<ArrowUpRight className="w-3.5 h-3.5" />}>
                     View Complete Audit Ledger →
                   </Button>
@@ -252,7 +252,7 @@ export const WalletDetailsDrawer: React.FC<WalletDetailsDrawerProps> = ({
               </div>
 
               <div className="pt-2">
-                <Link href="/transactions/all">
+                <Link href="/admin/transactions/all">
                   <Button variant="outline" size="sm" rightIcon={<ArrowUpRight className="w-3.5 h-3.5" />}>
                     Open All Transactions Module →
                   </Button>

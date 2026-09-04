@@ -104,13 +104,13 @@ export const MerchantOnboardingWizard: React.FC = () => {
           </div>
 
           <div className="flex justify-between pt-2 border-t border-slate-200">
-            <Link href="/kyc/onboarding">
+            <Link href="/admin/kyc/onboarding">
               <Button variant="outline" size="sm">
                 Back to Onboarding Applications
               </Button>
             </Link>
 
-            <Link href="/kyc">
+            <Link href="/admin/kyc">
               <Button variant="primary" size="sm" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
                 Go to KYC Applications Module
               </Button>

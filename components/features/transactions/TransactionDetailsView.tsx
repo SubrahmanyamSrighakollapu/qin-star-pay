@@ -68,7 +68,7 @@ export const TransactionDetailsView: React.FC<TransactionDetailsViewProps> = ({
       <div className="sticky top-0 z-20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white/95 backdrop-blur-xs border border-[var(--border)] rounded-[var(--radius-xl)] shadow-xs">
         <div className="flex items-center gap-3">
           {!isInsideDrawer && (
-            <Link href="/transactions/all">
+            <Link href="/admin/transactions/all">
               <Button variant="outline" size="sm" leftIcon={<ArrowLeft className="w-4 h-4" />}>
                 Back
               </Button>
@@ -354,7 +354,7 @@ export const TransactionDetailsView: React.FC<TransactionDetailsViewProps> = ({
               </div>
 
               <div className="pt-2">
-                <Link href="/logs/callbacks">
+                <Link href="/admin/logs/callbacks">
                   <Button variant="ghost" size="sm" fullWidth className="text-[11px]">
                     View Full Callback Log →
                   </Button>

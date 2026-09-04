@@ -116,7 +116,99 @@ export const walletService = {
     });
   },
 
+  async getMasterDistributorWallet(masterDistributorId: string): Promise<ApiResponse<WalletAccount>> {
+    if (APP_CONFIG.useMockData) {
+      await new Promise((res) => setTimeout(res, 150));
+      const wallet = inMemoryWallets.find(
+        (w) => w.entityId === masterDistributorId || w.walletId === `wlt_${masterDistributorId}`
+      ) || {
+        walletId: `wlt_${masterDistributorId}`,
+        entityId: masterDistributorId,
+        entityType: 'MASTER',
+        entityName: 'Apex Financial Services Master Pvt Ltd',
+        entityCode: 'MD001',
+        availableBalance: 245800.00,
+        ledgerBalance: 250800.00,
+        holdBalance: 5000.00,
+        pendingSettlement: 14500.00,
+        currency: 'INR',
+        status: 'ACTIVE',
+        updatedAt: new Date().toISOString(),
+      };
+      return {
+        success: true,
+        data: wallet as WalletAccount,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    return apiClient.get<ApiResponse<WalletAccount>>(`/master-distributor/${masterDistributorId}/wallet`);
+  },
+
+  async getDistributorWallet(distributorId: string): Promise<ApiResponse<WalletAccount>> {
+    if (APP_CONFIG.useMockData) {
+      await new Promise((res) => setTimeout(res, 150));
+      const wallet = inMemoryWallets.find(
+        (w) =>
+          w.entityId === distributorId ||
+          w.entityId === 'ent_dist_01' ||
+          w.walletId === `wlt_${distributorId}` ||
+          w.walletId === 'wlt_dst_001'
+      ) || {
+        walletId: `wlt_dst_001`,
+        entityId: distributorId,
+        entityType: 'DISTRIBUTOR',
+        entityName: 'North Zone Distributor',
+        entityCode: 'DST001',
+        availableBalance: 85200.00,
+        ledgerBalance: 87650.00,
+        holdBalance: 0.00,
+        pendingSettlement: 2450.00,
+        currency: 'INR',
+        status: 'ACTIVE',
+        updatedAt: new Date().toISOString(),
+      };
+      return {
+        success: true,
+        data: wallet as WalletAccount,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    return apiClient.get<ApiResponse<WalletAccount>>(`/distributor/${distributorId}/wallet`);
+  },
+
+  async getRetailerWallet(retailerId: string): Promise<ApiResponse<WalletAccount>> {
+    if (APP_CONFIG.useMockData) {
+      await new Promise((res) => setTimeout(res, 150));
+      const wallet = inMemoryWallets.find(
+        (w) =>
+          w.entityId === retailerId ||
+          w.walletId === `wlt_${retailerId}` ||
+          w.walletId === 'wlt_ret_001'
+      ) || {
+        walletId: `wlt_ret_001`,
+        entityId: retailerId,
+        entityType: 'RETAILER',
+        entityName: 'Metro Store #01',
+        entityCode: 'RET001',
+        availableBalance: 45350.00,
+        ledgerBalance: 46350.00,
+        holdBalance: 1000.00,
+        pendingSettlement: 0.00,
+        currency: 'INR',
+        status: 'ACTIVE',
+        updatedAt: new Date().toISOString(),
+      };
+      return {
+        success: true,
+        data: wallet as WalletAccount,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    return apiClient.get<ApiResponse<WalletAccount>>(`/retailer/${retailerId}/wallet`);
+  },
+
   async getWalletByEntityId(entityId: string): Promise<ApiResponse<WalletAccount | null>> {
+
     if (APP_CONFIG.useMockData) {
       await new Promise((res) => setTimeout(res, 150));
       const wallet = inMemoryWallets.find((w) => w.entityId === entityId || w.entityCode === entityId) || null;

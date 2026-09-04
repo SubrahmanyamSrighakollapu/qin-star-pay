@@ -136,7 +136,7 @@ export const LedgerDetailsDrawer: React.FC<LedgerDetailsDrawerProps> = ({
               <div className="flex justify-between py-1 border-b border-slate-100">
                 <span className="text-slate-500">Linked Transaction:</span>
                 <Link
-                  href={`/transactions/${entry.transactionId}`}
+                  href={`/admin/transactions/${entry.transactionId}`}
                   className="font-mono font-bold text-[var(--primary)] hover:underline inline-flex items-center gap-1"
                 >
                   <span>{entry.transactionId}</span>

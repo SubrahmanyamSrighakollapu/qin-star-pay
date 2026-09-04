@@ -225,7 +225,7 @@ export const InvoiceDetailsDrawer: React.FC<InvoiceDetailsDrawerProps> = ({
                 <div className="p-3 bg-white border border-slate-200 rounded-lg space-y-1">
                   <span className="text-[11px] text-slate-400 font-semibold block">Target Wallet</span>
                   <span className="font-mono font-bold text-xs text-[var(--primary)] block">{invoice.walletId}</span>
-                  <Link href="/wallet/balances">
+                  <Link href="/admin/wallet/balances">
                     <span className="text-[11px] text-blue-600 flex items-center gap-1 hover:underline mt-1">
                       <span>View Wallet</span>
                       <ExternalLink className="w-3 h-3" />
@@ -238,7 +238,7 @@ export const InvoiceDetailsDrawer: React.FC<InvoiceDetailsDrawerProps> = ({
                   <span className="font-mono font-bold text-xs text-[var(--primary)] block">
                     {invoice.transactionIds[0] || 'QSP20260903001'}
                   </span>
-                  <Link href={`/transactions/${invoice.transactionIds[0] || 'QSP20260903001'}`}>
+                  <Link href={`/admin/transactions/${invoice.transactionIds[0] || 'QSP20260903001'}`}>
                     <span className="text-[11px] text-blue-600 flex items-center gap-1 hover:underline mt-1">
                       <span>View Transaction</span>
                       <ExternalLink className="w-3 h-3" />
@@ -251,7 +251,7 @@ export const InvoiceDetailsDrawer: React.FC<InvoiceDetailsDrawerProps> = ({
                   <span className="font-mono font-bold text-xs text-[var(--primary)] block">
                     {invoice.settlementIds[0] || 'SET_20260903_001'}
                   </span>
-                  <Link href="/settlements">
+                  <Link href="/admin/settlements">
                     <span className="text-[11px] text-blue-600 flex items-center gap-1 hover:underline mt-1">
                       <span>View Settlement</span>
                       <ExternalLink className="w-3 h-3" />
@@ -264,7 +264,7 @@ export const InvoiceDetailsDrawer: React.FC<InvoiceDetailsDrawerProps> = ({
                   <span className="font-mono font-bold text-xs text-[var(--primary)] block">
                     {invoice.ledgerEntryIds[0] || 'led_001'}
                   </span>
-                  <Link href={`/wallet/ledger?searchQuery=${invoice.walletId}`}>
+                  <Link href={`/admin/wallet/ledger?searchQuery=${invoice.walletId}`}>
                     <span className="text-[11px] text-blue-600 flex items-center gap-1 hover:underline mt-1">
                       <span>View Ledger Log</span>
                       <BookOpen className="w-3 h-3" />

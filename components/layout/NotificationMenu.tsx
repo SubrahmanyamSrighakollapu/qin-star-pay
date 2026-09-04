@@ -8,12 +8,22 @@ import { notificationService } from '@/services/notificationService';
 import { Notification } from '@/types/domain';
 import { formatDate } from '@/utils/formatters';
 
+import { useAuth } from '@/context/AuthContext';
+
 export const NotificationMenu: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { session } = useAuth();
+
+  const getNotificationBasePath = () => {
+    if (session?.role === 'RETAILER') return '/retailer/notifications';
+    if (session?.role === 'DISTRIBUTOR') return '/distributor/notifications';
+    if (session?.role === 'MASTER_DISTRIBUTOR') return '/master-distributor/notifications';
+    return '/admin/notifications';
+  };
 
   const loadNotifications = () => {
     notificationService.getNotifications({}, 1, 5).then((res) => {
@@ -50,7 +60,7 @@ export const NotificationMenu: React.FC = () => {
       await notificationService.markAsRead(notif.id);
     }
     setIsOpen(false);
-    router.push(`/notifications?notification=${notif.id}`);
+    router.push(`${getNotificationBasePath()}?notification=${notif.id}`);
   };
 
   const getSeverityIcon = (severity: Notification['severity']) => {
@@ -150,7 +160,7 @@ export const NotificationMenu: React.FC = () => {
           {/* Footer Action */}
           <div className="p-2.5 bg-slate-50 border-t border-slate-200 text-center">
             <Link
-              href="/notifications"
+              href={getNotificationBasePath()}
               onClick={() => setIsOpen(false)}
               className="text-xs font-bold text-[var(--primary)] hover:underline block"
             >

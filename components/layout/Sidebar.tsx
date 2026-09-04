@@ -3,12 +3,15 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ChevronsLeft, ChevronsRight, Shield, LogOut } from 'lucide-react';
-import { NAVIGATION_CONFIG, filterNavigationByRole } from '@/config/navigation';
+import { NAVIGATION_CONFIG, filterNavigationByRole, getNavigationForRole } from '@/config/navigation';
 import { UserContext } from '@/config/roles';
 import { SidebarItem } from './SidebarItem';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 import { useToast } from '@/components/ui/Toast';
 import { cn } from '@/utils/cn';
+
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export interface SidebarProps {
   isCollapsed: boolean;
@@ -25,14 +28,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onNavigate,
   className,
 }) => {
-  const navItems = filterNavigationByRole(NAVIGATION_CONFIG, currentUser);
+  const router = useRouter();
+  const { logout } = useAuth();
+
+  const baseNav = getNavigationForRole(currentUser.role);
+  const navItems = filterNavigationByRole(baseNav, currentUser);
+
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { toastSuccess } = useToast();
 
   const handleConfirmLogout = () => {
     setShowLogoutModal(false);
+    logout();
     toastSuccess('Signed out successfully.');
+    router.push('/login');
   };
+
 
   return (
     <aside

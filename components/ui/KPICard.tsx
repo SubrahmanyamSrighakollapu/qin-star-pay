@@ -11,7 +11,7 @@ export interface KPITrend {
 export interface KPICardProps {
   title: string;
   value: React.ReactNode;
-  subtitle?: string;
+  subtitle?: React.ReactNode;
   trend?: KPITrend;
   icon?: React.ReactNode;
   badge?: React.ReactNode;

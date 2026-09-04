@@ -207,7 +207,7 @@ export const UserDetailsDrawer: React.FC<UserDetailsDrawerProps> = ({
               </div>
 
               <div className="pt-2">
-                <Link href="/kyc">
+                <Link href="/admin/kyc">
                   <Button variant="outline" size="sm" rightIcon={<ArrowUpRight className="w-3.5 h-3.5" />}>
                     Open Full KYC Application Module →
                   </Button>
@@ -232,7 +232,7 @@ export const UserDetailsDrawer: React.FC<UserDetailsDrawerProps> = ({
               </div>
 
               <div className="pt-2">
-                <Link href={`/transactions/all`}>
+                <Link href={`/admin/transactions/all`}>
                   <Button variant="outline" size="sm" rightIcon={<ArrowUpRight className="w-3.5 h-3.5" />}>
                     View All Entity Transactions in Transactions Module →
                   </Button>
@@ -257,7 +257,7 @@ export const UserDetailsDrawer: React.FC<UserDetailsDrawerProps> = ({
               </div>
 
               <div className="pt-2">
-                <Link href="/wallet/balances">
+                <Link href="/admin/wallet/balances">
                   <Button variant="outline" size="sm" rightIcon={<ArrowUpRight className="w-3.5 h-3.5" />}>
                     View Full Wallet Ledger in Wallet Module →
                   </Button>
@@ -279,7 +279,7 @@ export const UserDetailsDrawer: React.FC<UserDetailsDrawerProps> = ({
               </div>
 
               <div className="pt-2">
-                <Link href="/logs/activity">
+                <Link href="/admin/logs/activity">
                   <Button variant="outline" size="sm" rightIcon={<ArrowUpRight className="w-3.5 h-3.5" />}>
                     View Full Activity Logs in Logs Module →
                   </Button>

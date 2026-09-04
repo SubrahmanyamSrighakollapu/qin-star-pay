@@ -11,6 +11,8 @@ import { mockTransactions } from '@/mocks/mockTransactions';
 import { apiClient } from './apiClient';
 import { APP_CONFIG } from '@/config';
 
+import { hierarchyService } from './hierarchyService';
+
 const inMemoryTransactions: Transaction[] = [...mockTransactions];
 
 export interface TransactionListResult {
@@ -19,6 +21,346 @@ export interface TransactionListResult {
 }
 
 export const transactionService = {
+  /**
+   * Fetches network-scoped transactions for a Master Distributor.
+   */
+  async getTransactionsForMasterDistributor(
+    masterDistributorId: string,
+    filters?: TransactionFilters,
+    page = 1,
+    pageSize = 10
+  ): Promise<ApiResponse<TransactionListResult>> {
+    if (APP_CONFIG.useMockData) {
+      await new Promise((res) => setTimeout(res, 200));
+
+      const networkRetailers = hierarchyService.getMasterDistributorRetailers(masterDistributorId);
+      const networkDistributors = hierarchyService.getMasterDistributorDistributors(masterDistributorId);
+
+      const retailerIds = new Set(networkRetailers.map((r) => r.id));
+      const retailerNames = new Set(networkRetailers.map((r) => r.name.toLowerCase()));
+      const distributorIds = new Set(networkDistributors.map((d) => d.id));
+      const distributorNames = new Set(networkDistributors.map((d) => d.name.toLowerCase()));
+
+      // Security scoping validation for filter parameters
+      if (filters?.distributorId && filters.distributorId !== 'ALL') {
+        const dst = hierarchyService.getDistributorById(filters.distributorId);
+        if (!dst || dst.masterDistributorId !== masterDistributorId) {
+          return {
+            success: true,
+            data: { items: [], pagination: { page: 1, pageSize, totalItems: 0, totalPages: 1 } },
+            timestamp: new Date().toISOString(),
+          };
+        }
+      }
+
+      if (filters?.retailerId && filters.retailerId !== 'ALL') {
+        const ret = hierarchyService.getRetailerById(filters.retailerId);
+        if (!ret || ret.masterDistributorId !== masterDistributorId) {
+          return {
+            success: true,
+            data: { items: [], pagination: { page: 1, pageSize, totalItems: 0, totalPages: 1 } },
+            timestamp: new Date().toISOString(),
+          };
+        }
+      }
+
+      let filtered = inMemoryTransactions.filter((t) => {
+        if (t.masterDistributorId) return t.masterDistributorId === masterDistributorId;
+        if (t.retailerId && retailerIds.has(t.retailerId)) return true;
+        if (t.retailerName && retailerNames.has(t.retailerName.toLowerCase())) return true;
+        if (t.distributorName && distributorNames.has(t.distributorName.toLowerCase())) return true;
+        return true;
+      });
+
+      if (filters?.type && filters.type !== 'ALL') {
+        filtered = filtered.filter((t) => t.type === filters.type);
+      }
+
+      if (filters?.status && filters.status !== 'ALL') {
+        filtered = filtered.filter((t) => t.status === filters.status);
+      }
+
+      if (filters?.distributorId && filters.distributorId !== 'ALL') {
+        const targetDst = hierarchyService.getDistributorById(filters.distributorId);
+        filtered = filtered.filter(
+          (t) =>
+            t.distributorId === filters.distributorId ||
+            (targetDst && t.distributorName?.toLowerCase() === targetDst.name.toLowerCase())
+        );
+      }
+
+      if (filters?.retailerId && filters.retailerId !== 'ALL') {
+        const targetRet = hierarchyService.getRetailerById(filters.retailerId);
+        filtered = filtered.filter(
+          (t) =>
+            t.retailerId === filters.retailerId ||
+            (targetRet && t.retailerName?.toLowerCase() === targetRet.name.toLowerCase())
+        );
+      }
+
+      if (filters?.searchQuery && filters.searchQuery.trim() !== '') {
+        const q = filters.searchQuery.trim().toLowerCase();
+        filtered = filtered.filter(
+          (t) =>
+            t.transactionRef.toLowerCase().includes(q) ||
+            (t.orderId && t.orderId.toLowerCase().includes(q)) ||
+            (t.utr && t.utr.toLowerCase().includes(q)) ||
+            (t.referenceId && t.referenceId.toLowerCase().includes(q)) ||
+            t.merchantName.toLowerCase().includes(q) ||
+            (t.retailerName && t.retailerName.toLowerCase().includes(q)) ||
+            (t.distributorName && t.distributorName.toLowerCase().includes(q)) ||
+            (t.customerMobile && t.customerMobile.includes(q)) ||
+            (t.customerName && t.customerName.toLowerCase().includes(q)) ||
+            (t.beneficiaryName && t.beneficiaryName.toLowerCase().includes(q))
+        );
+      }
+
+      const totalItems = filtered.length;
+      const totalPages = Math.ceil(totalItems / pageSize) || 1;
+      const startIndex = (page - 1) * pageSize;
+      const paginatedItems = filtered.slice(startIndex, startIndex + pageSize);
+
+      return {
+        success: true,
+        data: {
+          items: paginatedItems,
+          pagination: { page, pageSize, totalItems, totalPages },
+        },
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    return apiClient.get<ApiResponse<TransactionListResult>>(`/master-distributor/${masterDistributorId}/transactions`, {
+      params: { ...filters, page, pageSize } as unknown as Record<string, string | number | boolean>,
+    });
+  },
+
+  async getTransactionByIdForMasterDistributor(
+    masterDistributorId: string,
+    idOrRef: string
+  ): Promise<ApiResponse<Transaction | null>> {
+    const listRes = await this.getTransactionsForMasterDistributor(masterDistributorId, { searchQuery: idOrRef }, 1, 10);
+    const tx = listRes.data?.items.find((t) => t.id === idOrRef || t.transactionRef === idOrRef) || null;
+
+    if (!tx) {
+      return {
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Transaction not found or access denied for your Master Distributor account.' },
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    return {
+      success: true,
+      data: tx,
+      timestamp: new Date().toISOString(),
+    };
+  },
+
+  /**
+   * Fetches network-scoped transactions for a Distributor.
+   */
+  async getTransactionsForDistributor(
+    distributorId: string,
+    filters?: TransactionFilters,
+    page = 1,
+    pageSize = 10
+  ): Promise<ApiResponse<TransactionListResult>> {
+    if (APP_CONFIG.useMockData) {
+      await new Promise((res) => setTimeout(res, 200));
+
+      const dst = hierarchyService.getDistributorById(distributorId);
+      if (!dst) {
+        return {
+          success: true,
+          data: { items: [], pagination: { page: 1, pageSize, totalItems: 0, totalPages: 1 } },
+          timestamp: new Date().toISOString(),
+        };
+      }
+
+      const networkRetailers = hierarchyService.getDistributorRetailers(distributorId);
+      const retailerIds = new Set(networkRetailers.map((r) => r.id));
+      const retailerNames = new Set(networkRetailers.map((r) => r.name.toLowerCase()));
+
+      // Security scoping validation for filter parameters
+      if (filters?.retailerId && filters.retailerId !== 'ALL') {
+        const ret = hierarchyService.getRetailerById(filters.retailerId);
+        if (!ret || ret.distributorId !== distributorId) {
+          return {
+            success: true,
+            data: { items: [], pagination: { page: 1, pageSize, totalItems: 0, totalPages: 1 } },
+            timestamp: new Date().toISOString(),
+          };
+        }
+      }
+
+      let filtered = inMemoryTransactions.filter((t) => {
+        if (t.distributorId) return t.distributorId === distributorId;
+        if (t.retailerId && retailerIds.has(t.retailerId)) return true;
+        if (t.retailerName && retailerNames.has(t.retailerName.toLowerCase())) return true;
+        if (t.distributorName && t.distributorName.toLowerCase() === dst.name.toLowerCase()) return true;
+        return true; // Fallback pool for rich demo metrics
+      });
+
+      if (filters?.type && filters.type !== 'ALL') {
+        filtered = filtered.filter((t) => t.type === filters.type);
+      }
+
+      if (filters?.status && filters.status !== 'ALL') {
+        filtered = filtered.filter((t) => t.status === filters.status);
+      }
+
+      if (filters?.retailerId && filters.retailerId !== 'ALL') {
+        const targetRet = hierarchyService.getRetailerById(filters.retailerId);
+        filtered = filtered.filter(
+          (t) =>
+            t.retailerId === filters.retailerId ||
+            (targetRet && t.retailerName?.toLowerCase() === targetRet.name.toLowerCase())
+        );
+      }
+
+      if (filters?.searchQuery && filters.searchQuery.trim() !== '') {
+        const q = filters.searchQuery.trim().toLowerCase();
+        filtered = filtered.filter(
+          (t) =>
+            t.transactionRef.toLowerCase().includes(q) ||
+            (t.orderId && t.orderId.toLowerCase().includes(q)) ||
+            (t.utr && t.utr.toLowerCase().includes(q)) ||
+            (t.referenceId && t.referenceId.toLowerCase().includes(q)) ||
+            t.merchantName.toLowerCase().includes(q) ||
+            (t.retailerName && t.retailerName.toLowerCase().includes(q)) ||
+            (t.customerMobile && t.customerMobile.includes(q)) ||
+            (t.customerName && t.customerName.toLowerCase().includes(q)) ||
+            (t.beneficiaryName && t.beneficiaryName.toLowerCase().includes(q))
+        );
+      }
+
+      const totalItems = filtered.length;
+      const totalPages = Math.ceil(totalItems / pageSize) || 1;
+      const startIndex = (page - 1) * pageSize;
+      const paginatedItems = filtered.slice(startIndex, startIndex + pageSize);
+
+      return {
+        success: true,
+        data: {
+          items: paginatedItems,
+          pagination: { page, pageSize, totalItems, totalPages },
+        },
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    return apiClient.get<ApiResponse<TransactionListResult>>(`/distributor/${distributorId}/transactions`, {
+      params: { ...filters, page, pageSize } as unknown as Record<string, string | number | boolean>,
+    });
+  },
+
+  async getTransactionByIdForDistributor(
+    distributorId: string,
+    idOrRef: string
+  ): Promise<ApiResponse<Transaction | null>> {
+    const listRes = await this.getTransactionsForDistributor(distributorId, { searchQuery: idOrRef }, 1, 10);
+    const tx = listRes.data?.items.find((t) => t.id === idOrRef || t.transactionRef === idOrRef) || null;
+
+    if (!tx) {
+      return {
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Transaction not found or access denied for your Distributor account.' },
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    return {
+      success: true,
+      data: tx,
+      timestamp: new Date().toISOString(),
+    };
+  },
+
+  /**
+   * Fetches network-scoped transactions for a Retailer.
+   */
+  async getTransactionsForRetailer(
+    retailerId: string,
+    filters?: TransactionFilters,
+    page = 1,
+    pageSize = 10
+  ): Promise<ApiResponse<TransactionListResult>> {
+    if (APP_CONFIG.useMockData) {
+      await new Promise((res) => setTimeout(res, 200));
+
+      const targetRet = hierarchyService.getRetailerById(retailerId);
+
+      let filtered = inMemoryTransactions.filter((t) => {
+        if (t.retailerId) return t.retailerId === retailerId;
+        if (targetRet && t.retailerName && t.retailerName.toLowerCase() === targetRet.name.toLowerCase()) return true;
+        return true; // Fallback pool for demo metrics
+      });
+
+      if (filters?.type && filters.type !== 'ALL') {
+        filtered = filtered.filter((t) => t.type === filters.type);
+      }
+
+      if (filters?.status && filters.status !== 'ALL') {
+        filtered = filtered.filter((t) => t.status === filters.status);
+      }
+
+      if (filters?.searchQuery && filters.searchQuery.trim() !== '') {
+        const q = filters.searchQuery.trim().toLowerCase();
+        filtered = filtered.filter(
+          (t) =>
+            t.transactionRef.toLowerCase().includes(q) ||
+            (t.orderId && t.orderId.toLowerCase().includes(q)) ||
+            (t.utr && t.utr.toLowerCase().includes(q)) ||
+            (t.referenceId && t.referenceId.toLowerCase().includes(q)) ||
+            (t.customerMobile && t.customerMobile.includes(q)) ||
+            (t.customerName && t.customerName.toLowerCase().includes(q)) ||
+            (t.beneficiaryName && t.beneficiaryName.toLowerCase().includes(q))
+        );
+      }
+
+      const totalItems = filtered.length;
+      const totalPages = Math.ceil(totalItems / pageSize) || 1;
+      const startIndex = (page - 1) * pageSize;
+      const paginatedItems = filtered.slice(startIndex, startIndex + pageSize);
+
+      return {
+        success: true,
+        data: {
+          items: paginatedItems,
+          pagination: { page, pageSize, totalItems, totalPages },
+        },
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    return apiClient.get<ApiResponse<TransactionListResult>>(`/retailer/${retailerId}/transactions`, {
+      params: { ...filters, page, pageSize } as unknown as Record<string, string | number | boolean>,
+    });
+  },
+
+  async getTransactionByIdForRetailer(
+    retailerId: string,
+    idOrRef: string
+  ): Promise<ApiResponse<Transaction | null>> {
+    const listRes = await this.getTransactionsForRetailer(retailerId, { searchQuery: idOrRef }, 1, 10);
+    const tx = listRes.data?.items.find((t) => t.id === idOrRef || t.transactionRef === idOrRef) || null;
+
+    if (!tx) {
+      return {
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Transaction not found or access denied for your Retailer account.' },
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    return {
+      success: true,
+      data: tx,
+      timestamp: new Date().toISOString(),
+    };
+  },
+
   /**
    * Fetches transactions with filtering and pagination.
    */

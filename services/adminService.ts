@@ -300,18 +300,131 @@ export const adminService = {
   },
 
   /**
-   * Resolve limit precedence: MERCHANT override > DISTRIBUTOR rule > GLOBAL default
+   * Resolve limit precedence: Scope + TxType + Mode > Scope + TxType > Scope > Global + TxType + Mode > Global + TxType > Global Default
    */
-  resolveEffectiveLimit(merchantId?: string, transactionType: 'PAY_IN' | 'PAY_OUT' = 'PAY_OUT'): TransactionLimit {
-    if (merchantId) {
-      const merchantLimit = inMemoryTransactionLimits.find(
-        (l) => l.scopeType === 'MERCHANT' && l.scopeId === merchantId && l.status === 'ACTIVE' && l.transactionType === transactionType
-      );
-      if (merchantLimit) return merchantLimit;
+  resolveEffectiveLimit(
+    paramsOrId?: {
+      entityType?: 'RETAILER' | 'MERCHANT' | 'DISTRIBUTOR' | 'GLOBAL';
+      entityId?: string;
+      transactionType?: 'PAY_IN' | 'PAY_OUT' | 'ALL';
+      paymentMode?: string;
+    } | string,
+    legacyTxType: 'PAY_IN' | 'PAY_OUT' = 'PAY_OUT'
+  ): TransactionLimit {
+    let entityId: string | undefined;
+    let txType: 'PAY_IN' | 'PAY_OUT' | 'ALL' = legacyTxType;
+    let mode: string | undefined;
+
+    if (typeof paramsOrId === 'object' && paramsOrId !== null) {
+      entityId = paramsOrId.entityId;
+      txType = paramsOrId.transactionType || 'ALL';
+      mode = paramsOrId.paymentMode;
+    } else if (typeof paramsOrId === 'string') {
+      entityId = paramsOrId;
+      txType = legacyTxType;
     }
 
-    const globalLimit = inMemoryTransactionLimits.find((l) => l.scopeType === 'GLOBAL' && l.status === 'ACTIVE' && l.transactionType === transactionType);
-    return globalLimit || inMemoryTransactionLimits[0];
+    const activeLimits = inMemoryTransactionLimits.filter((l) => l.status === 'ACTIVE');
+
+    // 1. Scope + Transaction Type + Mode
+    if (entityId && mode) {
+      const match = activeLimits.find(
+        (l) => l.scopeId === entityId && (l.transactionType === txType || l.transactionType === 'ALL') && (l.paymentMode === mode || l.paymentMode === 'ALL')
+      );
+      if (match) return match;
+    }
+
+    // 2. Scope + Transaction Type
+    if (entityId) {
+      const match = activeLimits.find(
+        (l) => l.scopeId === entityId && (l.transactionType === txType || l.transactionType === 'ALL')
+      );
+      if (match) return match;
+    }
+
+    // 3. Global + Transaction Type + Mode
+    if (mode) {
+      const match = activeLimits.find(
+        (l) => l.scopeType === 'GLOBAL' && (l.transactionType === txType || l.transactionType === 'ALL') && (l.paymentMode === mode || l.paymentMode === 'ALL')
+      );
+      if (match) return match;
+    }
+
+    // 4. Global + Transaction Type
+    const globalTxMatch = activeLimits.find(
+      (l) => l.scopeType === 'GLOBAL' && (l.transactionType === txType || l.transactionType === 'ALL')
+    );
+    if (globalTxMatch) return globalTxMatch;
+
+    // 5. Fallback Default
+    return activeLimits[0] || {
+      id: 'LIMIT_DEFAULT_FALLBACK',
+      scopeType: 'GLOBAL',
+      transactionType: txType,
+      paymentMode: 'ALL',
+      minPerTransaction: 10,
+      maxPerTransaction: 200000,
+      dailyAmountLimit: 1000000,
+      dailyCountLimit: 500,
+      monthlyAmountLimit: 25000000,
+      monthlyCountLimit: 10000,
+      status: 'ACTIVE',
+      effectiveFrom: new Date().toISOString(),
+    };
+  },
+
+  /**
+   * Central Service-Level Transaction Limit Validation
+   */
+  validateTransactionLimit(params: {
+    entityType?: 'RETAILER' | 'MERCHANT' | 'DISTRIBUTOR' | 'GLOBAL';
+    entityId?: string;
+    transactionType: 'PAY_IN' | 'PAY_OUT';
+    paymentMode?: string;
+    amount: number;
+  }): {
+    allowed: boolean;
+    reason?: string;
+    resolvedLimit: TransactionLimit;
+    minPerTransaction: number;
+    maxPerTransaction: number;
+  } {
+    const resolvedLimit = this.resolveEffectiveLimit({
+      entityType: params.entityType,
+      entityId: params.entityId,
+      transactionType: params.transactionType,
+      paymentMode: params.paymentMode,
+    });
+
+    const min = resolvedLimit.minPerTransaction || 10;
+    const max = resolvedLimit.maxPerTransaction || 200000;
+
+    if (params.amount < min) {
+      return {
+        allowed: false,
+        reason: `Transaction amount (₹${params.amount.toLocaleString('en-IN')}) is below the minimum allowed limit of ₹${min.toLocaleString('en-IN')}.`,
+        resolvedLimit,
+        minPerTransaction: min,
+        maxPerTransaction: max,
+      };
+    }
+
+    if (params.amount > max) {
+      return {
+        allowed: false,
+        reason: `Transaction amount (₹${params.amount.toLocaleString('en-IN')}) exceeds your per-transaction ${params.transactionType} limit of ₹${max.toLocaleString('en-IN')}.`,
+        resolvedLimit,
+        minPerTransaction: min,
+        maxPerTransaction: max,
+      };
+    }
+
+    return {
+      allowed: true,
+      resolvedLimit,
+      minPerTransaction: min,
+      maxPerTransaction: max,
+    };
   },
 
   /**

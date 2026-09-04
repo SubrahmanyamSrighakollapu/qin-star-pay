@@ -191,6 +191,20 @@ export const mockRoles: Role[] = [
 
 export const mockTransactionLimits: TransactionLimit[] = [
   {
+    id: 'LIMIT_GLOBAL_PAYIN_001',
+    scopeType: 'GLOBAL',
+    transactionType: 'PAY_IN',
+    paymentMode: 'ALL',
+    minPerTransaction: 10,
+    maxPerTransaction: 200000,
+    dailyAmountLimit: 1000000,
+    dailyCountLimit: 500,
+    monthlyAmountLimit: 25000000,
+    monthlyCountLimit: 10000,
+    status: 'ACTIVE',
+    effectiveFrom: '2025-01-01T00:00:00Z',
+  },
+  {
     id: 'LIMIT_GLOBAL_001',
     scopeType: 'GLOBAL',
     transactionType: 'PAY_OUT',

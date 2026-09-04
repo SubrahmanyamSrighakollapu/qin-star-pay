@@ -122,7 +122,7 @@ export const CreatePayInModal: React.FC<CreatePayInModalProps> = ({
               Create Another
             </Button>
 
-            <Link href={`/transactions/${createdTx.id}`}>
+            <Link href={`/admin/transactions/${createdTx.id}`}>
               <Button
                 variant="primary"
                 size="sm"

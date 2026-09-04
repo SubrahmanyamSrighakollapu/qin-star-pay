@@ -24,8 +24,12 @@ export interface PaginatedResponse<T> {
 export interface ApiResponse<T = unknown> {
   success: boolean;
   message?: string;
-  data: T;
+  data?: T | null;
   errorCode?: string;
+  error?: {
+    code?: string;
+    message: string;
+  };
   timestamp?: string;
 }
 

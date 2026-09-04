@@ -25,7 +25,182 @@ export const ledgerService = {
     return newEntry;
   },
 
+  async getMasterDistributorLedger(
+    masterDistributorId: string,
+    filters?: LedgerFilters,
+    page = 1,
+    pageSize = 10
+  ): Promise<ApiResponse<LedgerListResult>> {
+    if (APP_CONFIG.useMockData) {
+      await new Promise((res) => setTimeout(res, 200));
+
+      let filtered = inMemoryLedger.filter(
+        (l) => l.entityId === masterDistributorId || l.walletId === `wlt_${masterDistributorId}`
+      );
+
+      if (filtered.length === 0) {
+        // Fallback to demo entries if empty
+        filtered = inMemoryLedger.filter((l) => l.walletId === 'wlt_md_001');
+      }
+
+      if (filters?.direction && filters.direction !== 'ALL') {
+        filtered = filtered.filter((l) => l.direction === filters.direction);
+      }
+
+      if (filters?.entryType && filters.entryType !== 'ALL') {
+        filtered = filtered.filter((l) => l.entryType === filters.entryType);
+      }
+
+      if (filters?.searchQuery && filters.searchQuery.trim() !== '') {
+        const q = filters.searchQuery.trim().toLowerCase();
+        filtered = filtered.filter(
+          (l) =>
+            l.id.toLowerCase().includes(q) ||
+            l.walletId.toLowerCase().includes(q) ||
+            l.description.toLowerCase().includes(q) ||
+            (l.transactionId && l.transactionId.toLowerCase().includes(q)) ||
+            (l.referenceId && l.referenceId.toLowerCase().includes(q))
+        );
+      }
+
+      const totalItems = filtered.length;
+      const totalPages = Math.ceil(totalItems / pageSize) || 1;
+      const items = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+      return {
+        success: true,
+        data: {
+          items,
+          pagination: { page, pageSize, totalItems, totalPages },
+        },
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    return apiClient.get<ApiResponse<LedgerListResult>>(`/master-distributor/${masterDistributorId}/ledger`, {
+      params: { ...filters, page, pageSize } as unknown as Record<string, string | number | boolean>,
+    });
+  },
+
+  async getDistributorLedger(
+    distributorId: string,
+    filters?: LedgerFilters,
+    page = 1,
+    pageSize = 10
+  ): Promise<ApiResponse<LedgerListResult>> {
+    if (APP_CONFIG.useMockData) {
+      await new Promise((res) => setTimeout(res, 200));
+
+      let filtered = inMemoryLedger.filter(
+        (l) =>
+          l.entityId === distributorId ||
+          l.entityId === 'ent_dist_01' ||
+          l.walletId === `wlt_${distributorId}` ||
+          l.walletId === 'wlt_dist_001'
+      );
+
+      if (filters?.direction && filters.direction !== 'ALL') {
+        filtered = filtered.filter((l) => l.direction === filters.direction);
+      }
+
+      if (filters?.entryType && filters.entryType !== 'ALL') {
+        filtered = filtered.filter((l) => l.entryType === filters.entryType);
+      }
+
+      if (filters?.searchQuery && filters.searchQuery.trim() !== '') {
+        const q = filters.searchQuery.trim().toLowerCase();
+        filtered = filtered.filter(
+          (l) =>
+            l.id.toLowerCase().includes(q) ||
+            l.walletId.toLowerCase().includes(q) ||
+            l.description.toLowerCase().includes(q) ||
+            (l.transactionId && l.transactionId.toLowerCase().includes(q)) ||
+            (l.referenceId && l.referenceId.toLowerCase().includes(q))
+        );
+      }
+
+      const totalItems = filtered.length;
+      const totalPages = Math.ceil(totalItems / pageSize) || 1;
+      const items = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+      return {
+        success: true,
+        data: {
+          items,
+          pagination: { page, pageSize, totalItems, totalPages },
+        },
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    return apiClient.get<ApiResponse<LedgerListResult>>(`/distributor/${distributorId}/ledger`, {
+      params: { ...filters, page, pageSize } as unknown as Record<string, string | number | boolean>,
+    });
+  },
+
+  async getRetailerLedger(
+    retailerId: string,
+    filters?: LedgerFilters,
+    page = 1,
+    pageSize = 10
+  ): Promise<ApiResponse<LedgerListResult>> {
+    if (APP_CONFIG.useMockData) {
+      await new Promise((res) => setTimeout(res, 200));
+
+      let filtered = inMemoryLedger.filter(
+        (l) =>
+          l.entityId === retailerId ||
+          l.entityId === 'ret_001' ||
+          l.entityId === 'RET001' ||
+          l.walletId === `wlt_${retailerId}` ||
+          l.walletId === 'wlt_ret_001'
+      );
+
+      if (filtered.length === 0) {
+        filtered = inMemoryLedger.filter((l) => l.walletId === 'wlt_ret_001');
+      }
+
+      if (filters?.direction && filters.direction !== 'ALL') {
+        filtered = filtered.filter((l) => l.direction === filters.direction);
+      }
+
+      if (filters?.entryType && filters.entryType !== 'ALL') {
+        filtered = filtered.filter((l) => l.entryType === filters.entryType);
+      }
+
+      if (filters?.searchQuery && filters.searchQuery.trim() !== '') {
+        const q = filters.searchQuery.trim().toLowerCase();
+        filtered = filtered.filter(
+          (l) =>
+            l.id.toLowerCase().includes(q) ||
+            l.walletId.toLowerCase().includes(q) ||
+            l.description.toLowerCase().includes(q) ||
+            (l.transactionId && l.transactionId.toLowerCase().includes(q)) ||
+            (l.referenceId && l.referenceId.toLowerCase().includes(q))
+        );
+      }
+
+      const totalItems = filtered.length;
+      const totalPages = Math.ceil(totalItems / pageSize) || 1;
+      const items = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+      return {
+        success: true,
+        data: {
+          items,
+          pagination: { page, pageSize, totalItems, totalPages },
+        },
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    return apiClient.get<ApiResponse<LedgerListResult>>(`/retailer/${retailerId}/ledger`, {
+      params: { ...filters, page, pageSize } as unknown as Record<string, string | number | boolean>,
+    });
+  },
+
   async getLedgerEntries(
+
     filters?: LedgerFilters,
     page = 1,
     pageSize = 10

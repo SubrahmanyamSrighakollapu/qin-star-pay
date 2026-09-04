@@ -140,7 +140,7 @@ export const WalletTable: React.FC<WalletTableProps> = ({
                 View Wallet
               </Button>
 
-              <Link href={`/wallet/ledger?searchQuery=${row.walletId}`}>
+              <Link href={`/admin/wallet/ledger?searchQuery=${row.walletId}`}>
                 <Button
                   variant="outline"
                   size="sm"

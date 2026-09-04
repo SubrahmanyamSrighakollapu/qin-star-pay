@@ -276,7 +276,7 @@ export const SettlementDetailsDrawer: React.FC<SettlementDetailsDrawerProps> = (
                       </td>
                       <td className="p-2.5">
                         <Link
-                          href={`/transactions/${tx.transactionId}`}
+                          href={`/admin/transactions/${tx.transactionId}`}
                           className="text-[var(--primary)] font-semibold hover:underline inline-flex items-center gap-1"
                         >
                           <span>View</span>
@@ -316,7 +316,7 @@ export const SettlementDetailsDrawer: React.FC<SettlementDetailsDrawerProps> = (
                 </div>
 
                 <div className="flex justify-end pt-2">
-                  <Link href={`/wallet/ledger?searchQuery=${settlement.settlementId}`}>
+                  <Link href={`/admin/wallet/ledger?searchQuery=${settlement.settlementId}`}>
                     <Button variant="outline" size="sm" leftIcon={<Layers className="w-3.5 h-3.5" />}>
                       View Financial Audit Ledger →
                     </Button>
