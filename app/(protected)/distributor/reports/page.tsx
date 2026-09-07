@@ -7,7 +7,8 @@ import { reportService } from '@/services/reportService';
 import { transactionService } from '@/services/transactionService';
 import { commissionService } from '@/services/commissionService';
 import { ledgerService } from '@/services/ledgerService';
-import { PageHeader, Button, SearchInput, Pagination, Tabs, Table, StatusBadge, useToast } from '@/components/ui';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { Button, SearchInput, Pagination, Tabs, Table, StatusBadge, useToast } from '@/components/ui';
 import { formatCurrency, formatDateTime } from '@/utils/formatters';
 import { ColumnDefinition } from '@/types/common';
 import { Download, RefreshCw, FileText, Store, Percent, ArrowLeftRight } from 'lucide-react';
@@ -106,7 +107,7 @@ export default function DistributorReportsPage() {
     if (activeTab === 'txn-report') {
       const columns: ColumnDefinition<any>[] = [
         { key: 'transactionId', header: 'Txn ID', render: (r) => <span className="font-mono font-bold text-sky-600">{r.transactionId}</span> },
-        { key: 'retailerName', header: 'Retailer Outlet', render: (r) => <span className="font-semibold text-slate-900">{r.retailerName}</span> },
+        { key: 'retailerName', header: 'Retailer Name', render: (r) => <span className="font-semibold text-slate-900">{r.retailerName}</span> },
         { key: 'mobileNumber', header: 'Mobile', render: (r) => <span className="font-mono text-slate-600">{r.mobileNumber}</span> },
         { key: 'serviceType', header: 'Service', render: (r) => <span className="text-slate-700">{r.serviceType}</span> },
         { key: 'transactionAmount', header: 'Amount', align: 'right', render: (r) => <span className="font-bold text-slate-900 font-mono">{formatCurrency(r.transactionAmount)}</span> },
@@ -168,33 +169,30 @@ export default function DistributorReportsPage() {
   }, [reportData, currentPage, pageSize]);
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Header */}
-      <PageHeader
-        title="Distributor Operational Reports"
-        description="Inspect and export distributor-scoped transaction, retailer, commission, and wallet ledger statement reports"
-        actions={
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={loadData}
-              leftIcon={<RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />}
-            >
-              Refresh
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleExportCsv}
-              leftIcon={<Download className="w-4 h-4" />}
-            >
-              Export Report CSV
-            </Button>
-          </div>
-        }
-      />
-
+    <PageContainer
+      title="Distributor Operational Reports"
+      description="Inspect and export distributor-scoped transaction, retailer, commission, and wallet ledger statement reports"
+      actions={
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadData}
+            leftIcon={<RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />}
+          >
+            Refresh
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleExportCsv}
+            leftIcon={<Download className="w-4 h-4" />}
+          >
+            Export Report CSV
+          </Button>
+        </div>
+      }
+    >
       {/* Tabs */}
       <Tabs items={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
@@ -220,9 +218,11 @@ export default function DistributorReportsPage() {
         )}
       </div>
 
-      {/* Report Table */}
+      {/* Report Table with internal horizontal overflow */}
       <div className="space-y-4">
-        {renderTable()}
+        <div className="overflow-x-auto border border-slate-200/80 rounded-xl bg-white shadow-xs">
+          {renderTable()}
+        </div>
 
         {/* Pagination */}
         {reportData.length > 0 && (
@@ -235,6 +235,6 @@ export default function DistributorReportsPage() {
           />
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }

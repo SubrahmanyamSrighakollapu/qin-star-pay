@@ -6,8 +6,8 @@ import { AccessDeniedView } from '@/components/features/auth/AccessDeniedView';
 import { LedgerEntry, LedgerFilters } from '@/types/domain';
 import { ledgerService } from '@/services/ledgerService';
 import { reportService } from '@/services/reportService';
+import { PageContainer } from '@/components/layout/PageContainer';
 import {
-  PageHeader,
   Button,
   SearchInput,
   Select,
@@ -116,32 +116,30 @@ export default function DistributorLedgerPage() {
   const isFiltered = searchQuery || typeFilter !== 'ALL' || directionFilter !== 'ALL';
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Header */}
-      <PageHeader
-        title="Distributor Wallet Ledger"
-        description="Audit immutable historical debit, credit, and commission settlement entries for your operating wallet"
-        actions={
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={loadData}
-              leftIcon={<RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />}
-            >
-              Refresh
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportCsv}
-              leftIcon={<Download className="w-4 h-4 text-sky-600" />}
-            >
-              Export Statement
-            </Button>
-          </div>
-        }
-      />
+    <PageContainer
+      title="Distributor Wallet Ledger"
+      description="Audit immutable historical debit, credit, and commission settlement entries for your operating wallet"
+      actions={
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadData}
+            leftIcon={<RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />}
+          >
+            Refresh
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCsv}
+            leftIcon={<Download className="w-4 h-4 text-sky-600" />}
+          >
+            Export Statement
+          </Button>
+        </div>
+      }
+    >
 
       {/* Filter Bar */}
       <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-xs space-y-3">
@@ -227,6 +225,6 @@ export default function DistributorLedgerPage() {
         onClose={() => setDrawerOpen(false)}
         entry={selectedEntry}
       />
-    </div>
+    </PageContainer>
   );
 }

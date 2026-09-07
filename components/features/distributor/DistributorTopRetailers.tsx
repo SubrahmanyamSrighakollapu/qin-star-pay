@@ -51,7 +51,7 @@ export const DistributorTopRetailers: React.FC<DistributorTopRetailersProps> = (
       {topRetailers.length === 0 ? (
         <EmptyState
           title="No Retailers Registered"
-          description="Your direct retailer network has no active outlets."
+          description="Your direct retailer network has no active retailers."
           icon={<Store className="w-8 h-8 text-slate-400" />}
         />
       ) : (
@@ -60,8 +60,8 @@ export const DistributorTopRetailers: React.FC<DistributorTopRetailersProps> = (
             <thead>
               <tr className="border-b border-[var(--border)] text-[var(--text-muted)] font-semibold uppercase tracking-wider bg-slate-50/50">
                 <th className="py-2.5 px-3">Rank & Retailer</th>
-                <th className="py-2.5 px-3 text-right">Today's Txns</th>
-                <th className="py-2.5 px-3 text-right">Today's Volume</th>
+                <th className="py-2.5 px-3 text-right">Today&apos;s Txns</th>
+                <th className="py-2.5 px-3 text-right">Today&apos;s Volume</th>
                 <th className="py-2.5 px-3 text-right">Commission</th>
                 <th className="py-2.5 px-3 text-center">Status</th>
               </tr>

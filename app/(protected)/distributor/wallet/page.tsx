@@ -7,7 +7,8 @@ import { AccessDeniedView } from '@/components/features/auth/AccessDeniedView';
 import { WalletAccount, LedgerEntry } from '@/types/domain';
 import { walletService } from '@/services/walletService';
 import { ledgerService } from '@/services/ledgerService';
-import { PageHeader, Button, StatusBadge, useToast } from '@/components/ui';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { Button, StatusBadge, useToast } from '@/components/ui';
 import { formatCurrency, formatDateTime } from '@/utils/formatters';
 import {
   Wallet,
@@ -79,29 +80,27 @@ export default function DistributorWalletPage() {
     .reduce((sum, e) => sum + e.amount, 0);
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Page Header */}
-      <PageHeader
-        title="Distributor Operating Wallet"
-        description="View your personal Distributor operating wallet balance, hold reserves, and ledger credit statements"
-        actions={
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={loadData}
-              leftIcon={<RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />}
-            >
-              Refresh
+    <PageContainer
+      title="Distributor Operating Wallet"
+      description="View your personal Distributor operating wallet balance, hold reserves, and ledger credit statements"
+      actions={
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadData}
+            leftIcon={<RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />}
+          >
+            Refresh
+          </Button>
+          <Link href="/distributor/wallet/ledger">
+            <Button variant="primary" size="sm" leftIcon={<FileText className="w-4 h-4" />}>
+              View Full Ledger
             </Button>
-            <Link href="/distributor/wallet/ledger">
-              <Button variant="primary" size="sm" leftIcon={<FileText className="w-4 h-4" />}>
-                View Full Ledger
-              </Button>
-            </Link>
-          </div>
-        }
-      />
+          </Link>
+        </div>
+      }
+    >
 
       {/* Read-only Operational Info Banner */}
       <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/80 text-blue-900 text-xs flex items-start gap-3">
@@ -222,7 +221,7 @@ export default function DistributorWalletPage() {
 
         <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Today's Commission</p>
+            <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">{"Today's Commission"}</p>
             <p className="text-2xl font-bold text-sky-600 font-mono mt-1">
               +{formatCurrency(640.0)}
             </p>
@@ -289,6 +288,6 @@ export default function DistributorWalletPage() {
           </div>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }

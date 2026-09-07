@@ -10,16 +10,9 @@ import { formatCurrency, formatDateTime } from '@/utils/formatters';
 import {
   User,
   Building2,
-  Mail,
-  Phone,
-  Calendar,
-  Wallet,
-  ArrowLeftRight,
-  Percent,
   ShieldCheck,
   Tag,
   AlertTriangle,
-  Info,
   Clock,
 } from 'lucide-react';
 
@@ -36,29 +29,26 @@ export const DistributorRetailerDetailDrawer: React.FC<DistributorRetailerDetail
 }) => {
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [planDetails, setPlanDetails] = useState<RetailerPlan | null>(null);
-  const [walletSummary, setWalletSummary] = useState<any>(null);
-  const [txnSummary, setTxnSummary] = useState<any>(null);
-  const [commSummary, setCommSummary] = useState<any>(null);
 
   useEffect(() => {
-    if (retailer) {
-      // Load Plan details
-      if (retailer.planId) {
-        retailerPlanService.getPlanById(retailer.planId).then((res) => {
-          if (res.success && res.data) setPlanDetails(res.data);
-        });
-      } else {
-        setPlanDetails(null);
-      }
-
-      // Load Scoped Summaries
-      setWalletSummary(retailerService.getRetailerWalletSummary(retailer.id));
-      setTxnSummary(retailerService.getRetailerTransactionSummary(retailer.id));
-      setCommSummary(retailerService.getRetailerCommissionSummary(retailer.id));
+    if (retailer?.planId) {
+      let isMounted = true;
+      retailerPlanService.getPlanById(retailer.planId).then((res) => {
+        if (isMounted && res.success && res.data) {
+          setPlanDetails(res.data);
+        }
+      });
+      return () => {
+        isMounted = false;
+      };
     }
-  }, [retailer]);
+  }, [retailer?.planId]);
 
   if (!retailer) return null;
+
+  const walletSummary = retailerService.getRetailerWalletSummary(retailer.id);
+  const txnSummary = retailerService.getRetailerTransactionSummary(retailer.id);
+  const commSummary = retailerService.getRetailerCommissionSummary(retailer.id);
 
   const parentMd = hierarchyService.getMasterDistributorById(retailer.masterDistributorId);
   const parentDst = hierarchyService.getDistributorById(retailer.distributorId);
@@ -258,7 +248,7 @@ export const DistributorRetailerDetailDrawer: React.FC<DistributorRetailerDetail
               </div>
 
               <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
-                <span className="text-slate-400 font-bold uppercase text-[10px] block">Today's Transactions</span>
+                <span className="text-slate-400 font-bold uppercase text-[10px] block">Today&apos;s Transactions</span>
                 <span className="font-mono font-extrabold text-slate-900 text-lg">
                   {txnSummary?.todayTxnsCount || 0}
                 </span>

@@ -4,29 +4,29 @@ import React from 'react';
 import { FinancialMetricCard } from '@/components/features/financial/FinancialMetricCard';
 import { formatCurrency, formatNumber } from '@/utils/formatters';
 import { DistributorDashboardSummary } from '@/services/distributorDashboardService';
-import { Store, CheckCircle2, Clock, AlertTriangle, ArrowDownLeft, ArrowUpRight, Wallet, Percent, Sparkles } from 'lucide-react';
+import { Store, CheckCircle2, Clock, ArrowDownLeft, ArrowUpRight, Wallet, Sparkles } from 'lucide-react';
 
 interface DistributorKPIGridProps {
   summary: DistributorDashboardSummary;
   isLoading?: boolean;
 }
 
-export const DistributorKPIGrid: React.FC<DistributorKPIGridProps> = ({ summary, isLoading = false }) => {
+export const DistributorKPIGrid: React.FC<DistributorKPIGridProps> = ({ summary }) => {
   return (
     <div className="space-y-4">
       {/* 1. Primary Network & Financial Position Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <FinancialMetricCard
-          label="Total Outlets"
+          label="Total Retailers"
           value={formatNumber(summary.totalRetailers)}
-          subtext="Mapped retail counters"
+          subtext="Mapped retailers"
           icon={<Store className="w-3.5 h-3.5" />}
           variant="primary"
           isDominant
         />
 
         <FinancialMetricCard
-          label="Active Outlets"
+          label="Active Retailers"
           value={formatNumber(summary.activeRetailers)}
           subtext={`${summary.pendingAdminApprovalRetailers} pending approval`}
           icon={<CheckCircle2 className="w-3.5 h-3.5" />}
@@ -44,7 +44,7 @@ export const DistributorKPIGrid: React.FC<DistributorKPIGridProps> = ({ summary,
         />
 
         <FinancialMetricCard
-          label="This Month Earnings"
+          label="Monthly Earnings"
           value={`+${formatCurrency(summary.thisMonthCommission)}`}
           subtext={`Today: +${formatCurrency(summary.todayCommission)}`}
           icon={<Sparkles className="w-3.5 h-3.5" />}
@@ -72,7 +72,7 @@ export const DistributorKPIGrid: React.FC<DistributorKPIGridProps> = ({ summary,
         />
 
         <FinancialMetricCard
-          label="Pending Approvals"
+          label="Pending Admin Approval"
           value={summary.pendingAdminApprovalRetailers}
           subtext="Awaiting platform review"
           icon={<Clock className="w-3.5 h-3.5" />}

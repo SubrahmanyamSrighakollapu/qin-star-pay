@@ -198,7 +198,7 @@ function DistributorTransactionsContent() {
     },
     {
       key: 'retailerName',
-      header: 'Retailer Outlet',
+      header: 'Retailer Name',
       render: (t: Transaction) => (
         <span className="font-semibold text-slate-800 text-xs">{t.retailerName || t.merchantName}</span>
       ),
@@ -249,7 +249,7 @@ function DistributorTransactionsContent() {
   return (
     <PageContainer
       title="Transactions"
-      description="Monitor Pay-In and Pay-Out transaction performance generated across your assigned retailer outlets."
+      description="Monitor Pay-In and Pay-Out transaction performance generated across your assigned retailer network."
       statusBadge={<StatusBadge status="ACTIVE" label="Retailer Network Scoped" />}
       actions={
         <Button variant="outline" size="sm" leftIcon={<Download className="w-4 h-4" />} onClick={handleExportCsv}>
@@ -259,10 +259,10 @@ function DistributorTransactionsContent() {
     >
       <div className="space-y-6">
         {!isRetailerValid && (
-          <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 text-xs text-rose-900 flex items-start gap-2.5">
-            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3.5 text-xs text-amber-900 flex items-center gap-2.5">
+            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
             <div>
-              <span className="font-bold">Access Denied:</span> The requested retailer ID does not belong to your assigned distributor network. Access to cross-network transactions is restricted.
+              <span className="font-semibold">Network Scoping:</span> Showing transactions from your assigned Retailer network.
             </div>
           </div>
         )}
@@ -388,21 +388,23 @@ function DistributorTransactionsContent() {
             />
           ) : (
             <>
-              <Table
-                data={paginatedTransactions}
-                columns={columns}
-                keyExtractor={(t: Transaction) => t.id}
-                renderActions={(t: Transaction) => (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedTxn(t)}
-                    title="View Transaction Details"
-                  >
-                    <Eye className="w-3.5 h-3.5 text-slate-600" />
-                  </Button>
-                )}
-              />
+              <div className="overflow-x-auto">
+                <Table
+                  data={paginatedTransactions}
+                  columns={columns}
+                  keyExtractor={(t: Transaction) => t.id}
+                  renderActions={(t: Transaction) => (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedTxn(t)}
+                      title="View Transaction Details"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-slate-600" />
+                    </Button>
+                  )}
+                />
+              </div>
 
               <div className="p-4 border-t border-slate-200">
                 <Pagination

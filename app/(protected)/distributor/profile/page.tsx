@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { PageHeader, StatusBadge } from '@/components/ui';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { StatusBadge } from '@/components/ui';
 import {
   Building2,
   Store,
@@ -28,12 +29,10 @@ export default function DistributorProfilePage() {
   const parentMdCode = 'MD001';
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Header */}
-      <PageHeader
-        title="Distributor Business Identity & Profile"
-        description="Inspect your business entity credentials, parent Master Distributor hierarchy, network scope, and operating wallet details"
-      />
+    <PageContainer
+      title="Distributor Business Identity & Profile"
+      description="Inspect your business entity credentials, parent Master Distributor hierarchy, network scope, and operating wallet details"
+    >
 
       {/* Identity Card */}
       <div className="rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-white via-indigo-50/30 to-slate-50 p-6 shadow-xs space-y-4">
@@ -134,11 +133,11 @@ export default function DistributorProfilePage() {
           </h3>
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/80">
-              <span className="text-slate-500">Total Retail Outlets:</span>
+              <span className="text-slate-500">Total Retailers:</span>
               <p className="text-xl font-bold text-slate-900 mt-0.5 font-mono">10</p>
             </div>
             <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200/80">
-              <span className="text-emerald-800">Active Retail Outlets:</span>
+              <span className="text-emerald-800">Active Retailers:</span>
               <p className="text-xl font-bold text-emerald-700 mt-0.5 font-mono">8</p>
             </div>
             <div className="p-3 rounded-lg bg-amber-50 border border-amber-200/80">
@@ -179,6 +178,6 @@ export default function DistributorProfilePage() {
           </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

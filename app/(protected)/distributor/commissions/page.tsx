@@ -11,8 +11,8 @@ import {
 } from '@/services/commissionService';
 import { reportService } from '@/services/reportService';
 import { CommissionDetailDrawer } from '@/components/features/master-distributor/CommissionDetailDrawer';
+import { PageContainer } from '@/components/layout/PageContainer';
 import {
-  PageHeader,
   Button,
   SearchInput,
   Select,
@@ -152,7 +152,7 @@ export default function DistributorCommissionsPage() {
     },
     {
       key: 'retailer',
-      header: 'Retailer Outlet',
+      header: 'Retailer Name',
       render: (row) => (
         <div className="flex items-center gap-1.5 text-xs">
           <Store className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -226,32 +226,30 @@ export default function DistributorCommissionsPage() {
   ];
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Header */}
-      <PageHeader
-        title="Distributor Earned Commissions"
-        description="Monitor, audit, and track real-time distributor commission margins earned from retailer transactions"
-        actions={
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={loadData}
-              leftIcon={<RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />}
-            >
-              Refresh
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportCsv}
-              leftIcon={<Download className="w-4 h-4 text-sky-600" />}
-            >
-              Export CSV
-            </Button>
-          </div>
-        }
-      />
+    <PageContainer
+      title="Distributor Earned Commissions"
+      description="Monitor, audit, and track real-time distributor commission margins earned from retailer transactions"
+      actions={
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadData}
+            leftIcon={<RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />}
+          >
+            Refresh
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCsv}
+            leftIcon={<Download className="w-4 h-4 text-sky-600" />}
+          >
+            Export CSV
+          </Button>
+        </div>
+      }
+    >
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -364,33 +362,35 @@ export default function DistributorCommissionsPage() {
 
       {/* Commission Table */}
       <div className="space-y-4">
-        <Table
-          columns={columns}
-          data={paginatedCommissions}
-          keyExtractor={(row) => row.id}
-          isLoading={isLoading}
-          emptyTitle="No Commission Records Found"
-          emptyDescription="No commission entries found for the selected period or search criteria."
-          onRowClick={(row) => {
-            setSelectedCommission(row);
-            setDrawerOpen(true);
-          }}
-          renderActions={(row) => (
-            <Tooltip content="View Commission Details">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSelectedCommission(row);
-                  setDrawerOpen(true);
-                }}
-                className="p-1.5 h-8 w-8 text-slate-600 hover:text-sky-600 hover:bg-sky-50"
-              >
-                <Eye className="w-4 h-4" />
-              </Button>
-            </Tooltip>
-          )}
-        />
+        <div className="overflow-x-auto">
+          <Table
+            columns={columns}
+            data={paginatedCommissions}
+            keyExtractor={(row) => row.id}
+            isLoading={isLoading}
+            emptyTitle="No Commission Records Found"
+            emptyDescription="No commission entries found for the selected period or search criteria."
+            onRowClick={(row) => {
+              setSelectedCommission(row);
+              setDrawerOpen(true);
+            }}
+            renderActions={(row) => (
+              <Tooltip content="View Commission Details">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedCommission(row);
+                    setDrawerOpen(true);
+                  }}
+                  className="p-1.5 h-8 w-8 text-slate-600 hover:text-sky-600 hover:bg-sky-50"
+                >
+                  <Eye className="w-4 h-4" />
+                </Button>
+              </Tooltip>
+            )}
+          />
+        </div>
 
         {/* Pagination */}
         {commissions.length > 0 && (
@@ -410,6 +410,6 @@ export default function DistributorCommissionsPage() {
         onClose={() => setDrawerOpen(false)}
         commission={selectedCommission}
       />
-    </div>
+    </PageContainer>
   );
 }

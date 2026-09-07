@@ -98,7 +98,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
           onRoleChange={handleRoleChange}
         />
 
-        <main className="flex-1 overflow-y-auto min-h-0 bg-workspace-atmospheric">{children}</main>
+        <main className="flex-1 overflow-y-auto min-h-0 bg-workspace-atmospheric scroll-smooth">{children}</main>
       </div>
     </div>
   );

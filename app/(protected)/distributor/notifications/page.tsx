@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { PageHeader, Button, StatusBadge, Tabs } from '@/components/ui';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { Button, StatusBadge, Tabs } from '@/components/ui';
 import { Bell, CheckCircle2, Clock, AlertTriangle, ShieldCheck, Filter, RefreshCw } from 'lucide-react';
 import { formatDateTime } from '@/utils/formatters';
 
@@ -43,7 +44,7 @@ const MOCK_NOTIFICATIONS: DistributorNotification[] = [
   {
     id: 'notif_d4',
     title: 'Daily Network Volume Summary',
-    message: 'Your assigned retailer outlets processed ₹1,42,500.00 total volume across 84 successful operations today.',
+    message: 'Your assigned retailers processed ₹1,42,500.00 total volume across 84 successful operations today.',
     category: 'TRANSACTION',
     read: true,
     createdAt: new Date(Date.now() - 1000 * 60 * 720).toISOString(),
@@ -95,19 +96,17 @@ export default function DistributorNotificationsPage() {
   };
 
   return (
-    <div className="space-y-6 pb-12">
-      <PageHeader
-        title="Distributor Notifications & Alerts"
-        description="Stay updated with live retailer onboarding status, commission postings, transaction alerts, and system notices"
-        actions={
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={markAllRead} leftIcon={<CheckCircle2 className="w-4 h-4" />}>
-              Mark All as Read
-            </Button>
-          </div>
-        }
-      />
-
+    <PageContainer
+      title="Distributor Notifications & Alerts"
+      description="Stay updated with live retailer onboarding status, commission postings, transaction alerts, and system notices"
+      actions={
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={markAllRead} leftIcon={<CheckCircle2 className="w-4 h-4" />}>
+            Mark All as Read
+          </Button>
+        </div>
+      }
+    >
       <Tabs items={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
       <div className="space-y-3">
@@ -149,6 +148,6 @@ export default function DistributorNotificationsPage() {
           ))
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }

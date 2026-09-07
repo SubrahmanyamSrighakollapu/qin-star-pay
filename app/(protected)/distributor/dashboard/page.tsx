@@ -69,11 +69,11 @@ export default function DistributorDashboardPage() {
     );
   }
 
-  const distName = summary.distributor?.name || session?.name || 'North Zone Distributor';
-  const distCode = summary.distributor?.code || session?.entityId || 'DST001';
-  const businessName = summary.distributor?.businessName || 'North Zone Distribution Enterprises';
-  const parentMdName = summary.parentMasterDistributor?.name || 'Apex National Network';
-  const parentMdCode = summary.parentMasterDistributor?.code || 'MD001';
+  const distName = summary.distributor?.name || session?.name || 'Assigned Distributor';
+  const distCode = summary.distributor?.code || session?.entityId || 'DST';
+  const businessName = summary.distributor?.businessName || 'Distributor Operations';
+  const parentMdName = summary.parentMasterDistributor?.name || 'Master Distributor Network';
+  const parentMdCode = summary.parentMasterDistributor?.code || 'MD';
 
   return (
     <PageContainer fullWidth className="space-y-6">

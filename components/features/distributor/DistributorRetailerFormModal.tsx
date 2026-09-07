@@ -3,7 +3,7 @@ import { Retailer, KYCStatus, RetailerPlan } from '@/types/domain';
 import { CreateRetailerInput, UpdateRetailerInput } from '@/services/retailerService';
 import { retailerPlanService } from '@/services/retailerPlanService';
 import { Modal, Button, Input, Select, FormField } from '@/components/ui';
-import { User, Mail, Phone, MapPin, ShieldCheck, Tag, Info, AlertTriangle } from 'lucide-react';
+import { User, ShieldCheck, Tag, Info, AlertTriangle } from 'lucide-react';
 
 interface DistributorRetailerFormModalProps {
   isOpen: boolean;
@@ -37,28 +37,22 @@ export const DistributorRetailerFormModal: React.FC<DistributorRetailerFormModal
   });
 
   const [activePlans, setActivePlans] = useState<RetailerPlan[]>([]);
-  const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
 
-    const loadMetadata = async () => {
-      setIsLoadingMetadata(true);
-      try {
-        const plansRes = await retailerPlanService.getActiveRetailerPlans();
-        if (plansRes.success && plansRes.data) {
-          setActivePlans(plansRes.data);
+    let isMounted = true;
+    retailerPlanService.getActiveRetailerPlans().then((plansRes) => {
+      if (isMounted && plansRes.success && plansRes.data) {
+        const plans = plansRes.data;
+        setActivePlans(plans);
+        if (mode === 'create' && plans.length > 0) {
+          setFormData((prev) => (prev.planId ? prev : { ...prev, planId: plans[0].id }));
         }
-      } catch (err) {
-        console.error('Error loading modal metadata:', err);
-      } finally {
-        setIsLoadingMetadata(false);
       }
-    };
-
-    loadMetadata();
+    });
 
     if (initialData && mode === 'edit') {
       setFormData({
@@ -74,7 +68,7 @@ export const DistributorRetailerFormModal: React.FC<DistributorRetailerFormModal
         pincode: initialData.pincode || '',
         kycStatus: initialData.kycStatus || 'APPROVED',
       });
-    } else {
+    } else if (mode === 'create') {
       setFormData({
         planId: '',
         name: '',
@@ -90,16 +84,11 @@ export const DistributorRetailerFormModal: React.FC<DistributorRetailerFormModal
       });
     }
     setErrors({});
-  }, [isOpen, initialData, mode]);
 
-  // Pre-select first plan if blank in create mode
-  useEffect(() => {
-    if (mode === 'create' && isOpen) {
-      if (!formData.planId && activePlans.length > 0) {
-        setFormData((prev) => ({ ...prev, planId: activePlans[0].id }));
-      }
-    }
-  }, [activePlans, mode, isOpen]);
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, initialData, mode]);
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -174,7 +163,7 @@ export const DistributorRetailerFormModal: React.FC<DistributorRetailerFormModal
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2.5 text-xs text-amber-900">
             <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold">Admin Approval Requirement:</span> New retailers submitted by a Distributor will be initialized as <code className="bg-amber-100 px-1 rounded text-amber-900 font-bold">PENDING_APPROVAL</code> and <code className="bg-amber-100 px-1 rounded text-amber-900 font-bold">INACTIVE</code>. Admin review is required before account activation.
+              <span className="font-bold">Admin Approval Requirement:</span> Retailers created from the Distributor portal require Admin approval before activation. Newly created retailers are set to <code className="bg-amber-100 px-1 rounded text-amber-900 font-bold">PENDING_APPROVAL</code> and <code className="bg-amber-100 px-1 rounded text-amber-900 font-bold">INACTIVE</code>.
             </div>
           </div>
         ) : (

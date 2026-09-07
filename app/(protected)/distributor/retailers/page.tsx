@@ -338,16 +338,16 @@ export default function DistributorRetailersPage() {
         {/* 1. Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <FinancialMetricCard
-            label="Total Outlets"
+            label="Total Retailers"
             value={summary.total}
-            subtext="Mapped retail counters"
+            subtext="Mapped retailers"
             icon={<Store className="w-3.5 h-3.5" />}
             variant="primary"
             isDominant
           />
 
           <FinancialMetricCard
-            label="Active Outlets"
+            label="Active Retailers"
             value={summary.active}
             subtext="Approved & active status"
             icon={<CheckCircle2 className="w-3.5 h-3.5" />}
@@ -480,52 +480,54 @@ export default function DistributorRetailersPage() {
             />
           ) : (
             <>
-              <Table
-                data={paginatedRetailers}
-                columns={columns}
-                keyExtractor={(r: Retailer) => r.id}
-                renderActions={(r: Retailer) => {
-                  const isApproved = r.approvalStatus === 'APPROVED' || !r.approvalStatus;
-                  const isActive = r.accountStatus === 'ACTIVE';
+              <div className="overflow-x-auto">
+                <Table
+                  data={paginatedRetailers}
+                  columns={columns}
+                  keyExtractor={(r: Retailer) => r.id}
+                  renderActions={(r: Retailer) => {
+                    const isApproved = r.approvalStatus === 'APPROVED' || !r.approvalStatus;
+                    const isActive = r.accountStatus === 'ACTIVE';
 
-                  return (
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleOpenDetailDrawer(r)}
-                        title="View Details"
-                      >
-                        <Eye className="w-3.5 h-3.5 text-slate-600" />
-                      </Button>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleOpenEditModal(r)}
-                        title="Edit Retailer"
-                      >
-                        <Edit2 className="w-3.5 h-3.5 text-slate-600" />
-                      </Button>
-
-                      {isApproved ? (
+                    return (
+                      <div className="flex items-center justify-end gap-1">
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setToggleTarget(r)}
-                          title={isActive ? 'Deactivate Retailer' : 'Reactivate Retailer'}
+                          onClick={() => handleOpenDetailDrawer(r)}
+                          title="View Details"
                         >
-                          <Power className={`w-3.5 h-3.5 ${isActive ? 'text-rose-600' : 'text-emerald-600'}`} />
+                          <Eye className="w-3.5 h-3.5 text-slate-600" />
                         </Button>
-                      ) : (
-                        <span className="text-[10px] text-slate-400 font-medium px-1 italic">
-                          {r.approvalStatus === 'PENDING_APPROVAL' ? 'Pending Admin' : 'Rejected'}
-                        </span>
-                      )}
-                    </div>
-                  );
-                }}
-              />
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleOpenEditModal(r)}
+                          title="Edit Retailer"
+                        >
+                          <Edit2 className="w-3.5 h-3.5 text-slate-600" />
+                        </Button>
+
+                        {isApproved ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setToggleTarget(r)}
+                            title={isActive ? 'Deactivate Retailer' : 'Reactivate Retailer'}
+                          >
+                            <Power className={`w-3.5 h-3.5 ${isActive ? 'text-rose-600' : 'text-emerald-600'}`} />
+                          </Button>
+                        ) : (
+                          <span className="text-[10px] text-slate-400 font-medium px-1 italic">
+                            {r.approvalStatus === 'PENDING_APPROVAL' ? 'Pending Admin' : 'Rejected'}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  }}
+                />
+              </div>
 
               <div className="p-4 border-t border-slate-200">
                 <Pagination

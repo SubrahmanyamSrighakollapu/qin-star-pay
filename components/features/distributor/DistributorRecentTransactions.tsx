@@ -38,7 +38,7 @@ export const DistributorRecentTransactions: React.FC<DistributorRecentTransactio
     <>
       <Card
         title="Recent Retailer Transactions"
-        subtitle="Latest live operations across your assigned retailer outlets"
+        subtitle="Latest live operations across your assigned retailer network"
         action={
           <Link href="/distributor/transactions">
             <Button variant="outline" size="sm" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
