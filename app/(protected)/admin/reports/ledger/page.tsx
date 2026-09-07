@@ -15,6 +15,7 @@ import { formatCurrency, formatDate } from '@/utils/formatters';
 import { ReportDateRangePicker } from '@/components/features/reports/ReportDateRangePicker';
 import { ReportExportMenu } from '@/components/features/reports/ReportExportMenu';
 import { LedgerDetailsDrawer } from '@/components/features/wallet/LedgerDetailsDrawer';
+import { AdminReportNav } from '@/components/features/reports/AdminReportNav';
 import { Search, Filter, RotateCcw, Eye, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 
 export default function LedgerReportPage() {
@@ -177,6 +178,9 @@ export default function LedgerReportPage() {
       }
     >
       <div className="space-y-6">
+        {/* Reports Navigation Bar */}
+        <AdminReportNav />
+
         {/* Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4 bg-white border border-slate-200">

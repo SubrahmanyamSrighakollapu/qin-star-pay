@@ -2,15 +2,17 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { Button } from '@/components/ui/Button';
 import { useModal } from '@/hooks/useModal';
 import { walletService, WalletListResult } from '@/services/walletService';
+import { reportService } from '@/services/reportService';
 import { WalletAccount, WalletFilters, PaginationState, EntityType } from '@/types/domain';
 import { WalletSummaryCards } from '@/components/features/wallet/WalletSummaryCards';
 import { WalletFilterBar } from '@/components/features/wallet/WalletFilterBar';
 import { WalletTable } from '@/components/features/wallet/WalletTable';
 import { WalletDetailsDrawer } from '@/components/features/wallet/WalletDetailsDrawer';
 import { CreditDebitFormModal } from '@/components/features/wallet/CreditDebitFormModal';
-import { Layers } from 'lucide-react';
+import { Layers, Download } from 'lucide-react';
 
 export default function AvailableBalancesPage() {
   const [activeTab, setActiveTab] = useState<'MASTER' | 'DISTRIBUTOR' | 'RETAILER' | 'MERCHANT'>('MASTER');
@@ -86,10 +88,38 @@ export default function AvailableBalancesPage() {
     totalPendingSettlement: 0,
   };
 
+  const handleExportCSV = () => {
+    if (!wallets.length) return;
+    const exportRows = wallets.map((w) => ({
+      'Wallet ID': w.walletId,
+      'Entity Code': w.entityCode,
+      'Entity Name': w.entityName,
+      'Entity Type': w.entityType,
+      'Parent Name': w.parentName || 'Direct',
+      'Available Balance': w.availableBalance,
+      'Ledger Balance': w.ledgerBalance,
+      'Hold Balance': w.holdBalance,
+      'Pending Settlement': w.pendingSettlement,
+      'Status': w.status,
+      'Last Updated': w.updatedAt,
+    }));
+    reportService.exportToCsv(`Admin_Wallet_Balances_${activeTab}_${new Date().toISOString().split('T')[0]}`, exportRows);
+  };
+
   return (
     <PageContainer
       title="Available Balances"
       description="Monitor available, ledger, hold, and pending settlement balances across Master, Distributors, Retailers, and Merchants."
+      actions={
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExportCSV}
+          leftIcon={<Download className="w-4 h-4" />}
+        >
+          Export CSV
+        </Button>
+      }
       className="space-y-6"
     >
       {/* 1. Top Summary Cards */}

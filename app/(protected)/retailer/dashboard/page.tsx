@@ -3,31 +3,40 @@
 import React, { useState, useEffect } from 'react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
+import { Transaction } from '@/types/domain';
+import { formatCurrency } from '@/utils/formatters';
+import { transactionService } from '@/services/transactionService';
 import {
   retailerDashboardService,
   RetailerDashboardSummary,
 } from '@/services/retailerDashboardService';
 
-import { RetailerWalletHero } from '@/components/features/retailer/RetailerWalletHero';
-import { RetailerQuickActions } from '@/components/features/retailer/RetailerQuickActions';
+import { RetailerPayInPayOutOverview } from '@/components/features/retailer/RetailerPayInPayOutOverview';
 import { RetailerKPIGrid } from '@/components/features/retailer/RetailerKPIGrid';
+import { RetailerAttentionPanel } from '@/components/features/retailer/RetailerAttentionPanel';
+import { RetailerQuickActions } from '@/components/features/retailer/RetailerQuickActions';
 import { RetailerAnalyticsSection } from '@/components/features/retailer/RetailerAnalyticsSection';
 import { RetailerRecentTransactions } from '@/components/features/retailer/RetailerRecentTransactions';
 import { RetailerCommissionSummary } from '@/components/features/retailer/RetailerCommissionSummary';
-import { RetailerAttentionPanel } from '@/components/features/retailer/RetailerAttentionPanel';
+import { RetailerPaymentMethodDrawer } from '@/components/features/retailer/RetailerPaymentMethodDrawer';
 
-import { RefreshCw, Calendar, Store, Building2 } from 'lucide-react';
+import { RefreshCw, Wallet, ShieldCheck } from 'lucide-react';
 
 export default function RetailerDashboardPage() {
   const { session } = useAuth();
   const [summary, setSummary] = useState<RetailerDashboardSummary | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPeriod, setSelectedPeriod] = useState<'today' | '7d' | 'month'>('today');
+
+  // Time Period Filter State
+  const [selectedPeriod, setSelectedPeriod] = useState<'today' | '7d' | '30d'>('today');
+
+  // Interactive Payment Method Drill-Down Drawer State
+  const [drillDownType, setDrillDownType] = useState<'PAY_IN' | 'PAY_OUT' | null>(null);
 
   const retailerId = session?.entityId || 'ret_001';
 
@@ -36,11 +45,18 @@ export default function RetailerDashboardPage() {
     setError(null);
 
     try {
-      const res = await retailerDashboardService.getDashboardSummary(retailerId);
-      if (res.success && res.data) {
-        setSummary(res.data);
+      // 1. Fetch Dashboard Summary
+      const summaryRes = await retailerDashboardService.getDashboardSummary(retailerId);
+      if (summaryRes.success && summaryRes.data) {
+        setSummary(summaryRes.data);
       } else {
-        setError(res.error?.message || 'Failed to load retailer dashboard data.');
+        setError(summaryRes.error?.message || 'Failed to load retailer dashboard summary.');
+      }
+
+      // 2. Fetch Detailed Retailer Transactions Pool for Analytics
+      const txRes = await transactionService.getTransactionsForRetailer(retailerId, {}, 1, 100);
+      if (txRes.success && txRes.data) {
+        setTransactions(txRes.data.items || []);
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'An unexpected error occurred while loading dashboard.';
@@ -58,7 +74,7 @@ export default function RetailerDashboardPage() {
     return (
       <PageContainer title="Retailer Dashboard">
         <ErrorState
-          title="Unable to load Retailer Command Center"
+          title="Unable to load Retailer Operations Center"
           description={error}
           onRetry={loadDashboard}
         />
@@ -76,43 +92,46 @@ export default function RetailerDashboardPage() {
   const retailerName = summary?.retailer?.name || session?.name || 'Metro Store #01';
   const retailerCode = summary?.retailer?.code || session?.entityId || 'RET001';
   const businessName = summary?.retailer?.businessName || 'Metro Store Retail Solutions';
+  const walletBalance = summary?.wallet?.availableBalance || 45350.0;
+
+  const periodLabel = selectedPeriod === 'today' ? "Today" : selectedPeriod === '7d' ? "7 Days" : "30 Days";
 
   return (
     <PageContainer
-      title={`${getTimeOfDayGreeting()}, ${retailerName}`}
-      description="Retailer Financial Operations Command Center — Today's wallet activity and transaction performance."
+      title={`${getTimeOfDayGreeting()}, ${retailerName}!`}
+      description="Here's your real-time Pay-In & Pay-Out business overview."
       statusBadge={<StatusBadge status={summary?.retailer?.kycStatus || 'APPROVED'} label={`KYC ${summary?.retailer?.kycStatus || 'APPROVED'}`} />}
     >
-      <div className="space-y-6">
-        {/* Contextual Header & Quick Filter Bar */}
-        <div className="bg-white/90 backdrop-blur-xs border border-[#E5EBF2] rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-[var(--primary)] text-white font-extrabold text-xs flex items-center justify-center shadow-xs shrink-0">
+      <div className="space-y-5">
+        {/* 1. Compact Header / Date Filter / Balance Bar */}
+        <div className="bg-white/95 backdrop-blur-xs border border-slate-200/90 rounded-2xl p-3.5 px-5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[var(--primary)] text-white font-extrabold text-xs flex items-center justify-center shadow-2xs shrink-0">
               QSP
             </div>
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)] leading-tight">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">
                   {businessName}
                 </h2>
-                <span className="text-xs font-mono font-bold text-slate-500">({retailerCode})</span>
+                <span className="text-[11px] font-mono font-bold text-slate-500">({retailerCode})</span>
               </div>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5 flex items-center gap-2 flex-wrap">
-                <span>Distributor: <strong className="text-slate-700">{summary?.parentDistributor?.name || 'North Zone Distributor'}</strong></span>
+              <p className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-2">
+                <span>Distributor: <strong className="text-slate-700">{summary?.parentDistributor?.name || 'North Zone'}</strong></span>
                 <span>•</span>
                 <span>Master: <strong className="text-slate-700">{summary?.parentMasterDistributor?.name || 'Apex Network'}</strong></span>
               </p>
             </div>
           </div>
 
-          {/* Period Selector & Manual Telemetry Refresh */}
-          <div className="flex items-center gap-2.5 shrink-0 self-start md:self-auto">
-            <div className="flex items-center bg-slate-100 p-1 rounded-[var(--radius-md)] text-xs font-medium border border-slate-200/60">
+          <div className="flex items-center gap-3 shrink-0 self-start md:self-auto">
+            {/* Time Filter Controls */}
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-lg text-xs font-semibold border border-slate-200/80">
               <button
                 type="button"
                 onClick={() => setSelectedPeriod('today')}
-                className={`px-3 py-1 rounded-sm transition-all cursor-pointer ${
-                  selectedPeriod === 'today' ? 'bg-white text-[var(--primary)] font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
+                  selectedPeriod === 'today' ? 'bg-white text-[var(--primary)] font-extrabold shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Today
@@ -120,21 +139,34 @@ export default function RetailerDashboardPage() {
               <button
                 type="button"
                 onClick={() => setSelectedPeriod('7d')}
-                className={`px-3 py-1 rounded-sm transition-all cursor-pointer ${
-                  selectedPeriod === '7d' ? 'bg-white text-[var(--primary)] font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
+                  selectedPeriod === '7d' ? 'bg-white text-[var(--primary)] font-extrabold shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 7 Days
               </button>
               <button
                 type="button"
-                onClick={() => setSelectedPeriod('month')}
-                className={`px-3 py-1 rounded-sm transition-all cursor-pointer ${
-                  selectedPeriod === 'month' ? 'bg-white text-[var(--primary)] font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                onClick={() => setSelectedPeriod('30d')}
+                className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
+                  selectedPeriod === '30d' ? 'bg-white text-[var(--primary)] font-extrabold shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                This Month
+                30 Days
               </button>
+            </div>
+
+            {/* Live Available Wallet Balance Pill */}
+            <div className="flex items-center gap-2 bg-emerald-50/90 border border-emerald-200/90 px-3 py-1 rounded-lg text-xs">
+              <Wallet className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <div>
+                <span className="text-[9px] font-extrabold uppercase text-emerald-800 tracking-wider block leading-none">
+                  Available Balance
+                </span>
+                <span className="font-mono font-extrabold text-emerald-950 text-xs tabular-nums block mt-0.5">
+                  {formatCurrency(walletBalance)}
+                </span>
+              </div>
             </div>
 
             <Button
@@ -143,35 +175,33 @@ export default function RetailerDashboardPage() {
               onClick={loadDashboard}
               isLoading={isLoading}
               title="Refresh telemetry"
+              className="h-8 px-2.5 border-slate-200 text-slate-700 hover:text-slate-900 cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 text-slate-600 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
           </div>
         </div>
 
-        {/* Bento Grid Composition with Mobile Responsive Order Handling */}
-        <div className="flex flex-col space-y-6">
-          {/* 1. Wallet Hero Surface (Order 1 everywhere) */}
-          <div className="order-1">
-            {summary && (
-              <RetailerWalletHero
-                wallet={summary.wallet}
-                plan={summary.plan}
-                retailerName={summary.retailer.name}
-                retailerCode={summary.retailer.code}
-                kycStatus={summary.retailer.kycStatus}
-                isLoading={isLoading}
-              />
-            )}
-          </div>
+        {/* 2. PRIMARY DASHBOARD HERO CONTENT: Pay-In & Pay-Out Analytics Cards (Directly Visible Above Fold) */}
+        <div>
+          <RetailerPayInPayOutOverview
+            transactions={transactions.length > 0 ? transactions : (summary?.recentTransactions || [])}
+            selectedPeriod={selectedPeriod}
+            onOpenDrillDown={(type) => setDrillDownType(type)}
+            isLoading={isLoading}
+          />
+        </div>
 
-          {/* 2. Quick Actions Strip (Order 2 everywhere) */}
-          <div className="order-2">
-            <RetailerQuickActions />
-          </div>
+        {/* 3. COMPACT BUSINESS SUMMARY STRIP */}
+        <div>
+          {summary && (
+            <RetailerKPIGrid summary={summary} isLoading={isLoading} />
+          )}
+        </div>
 
-          {/* 3. Action Center / Operational Attention Panel (Order 3 on mobile, Order 6 on desktop) */}
-          <div className="order-3 md:order-6">
+        {/* 4. NEEDS ATTENTION (65-70%) & QUICK ACTIONS (30-35%) ROW */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div className="lg:col-span-8">
             {summary && (
               <RetailerAttentionPanel
                 attentionItems={summary.attentionItems}
@@ -179,48 +209,55 @@ export default function RetailerDashboardPage() {
               />
             )}
           </div>
-
-          {/* 4. Today's Operational Performance KPIs (Order 4 on mobile, Order 3 on desktop) */}
-          <div className="order-4 md:order-3">
-            {summary && (
-              <RetailerKPIGrid summary={summary} isLoading={isLoading} />
-            )}
+          <div className="lg:col-span-4">
+            <RetailerQuickActions />
           </div>
+        </div>
 
-          {/* 5. 7-Day Analytics & Status Breakdown (Order 7 on mobile, Order 4 on desktop) */}
-          <div className="order-7 md:order-4">
+        {/* 5. 7-DAY TRANSACTION TREND CHART */}
+        <div>
+          {summary && (
+            <RetailerAnalyticsSection
+              trendData={summary.trendData}
+              transactionSummary={summary.transactionSummary}
+              isLoading={isLoading}
+            />
+          )}
+        </div>
+
+        {/* 6. RECENT TRANSACTIONS TABLE & COMMISSION SUMMARY */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div className="lg:col-span-8">
             {summary && (
-              <RetailerAnalyticsSection
-                trendData={summary.trendData}
-                transactionSummary={summary.transactionSummary}
+              <RetailerRecentTransactions
+                transactions={summary.recentTransactions}
                 isLoading={isLoading}
               />
             )}
           </div>
 
-          {/* 6. Recent Transactions & Commission Summary (Orders 5 & 6 on mobile, Order 5 on desktop) */}
-          <div className="order-5 md:order-5 flex flex-col lg:grid lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-8 order-1">
-              {summary && (
-                <RetailerRecentTransactions
-                  transactions={summary.recentTransactions}
-                  isLoading={isLoading}
-                />
-              )}
-            </div>
-
-            <div className="lg:col-span-4 order-2 space-y-6">
-              {summary && (
-                <RetailerCommissionSummary
-                  commissionSummary={summary.commissionSummary}
-                  planName={summary.plan?.name}
-                  isLoading={isLoading}
-                />
-              )}
-            </div>
+          <div className="lg:col-span-4 space-y-5">
+            {summary && (
+              <RetailerCommissionSummary
+                commissionSummary={summary.commissionSummary}
+                planName={summary.plan?.name}
+                isLoading={isLoading}
+              />
+            )}
           </div>
         </div>
       </div>
+
+      {/* Interactive Payment Method Breakdown Drill-Down Drawer */}
+      {drillDownType && (
+        <RetailerPaymentMethodDrawer
+          isOpen={Boolean(drillDownType)}
+          onClose={() => setDrillDownType(null)}
+          type={drillDownType}
+          periodLabel={periodLabel}
+          transactions={transactions.length > 0 ? transactions : (summary?.recentTransactions || [])}
+        />
+      )}
     </PageContainer>
   );
 }

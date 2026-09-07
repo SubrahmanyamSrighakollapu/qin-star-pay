@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronDown, ChevronRight, Layers } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { NavigationItem } from '@/config/navigation';
 import { IconRenderer } from './IconRenderer';
 import { cn } from '@/utils/cn';
@@ -52,11 +52,8 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   // Collapsed Flyout States
   const [isHovered, setIsHovered] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
-  const [flyoutTop, setFlyoutTop] = useState<number>(0);
+  const [flyoutTop, setFlyoutTop] = useState(0);
 
-  const isFlyoutOpen = isCollapsed && hasChildren && (isPinned || isHovered);
-
-  // Recalculate Flyout Top Position with Viewport Boundary Collision Handling
   const calculateFlyoutPosition = useCallback(() => {
     if (buttonRef.current && isCollapsed && hasChildren) {
       const rect = buttonRef.current.getBoundingClientRect();
@@ -71,19 +68,25 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
     }
   }, [isCollapsed, hasChildren, item.children]);
 
+  const isFlyoutOpen = isCollapsed && hasChildren && (isHovered || isPinned);
+
   useEffect(() => {
     if (isFlyoutOpen) {
       calculateFlyoutPosition();
     }
   }, [isFlyoutOpen, calculateFlyoutPosition]);
 
-  // Click Outside & Escape Key Listener
+  // Reset flyout state on uncollapse or state change
   useEffect(() => {
-    if (!isCollapsed) {
+    if (!isCollapsed && (isPinned || isHovered)) {
       setIsPinned(false);
       setIsHovered(false);
-      return;
     }
+  }, [isCollapsed, isPinned, isHovered]);
+
+  // Click Outside & Escape Key Listener
+  useEffect(() => {
+    if (!isCollapsed) return;
 
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -110,12 +113,6 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isCollapsed]);
-
-  // Reset flyout state when sidebar collapses/expands
-  useEffect(() => {
-    setIsPinned(false);
-    setIsHovered(false);
   }, [isCollapsed]);
 
   const handleParentClick = (e: React.MouseEvent) => {
@@ -301,4 +298,3 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
     </div>
   );
 };
-

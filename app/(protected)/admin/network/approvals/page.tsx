@@ -22,6 +22,7 @@ import {
   StatusBadge,
   Table,
   Tooltip,
+  ConfirmationDialog,
   useToast,
 } from '@/components/ui';
 import { ColumnDefinition } from '@/types/common';
@@ -67,6 +68,9 @@ export default function AdminApprovalsPage() {
   // Drawer & Modals
   const [detailItem, setDetailItem] = useState<PendingApprovalItem | null>(null);
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
+
+  const [approvingItem, setApprovingItem] = useState<PendingApprovalItem | null>(null);
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
 
   const [rejectingItem, setRejectingItem] = useState<PendingApprovalItem | null>(null);
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
@@ -129,9 +133,16 @@ export default function AdminApprovalsPage() {
     setDetailDrawerOpen(true);
   };
 
-  const handleApprove = async (item: PendingApprovalItem) => {
-    if (item.entityType === 'DISTRIBUTOR') {
-      const res = await approvalService.approveDistributor(item.id, session?.userId || 'usr_admin_01');
+  const handlePromptApprove = (item: PendingApprovalItem) => {
+    setApprovingItem(item);
+    setApproveDialogOpen(true);
+  };
+
+  const handleConfirmApprove = async () => {
+    if (!approvingItem) return;
+
+    if (approvingItem.entityType === 'DISTRIBUTOR') {
+      const res = await approvalService.approveDistributor(approvingItem.id, session?.userId || 'usr_admin_01');
       if (res.success && res.data) {
         toastSuccess(`Distributor "${res.data.code}" approved successfully! Login is now enabled.`);
         loadData();
@@ -139,7 +150,7 @@ export default function AdminApprovalsPage() {
         toastError(res.error?.message || 'Failed to approve distributor.');
       }
     } else {
-      const res = await approvalService.approveRetailer(item.id, session?.userId || 'usr_admin_01');
+      const res = await approvalService.approveRetailer(approvingItem.id, session?.userId || 'usr_admin_01');
       if (res.success && res.data) {
         toastSuccess(`Retailer "${res.data.code}" approved successfully! Login is now enabled.`);
         loadData();
@@ -147,6 +158,9 @@ export default function AdminApprovalsPage() {
         toastError(res.error?.message || 'Failed to approve retailer.');
       }
     }
+
+    setApproveDialogOpen(false);
+    setApprovingItem(null);
   };
 
   const handlePromptReject = (item: PendingApprovalItem) => {
@@ -427,7 +441,7 @@ export default function AdminApprovalsPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleApprove(row)}
+                      onClick={() => handlePromptApprove(row)}
                       className="p-1.5 h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
                     >
                       <CheckCircle2 className="w-4 h-4" />
@@ -466,9 +480,22 @@ export default function AdminApprovalsPage() {
         item={detailItem}
         isOpen={detailDrawerOpen}
         onClose={() => setDetailDrawerOpen(false)}
-        onApprove={handleApprove}
+        onApprove={handlePromptApprove}
         onReject={handlePromptReject}
       />
+
+      {/* Table Action Confirmation Dialog */}
+      {approvingItem && (
+        <ConfirmationDialog
+          isOpen={approveDialogOpen}
+          onCancel={() => setApproveDialogOpen(false)}
+          onConfirm={handleConfirmApprove}
+          title={`Approve ${approvingItem.entityType} "${approvingItem.code}"?`}
+          message={`Are you sure you want to approve onboarding for ${approvingItem.name} (${approvingItem.businessName})? This will set approval status to APPROVED and activate account access.`}
+          confirmText="Confirm Approval"
+          variant="info"
+        />
+      )}
 
       {/* Rejection Reason Modal */}
       {rejectingItem && (
@@ -484,3 +511,4 @@ export default function AdminApprovalsPage() {
     </div>
   );
 }
+

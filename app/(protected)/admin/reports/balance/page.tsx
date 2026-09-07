@@ -14,6 +14,7 @@ import { reportService, ReportListResult } from '@/services/reportService';
 import { WalletAccount, BalanceReportSummary, AccountSummary, EntityType, ReportFilters, PaginationState } from '@/types/domain';
 import { formatCurrency, formatDate } from '@/utils/formatters';
 import { ReportExportMenu } from '@/components/features/reports/ReportExportMenu';
+import { AdminReportNav } from '@/components/features/reports/AdminReportNav';
 import { Search, Filter, RotateCcw, Eye, BookOpen, Layers } from 'lucide-react';
 
 export default function BalanceReportPage() {
@@ -250,6 +251,9 @@ export default function BalanceReportPage() {
       }
     >
       <div className="space-y-6">
+        {/* Reports Navigation Bar */}
+        <AdminReportNav />
+
         {/* Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4 bg-white border border-slate-200">

@@ -2,9 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
 import { AlertTriangle, CheckCircle2, Info, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 export interface RetailerAttentionPanelProps {
   attentionItems: {
@@ -23,68 +22,68 @@ export const RetailerAttentionPanel: React.FC<RetailerAttentionPanelProps> = ({
   isLoading = false,
 }) => {
   if (isLoading) {
-    return <Card title="Needs Attention"><div className="h-24 bg-slate-100 rounded-lg animate-pulse" /></Card>;
+    return <div className="h-14 bg-slate-100 rounded-xl animate-pulse" />;
+  }
+
+  if (attentionItems.length === 0) {
+    return (
+      <div className="bg-emerald-50/80 border border-emerald-200/90 rounded-2xl p-3.5 px-4 flex items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          <div>
+            <span className="font-extrabold text-emerald-950 block leading-tight">
+              All Counter Operations Nominal
+            </span>
+            <span className="text-[11px] text-emerald-800">
+              No pending issues or operational alerts currently require your attention.
+            </span>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <Card
-      title={
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-amber-600" />
-          <span>Needs Attention</span>
-        </div>
-      }
-      subtitle="Actionable operational alerts & account notifications"
-    >
-      {attentionItems.length === 0 ? (
-        <div className="p-4 bg-emerald-50/70 border border-emerald-200/80 rounded-xl flex items-center gap-3 text-xs text-emerald-900">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-          <div>
-            <div className="font-bold text-emerald-950">Everything looks good</div>
-            <div className="text-emerald-800/90 text-[11px] mt-0.5">
-              No pending issues or operational alerts currently require your attention.
+    <div className="space-y-2">
+      {attentionItems.map((item) => (
+        <div
+          key={item.id}
+          className={`p-3.5 px-4 rounded-2xl border text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-colors ${
+            item.type === 'WARNING'
+              ? 'bg-amber-50/90 border-amber-200/90 text-amber-950'
+              : item.type === 'SUCCESS'
+              ? 'bg-emerald-50/90 border-emerald-200/90 text-emerald-950'
+              : 'bg-blue-50/90 border-blue-200/90 text-blue-950'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            {item.type === 'WARNING' ? (
+              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+            ) : item.type === 'SUCCESS' ? (
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            ) : (
+              <Info className="w-5 h-5 text-blue-600 shrink-0" />
+            )}
+            <div>
+              <span className="font-extrabold block leading-tight">{item.title}</span>
+              <span className="text-[11px] opacity-90 block mt-0.5">{item.description}</span>
             </div>
           </div>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {attentionItems.map((item) => (
-            <div
-              key={item.id}
-              className={`p-3.5 rounded-xl border text-xs space-y-1.5 transition-colors ${
-                item.type === 'WARNING'
-                  ? 'bg-amber-50/80 border-amber-200 text-amber-950'
-                  : item.type === 'SUCCESS'
-                  ? 'bg-emerald-50/80 border-emerald-200 text-emerald-950'
-                  : 'bg-blue-50/80 border-blue-200 text-blue-950'
-              }`}
-            >
-              <div className="flex items-center justify-between font-bold">
-                <div className="flex items-center gap-1.5">
-                  {item.type === 'WARNING' ? (
-                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                  ) : (
-                    <Info className="w-4 h-4 text-blue-600 shrink-0" />
-                  )}
-                  <span>{item.title}</span>
-                </div>
-              </div>
 
-              <p className="text-slate-700 leading-relaxed text-[11px]">{item.description}</p>
-
-              {item.actionText && item.actionUrl && (
-                <div className="pt-1">
-                  <Link href={item.actionUrl}>
-                    <Button variant="ghost" size="sm" rightIcon={<ArrowRight className="w-3 h-3" />} className="px-0 h-auto text-xs font-bold text-[var(--primary)] hover:bg-transparent">
-                      {item.actionText}
-                    </Button>
-                  </Link>
-                </div>
-              )}
-            </div>
-          ))}
+          {item.actionText && item.actionUrl && (
+            <Link href={item.actionUrl} className="shrink-0 self-end sm:self-auto">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs font-extrabold gap-1 bg-white border-amber-300 text-amber-900 hover:bg-amber-100 cursor-pointer shadow-2xs"
+              >
+                <span>{item.actionText}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
+            </Link>
+          )}
         </div>
-      )}
-    </Card>
+      ))}
+    </div>
   );
 };

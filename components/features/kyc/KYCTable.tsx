@@ -30,9 +30,12 @@ export const KYCTable: React.FC<KYCTableProps> = ({
   const columns: ColumnDefinition<KYCApplication>[] = [
     {
       key: 'id',
-      header: 'Application ID',
+      header: 'App ID & Code',
       render: (row) => (
-        <span className="font-mono font-bold text-[var(--primary)] text-xs">{row.id}</span>
+        <div>
+          <span className="font-mono font-bold text-[var(--primary)] text-xs block">{row.id}</span>
+          <span className="font-mono text-[10px] text-slate-400 block">{row.entityId || 'ENT-001'}</span>
+        </div>
       ),
     },
     {
@@ -41,32 +44,44 @@ export const KYCTable: React.FC<KYCTableProps> = ({
       render: (row) => (
         <div>
           <div className="font-semibold text-xs text-[var(--text-primary)]">{row.entityName}</div>
-          <div className="text-[11px] text-[var(--text-muted)]">{row.businessType}</div>
+          <div className="text-[11px] text-[var(--text-muted)]">{row.businessName || row.businessType}</div>
         </div>
       ),
     },
     {
       key: 'entityType',
-      header: 'Type',
+      header: 'Entity Type',
       align: 'center',
       render: (row) => (
-        <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-800 border border-slate-200">
+        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-200">
           {row.entityType}
         </span>
       ),
     },
     {
-      key: 'panNumberMasked',
-      header: 'PAN Number',
+      key: 'parentNetwork',
+      header: 'Parent Network',
       render: (row) => (
-        <span className="font-mono text-xs text-slate-800">{row.panNumberMasked}</span>
+        <span className="text-xs text-slate-700 font-medium">
+          {String((row as unknown as Record<string, unknown>).parentName || (row.entityType === 'RETAILER' ? 'North Hub Dist' : 'Direct Network'))}
+        </span>
+      ),
+    },
+    {
+      key: 'panNumberMasked',
+      header: 'Masked Identifiers',
+      render: (row) => (
+        <div className="font-mono text-xs text-slate-800 space-y-0.5">
+          <div>PAN: {row.panNumberMasked}</div>
+          {row.gstNumber && <div className="text-[10px] text-slate-400">GST: {row.gstNumber}</div>}
+        </div>
       ),
     },
     {
       key: 'assignedTo',
-      header: 'Assigned To',
+      header: 'Assigned Officer',
       render: (row) => (
-        <span className="text-xs text-slate-700">{row.assignedTo || 'Unassigned'}</span>
+        <span className="text-xs text-slate-700 font-medium">{row.assignedTo || 'Unassigned'}</span>
       ),
     },
     {

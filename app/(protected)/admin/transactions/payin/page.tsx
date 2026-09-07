@@ -5,13 +5,14 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/Button';
 import { useModal } from '@/hooks/useModal';
 import { transactionService, TransactionListResult } from '@/services/transactionService';
+import { reportService } from '@/services/reportService';
 import { Transaction, TransactionFilters, PaginationState } from '@/types/domain';
 import { TransactionSummaryCards } from '@/components/features/transactions/TransactionSummaryCards';
 import { TransactionFilterBar } from '@/components/features/transactions/TransactionFilterBar';
 import { TransactionTable } from '@/components/features/transactions/TransactionTable';
 import { TransactionDetailsDrawer } from '@/components/features/transactions/TransactionDetailsDrawer';
 import { CreatePayInModal } from '@/components/features/transactions/CreatePayInModal';
-import { ArrowDownLeft } from 'lucide-react';
+import { ArrowDownLeft, Download } from 'lucide-react';
 
 export default function PayInTransactionsPage() {
   const [data, setData] = useState<TransactionListResult | null>(null);
@@ -79,19 +80,46 @@ export default function PayInTransactionsPage() {
   const pendingCount = items.filter((t) => t.status === 'PENDING' || t.status === 'PROCESSING').length;
   const successRate = items.length > 0 ? (successfulCount / items.length) * 100 : 0;
 
+  const handleExportCSV = () => {
+    if (!items.length) return;
+    const exportRows = items.map((t) => ({
+      'Transaction ID': t.transactionRef,
+      'Order ID': t.orderId || '',
+      'Type': t.type,
+      'Retailer/Merchant': t.retailerName || t.merchantName || '',
+      'Payment Mode': t.paymentMode || '',
+      'Amount': t.amount,
+      'Fee': t.fee,
+      'Status': t.status,
+      'UTR/RRN': t.utr || t.referenceId || '',
+      'Date': t.createdAt,
+    }));
+    reportService.exportToCsv(`Admin_PayIn_Transactions_${new Date().toISOString().split('T')[0]}`, exportRows);
+  };
+
   return (
     <PageContainer
       title="Pay-In Transactions"
       description="Monitor incoming payments, UPI collections and gateway traffic."
       actions={
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => setIsPayInModalOpen(true)}
-          leftIcon={<ArrowDownLeft className="w-4 h-4" />}
-        >
-          Create Payment Request
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCSV}
+            leftIcon={<Download className="w-4 h-4" />}
+          >
+            Export CSV
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setIsPayInModalOpen(true)}
+            leftIcon={<ArrowDownLeft className="w-4 h-4" />}
+          >
+            Create Payment Request
+          </Button>
+        </div>
       }
       className="space-y-6"
     >

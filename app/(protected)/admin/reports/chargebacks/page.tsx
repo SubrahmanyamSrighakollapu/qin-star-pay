@@ -12,6 +12,7 @@ import { reportService } from '@/services/reportService';
 import { Chargeback, ChargebackSummary } from '@/types/domain';
 import { formatCurrency, formatDate } from '@/utils/formatters';
 import { ReportExportMenu } from '@/components/features/reports/ReportExportMenu';
+import { AdminReportNav } from '@/components/features/reports/AdminReportNav';
 import { Eye } from 'lucide-react';
 
 export default function ChargebackReportPage() {
@@ -120,6 +121,9 @@ export default function ChargebackReportPage() {
       }
     >
       <div className="space-y-6">
+        {/* Reports Navigation Bar */}
+        <AdminReportNav />
+
         {/* Metric Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4 bg-white border border-slate-200">

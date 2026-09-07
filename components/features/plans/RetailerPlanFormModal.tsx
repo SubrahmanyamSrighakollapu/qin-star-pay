@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { RetailerPlan, CommissionType, PlanStatus } from '@/types/domain';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
@@ -22,64 +22,32 @@ export const RetailerPlanFormModal: React.FC<RetailerPlanFormModalProps> = ({
   isSubmitting = false,
 }) => {
   const isEditing = !!initialData;
+  const payinRule = initialData?.commissionRules?.find((r) => r.serviceType === 'PAY_IN');
+  const payoutRule = initialData?.commissionRules?.find((r) => r.serviceType === 'PAY_OUT');
 
-  const [name, setName] = useState('');
-  const [code, setCode] = useState('');
-  const [description, setDescription] = useState('');
-  const [status, setStatus] = useState<PlanStatus>('ACTIVE');
+  const [name, setName] = useState(initialData?.name || '');
+  const [code, setCode] = useState(initialData?.code || '');
+  const [description, setDescription] = useState(initialData?.description || '');
+  const [status, setStatus] = useState<PlanStatus>(initialData?.status || 'ACTIVE');
 
   // Pay-In Rules
-  const [payinType, setPayinType] = useState<CommissionType>('PERCENTAGE');
-  const [payinValue, setPayinValue] = useState<string>('0.25');
+  const [payinType, setPayinType] = useState<CommissionType>(payinRule?.commissionType || 'PERCENTAGE');
+  const [payinValue, setPayinValue] = useState<string>(payinRule?.value ? payinRule.value.toString() : '0.25');
 
   // Pay-Out Rules
-  const [payoutType, setPayoutType] = useState<CommissionType>('FLAT');
-  const [payoutValue, setPayoutValue] = useState<string>('5.00');
+  const [payoutType, setPayoutType] = useState<CommissionType>(payoutRule?.commissionType || 'FLAT');
+  const [payoutValue, setPayoutValue] = useState<string>(payoutRule?.value ? payoutRule.value.toString() : '5.00');
 
   // Effective Dates
   const [effectiveFrom, setEffectiveFrom] = useState<string>(
-    new Date().toISOString().split('T')[0]
+    initialData?.effectiveFrom ? initialData.effectiveFrom.split('T')[0] : new Date().toISOString().split('T')[0]
   );
-  const [effectiveTo, setEffectiveTo] = useState<string>('');
+  const [effectiveTo, setEffectiveTo] = useState<string>(
+    initialData?.effectiveTo ? initialData.effectiveTo.split('T')[0] : ''
+  );
 
   // Errors
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (initialData) {
-      setName(initialData.name);
-      setCode(initialData.code);
-      setDescription(initialData.description || '');
-      setStatus(initialData.status);
-
-      const payinRule = initialData.commissionRules.find((r) => r.serviceType === 'PAY_IN');
-      if (payinRule) {
-        setPayinType(payinRule.commissionType);
-        setPayinValue(payinRule.value.toString());
-      }
-
-      const payoutRule = initialData.commissionRules.find((r) => r.serviceType === 'PAY_OUT');
-      if (payoutRule) {
-        setPayoutType(payoutRule.commissionType);
-        setPayoutValue(payoutRule.value.toString());
-      }
-
-      setEffectiveFrom(initialData.effectiveFrom ? initialData.effectiveFrom.split('T')[0] : '');
-      setEffectiveTo(initialData.effectiveTo ? initialData.effectiveTo.split('T')[0] : '');
-    } else {
-      setName('');
-      setCode('');
-      setDescription('');
-      setStatus('ACTIVE');
-      setPayinType('PERCENTAGE');
-      setPayinValue('0.25');
-      setPayoutType('FLAT');
-      setPayoutValue('5.00');
-      setEffectiveFrom(new Date().toISOString().split('T')[0]);
-      setEffectiveTo('');
-    }
-    setErrors({});
-  }, [initialData, isOpen]);
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};

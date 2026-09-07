@@ -6,7 +6,7 @@ import { AccessDeniedView } from '@/components/features/auth/AccessDeniedView';
 import { Distributor, AccountStatus, KYCStatus, ApprovalStatus } from '@/types/domain';
 import { hierarchyService } from '@/services/hierarchyService';
 import { distributorService, CreateDistributorInput, UpdateDistributorInput } from '@/services/distributorService';
-import { AdminDistributorFormModal, ApprovalDetailDrawer } from '@/components/features/admin/network';
+import { AdminDistributorFormModal, AdminDistributorDetailDrawer } from '@/components/features/admin/network';
 import {
   PageHeader,
   Button,
@@ -111,6 +111,11 @@ export default function AdminDistributorsPage() {
     );
   }
 
+  const handleOpenDetail = (d: Distributor) => {
+    setDrawerDistributor(d);
+    setDrawerOpen(true);
+  };
+
   const handleOpenCreate = () => {
     setSelectedDistributor(null);
     setFormMode('create');
@@ -140,7 +145,7 @@ export default function AdminDistributorsPage() {
         return false;
       }
 
-      toastSuccess(`Distributor "${res.data.code}" created and approved successfully!`);
+      toastSuccess(`Distributor "${res.data.code}" created directly as APPROVED + ACTIVE!`);
       loadData();
       return true;
     } else {
@@ -411,8 +416,17 @@ export default function AdminDistributorsPage() {
           isLoading={isLoading}
           emptyTitle="No Distributors Found"
           emptyDescription="There are no distributors matching your query."
+          onRowClick={(row) => handleOpenDetail(row)}
           renderActions={(row) => (
-            <div className="flex items-center justify-end gap-1">
+            <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleOpenDetail(row)}
+                className="p-1.5 h-8 w-8 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50"
+              >
+                <Eye className="w-4 h-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -450,6 +464,13 @@ export default function AdminDistributorsPage() {
         )}
       </div>
 
+      {/* Detail Drawer */}
+      <AdminDistributorDetailDrawer
+        distributor={drawerDistributor}
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      />
+
       {/* Modal */}
       <AdminDistributorFormModal
         isOpen={formModalOpen}
@@ -476,3 +497,4 @@ export default function AdminDistributorsPage() {
     </div>
   );
 }
+

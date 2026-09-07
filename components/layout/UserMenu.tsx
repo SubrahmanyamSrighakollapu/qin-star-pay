@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { User, KeyRound, Settings, LogOut, ChevronDown, Shield, RefreshCw } from 'lucide-react';
-import { UserContext, UserRole, MOCK_CURRENT_USER } from '@/config/roles';
+import { UserContext, UserRole, MOCK_CURRENT_USER, USER_ROLE_LABELS } from '@/config/roles';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useToast } from '@/components/ui/Toast';
 import { cn } from '@/utils/cn';
@@ -17,17 +17,13 @@ export interface UserMenuProps {
   onRoleChange?: (newRole: UserRole) => void;
 }
 
-const availableRoles: UserRole[] = [
-  'ADMIN',
-  'SUPER_ADMIN',
-  'MASTER_DISTRIBUTOR',
-  'DISTRIBUTOR',
-  'RETAILER',
-  'OPERATIONS',
-  'ACCOUNTS',
-  'KYC',
-  'SUPPORT',
+const DISPLAYED_DEV_ROLES: UserRole[] = [
   'SALES',
+  'KYC',
+  'ACCOUNTS',
+  'OPERATIONS',
+  'SUPPORT',
+  'MERCHANT',
 ];
 
 export const UserMenu: React.FC<UserMenuProps> = ({
@@ -77,7 +73,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
             {currentUser.name}
           </span>
           <span className="text-[10px] font-bold text-[var(--primary)] tracking-wide">
-            {currentUser.role}
+            {USER_ROLE_LABELS[currentUser.role] || currentUser.role}
           </span>
         </div>
 
@@ -91,7 +87,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
             <div className="font-semibold text-xs text-[var(--text-primary)]">{currentUser.name}</div>
             <div className="text-[11px] text-[var(--text-muted)] truncate">{currentUser.email}</div>
             <div className="pt-1">
-              <StatusBadge status="ACTIVE" label={`ROLE: ${currentUser.role}`} size="sm" />
+              <StatusBadge status="ACTIVE" label={`ROLE: ${USER_ROLE_LABELS[currentUser.role] || currentUser.role}`} size="sm" />
             </div>
           </div>
 
@@ -133,7 +129,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
               <span>System Settings</span>
             </button>
 
-            {/* Dev Role Switcher Helper */}
+            {/* Dev Role Switcher Helper — Displays only approved 6 functional roles */}
             {DEV_FEATURES.showRolePreviewSwitcher && onRoleChange && (
               <div className="border-t border-[var(--border-subtle)] my-1 pt-1">
                 <button
@@ -149,8 +145,8 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 </button>
 
                 {showRoleSwitcher && (
-                  <div className="px-4 py-2 bg-slate-50 grid grid-cols-2 gap-1 text-[11px]">
-                    {availableRoles.map((role) => (
+                  <div className="px-3 py-2 bg-slate-50 flex flex-col gap-1 text-[11px]">
+                    {DISPLAYED_DEV_ROLES.map((role) => (
                       <button
                         key={role}
                         type="button"
@@ -160,13 +156,13 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                           setShowRoleSwitcher(false);
                         }}
                         className={cn(
-                          'px-2 py-1 rounded text-left font-medium transition-colors cursor-pointer',
+                          'px-2.5 py-1.5 rounded text-left font-medium transition-colors cursor-pointer flex items-center justify-between',
                           currentUser.role === role
-                            ? 'bg-[var(--primary)] text-white font-bold'
+                            ? 'bg-[var(--primary)] text-white font-bold shadow-2xs'
                             : 'hover:bg-slate-200 text-slate-700'
                         )}
                       >
-                        {role}
+                        <span>{USER_ROLE_LABELS[role] || role}</span>
                       </button>
                     ))}
                   </div>

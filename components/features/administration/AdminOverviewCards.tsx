@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { AdminSummary } from '@/types/domain';
-import { Users, ShieldCheck, Gauge, Percent, Settings, Palette, Lock, ChevronRight } from 'lucide-react';
+import { Users, ShieldCheck, Gauge, Percent, Settings, Palette, Lock, ChevronRight, UserCheck, Key, SlidersHorizontal } from 'lucide-react';
 
 export interface AdminOverviewCardsProps {
   summary: AdminSummary;
@@ -73,53 +73,83 @@ export const AdminOverviewCards: React.FC<AdminOverviewCardsProps> = ({ summary 
   return (
     <div className="space-y-6">
       {/* Top KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-        <Card className="p-4 bg-white border border-slate-200">
-          <span className="text-xs font-semibold text-slate-500">Admin Users</span>
-          <div className="mt-1 font-mono font-extrabold text-base text-[var(--primary)]">
-            {summary.totalAdminUsers} Staff
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+        <Card className="p-3.5 bg-white border border-slate-200/80 shadow-xs hover:border-[var(--primary)] transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Admin Staff</span>
+            <div className="p-1.5 rounded-lg bg-blue-50 text-blue-700">
+              <Users className="w-3.5 h-3.5" />
+            </div>
           </div>
-          <span className="text-[11px] text-emerald-600 block mt-0.5">{summary.activeAdminUsers} Active</span>
+          <div className="mt-2 font-mono font-extrabold text-lg text-[var(--primary)]">
+            {summary.totalAdminUsers}
+          </div>
+          <span className="text-[10px] text-emerald-600 font-semibold block mt-0.5">{summary.activeAdminUsers} Active Staff</span>
         </Card>
 
-        <Card className="p-4 bg-white border border-slate-200">
-          <span className="text-xs font-semibold text-slate-500">Super Admins</span>
-          <div className="mt-1 font-mono font-extrabold text-base text-purple-900">
+        <Card className="p-3.5 bg-white border border-slate-200/80 shadow-xs hover:border-purple-400 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Super Admins</span>
+            <div className="p-1.5 rounded-lg bg-purple-50 text-purple-700">
+              <UserCheck className="w-3.5 h-3.5" />
+            </div>
+          </div>
+          <div className="mt-2 font-mono font-extrabold text-lg text-purple-900">
             {summary.superAdminsCount}
           </div>
-          <span className="text-[11px] text-purple-600 block mt-0.5 font-mono">Full Access</span>
+          <span className="text-[10px] text-purple-600 block mt-0.5 font-mono font-semibold">Full Governance</span>
         </Card>
 
-        <Card className="p-4 bg-white border border-slate-200">
-          <span className="text-xs font-semibold text-slate-500">Configured Roles</span>
-          <div className="mt-1 font-mono font-extrabold text-base text-slate-900">
-            {summary.totalRoles} Roles
+        <Card className="p-3.5 bg-white border border-slate-200/80 shadow-xs hover:border-slate-400 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">System Roles</span>
+            <div className="p-1.5 rounded-lg bg-slate-100 text-slate-700">
+              <ShieldCheck className="w-3.5 h-3.5" />
+            </div>
           </div>
-          <span className="text-[11px] text-slate-500 block mt-0.5">{summary.systemRolesCount} System • {summary.customRolesCount} Custom</span>
+          <div className="mt-2 font-mono font-extrabold text-lg text-slate-900">
+            {summary.totalRoles}
+          </div>
+          <span className="text-[10px] text-slate-500 block mt-0.5 font-medium">{summary.systemRolesCount} Core • {summary.customRolesCount} Custom</span>
         </Card>
 
-        <Card className="p-4 bg-white border border-slate-200">
-          <span className="text-xs font-semibold text-slate-500">Permissions Tokens</span>
-          <div className="mt-1 font-mono font-extrabold text-base text-blue-700">
-            {summary.configuredPermissionsCount} Tokens
+        <Card className="p-3.5 bg-white border border-slate-200/80 shadow-xs hover:border-blue-400 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Permissions</span>
+            <div className="p-1.5 rounded-lg bg-blue-50 text-blue-700">
+              <Key className="w-3.5 h-3.5" />
+            </div>
           </div>
-          <span className="text-[11px] text-blue-600 block mt-0.5">Granular Controls</span>
+          <div className="mt-2 font-mono font-extrabold text-lg text-blue-700">
+            {summary.configuredPermissionsCount}
+          </div>
+          <span className="text-[10px] text-blue-600 block mt-0.5 font-medium">Granular Tokens</span>
         </Card>
 
-        <Card className="p-4 bg-white border border-slate-200">
-          <span className="text-xs font-semibold text-slate-500">Active Limit Rules</span>
-          <div className="mt-1 font-mono font-extrabold text-base text-emerald-700">
-            {summary.activeLimitRules} Active
+        <Card className="p-3.5 bg-white border border-slate-200/80 shadow-xs hover:border-emerald-400 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Limit Rules</span>
+            <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">
+              <Gauge className="w-3.5 h-3.5" />
+            </div>
           </div>
-          <span className="text-[11px] text-slate-500 block mt-0.5">Precedence Enabled</span>
+          <div className="mt-2 font-mono font-extrabold text-lg text-emerald-700">
+            {summary.activeLimitRules}
+          </div>
+          <span className="text-[10px] text-emerald-600 block mt-0.5 font-medium">Precedence Active</span>
         </Card>
 
-        <Card className="p-4 bg-white border border-slate-200">
-          <span className="text-xs font-semibold text-slate-500">Fee Rules</span>
-          <div className="mt-1 font-mono font-extrabold text-base text-amber-700">
-            {summary.activeFeeRules} Active
+        <Card className="p-3.5 bg-white border border-slate-200/80 shadow-xs hover:border-amber-400 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Fee Rules</span>
+            <div className="p-1.5 rounded-lg bg-amber-50 text-amber-700">
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+            </div>
           </div>
-          <span className="text-[11px] text-slate-500 block mt-0.5">GST Included</span>
+          <div className="mt-2 font-mono font-extrabold text-lg text-amber-700">
+            {summary.activeFeeRules}
+          </div>
+          <span className="text-[10px] text-slate-500 block mt-0.5 font-medium">GST Included</span>
         </Card>
       </div>
 
@@ -159,3 +189,4 @@ export const AdminOverviewCards: React.FC<AdminOverviewCardsProps> = ({ summary 
     </div>
   );
 };
+

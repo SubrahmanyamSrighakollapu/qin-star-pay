@@ -11,7 +11,7 @@ export const DEV_FEATURES = {
   /**
    * Quick role preview switcher in profile popover.
    */
-  showRolePreviewSwitcher: false,
+  showRolePreviewSwitcher: true,
 
   /**
    * Quick demo credential fill panel on login screen.

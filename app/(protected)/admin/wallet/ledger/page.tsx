@@ -3,13 +3,16 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { Button } from '@/components/ui/Button';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { useModal } from '@/hooks/useModal';
 import { ledgerService, LedgerListResult } from '@/services/ledgerService';
+import { reportService } from '@/services/reportService';
 import { LedgerEntry, LedgerFilters, PaginationState } from '@/types/domain';
 import { LedgerFilterBar } from '@/components/features/wallet/LedgerFilterBar';
 import { LedgerTable } from '@/components/features/wallet/LedgerTable';
 import { LedgerDetailsDrawer } from '@/components/features/wallet/LedgerDetailsDrawer';
+import { Download } from 'lucide-react';
 
 function LedgerContent() {
   const searchParams = useSearchParams();
@@ -43,8 +46,37 @@ function LedgerContent() {
 
   const entries = data?.items || [];
 
+  const handleExportCSV = () => {
+    if (!entries.length) return;
+    const exportRows = entries.map((e) => ({
+      'Ledger ID': e.id,
+      'Date': e.createdAt,
+      'Wallet ID': e.walletId,
+      'Entity Name': e.entityName,
+      'Entry Type': e.entryType,
+      'Direction': e.direction,
+      'Reference ID': e.referenceId || e.transactionId || '',
+      'Opening Balance': e.openingBalance,
+      'Amount': e.amount,
+      'Closing Balance': e.closingBalance,
+      'Description': e.description,
+    }));
+    reportService.exportToCsv(`Admin_Financial_Ledger_${new Date().toISOString().split('T')[0]}`, exportRows);
+  };
+
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExportCSV}
+          leftIcon={<Download className="w-4 h-4" />}
+        >
+          Export CSV
+        </Button>
+      </div>
+
       {/* 1. Filter Bar */}
       <LedgerFilterBar
         onApplyFilters={(f) => {

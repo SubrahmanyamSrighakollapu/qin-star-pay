@@ -195,12 +195,18 @@ export const TransactionDetailsView: React.FC<TransactionDetailsViewProps> = ({
                     <span className="font-semibold text-slate-900">{tx.merchantName}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Distributor:</span>
-                    <span className="text-slate-800">{tx.distributorName || 'Direct'}</span>
+                    <span className="text-slate-500">Master Distributor:</span>
+                    <span className="font-semibold text-slate-800">
+                      {String((tx as unknown as Record<string, unknown>).masterDistributorName || tx.masterDistributorId || '—')}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Retailer:</span>
-                    <span className="text-slate-800">{tx.retailerName || 'Direct'}</span>
+                    <span className="text-slate-500">Distributor:</span>
+                    <span className="text-slate-800">{tx.distributorName || 'Direct Network'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Retailer / Merchant:</span>
+                    <span className="text-slate-800">{tx.retailerName || tx.merchantName || 'Direct'}</span>
                   </div>
                 </div>
               </div>
@@ -279,22 +285,22 @@ export const TransactionDetailsView: React.FC<TransactionDetailsViewProps> = ({
         {/* RIGHT SIDEBAR COLUMN (5/12 = ~40% width) */}
         <div className="lg:col-span-5 space-y-6">
           {/* Amount & Tax Breakdown */}
-          <Card title="Amount Breakdown" subtitle="Financial debit & settlement ledger">
+          <Card title="Financial & Commission Ledger" subtitle="Principal, Charges, Taxes & Network Allocations">
             <div className="space-y-3 text-xs">
               <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
-                <span className="text-slate-600 font-medium">Transaction Amount</span>
+                <span className="text-slate-600 font-medium">Principal Amount</span>
                 <span className="font-bold text-slate-900 text-sm tabular-nums">
                   {formatCurrency(tx.amount)}
                 </span>
               </div>
 
               <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
-                <span className="text-slate-600">Platform / Service Fee</span>
+                <span className="text-slate-600">Service Charges / Fee</span>
                 <span className="font-mono tabular-nums">{formatCurrency(tx.fee)}</span>
               </div>
 
               <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
-                <span className="text-slate-600">GST (18% on Fee)</span>
+                <span className="text-slate-600">GST (18%)</span>
                 <span className="font-mono tabular-nums">
                   {formatCurrency(tx.gst !== undefined ? tx.gst : +(tx.fee * 0.18).toFixed(2))}
                 </span>
@@ -303,6 +309,26 @@ export const TransactionDetailsView: React.FC<TransactionDetailsViewProps> = ({
               <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
                 <span className="text-slate-600">TDS Deduction</span>
                 <span className="font-mono tabular-nums">{formatCurrency(tx.tds || 0)}</span>
+              </div>
+
+              <div className="pt-2 border-t border-slate-200">
+                <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  Commission Distribution
+                </div>
+                <div className="space-y-1.5 pl-2 border-l-2 border-slate-200">
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-slate-500">Retailer Commission</span>
+                    <span className="font-mono text-emerald-700">{formatCurrency(+(tx.amount * 0.0025).toFixed(2))}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-slate-500">Distributor Commission</span>
+                    <span className="font-mono text-emerald-700">{formatCurrency(+(tx.amount * 0.0010).toFixed(2))}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-slate-500">Master Distributor Commission</span>
+                    <span className="font-mono text-emerald-700">{formatCurrency(+(tx.amount * 0.0005).toFixed(2))}</span>
+                  </div>
+                </div>
               </div>
 
               <div className="flex justify-between items-center py-2.5 border-t-2 border-slate-200 font-bold text-sm text-[var(--primary)]">

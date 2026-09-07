@@ -25,6 +25,7 @@ import { ReportDateRangePicker } from '@/components/features/reports/ReportDateR
 import { ReportExportMenu } from '@/components/features/reports/ReportExportMenu';
 import { SettlementDetailsDrawer } from '@/components/features/settlements/SettlementDetailsDrawer';
 import { ReconciliationDetailsModal } from '@/components/features/settlements/ReconciliationDetailsModal';
+import { AdminReportNav } from '@/components/features/reports/AdminReportNav';
 import { Search, Filter, RotateCcw, Eye, ShieldCheck } from 'lucide-react';
 
 export default function SettlementReportPage() {
@@ -263,6 +264,9 @@ export default function SettlementReportPage() {
       }
     >
       <div className="space-y-6">
+        {/* Reports Navigation Bar */}
+        <AdminReportNav />
+
         {/* Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4 bg-white border border-slate-200">

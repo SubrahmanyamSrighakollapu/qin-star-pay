@@ -9,6 +9,7 @@ import { Select } from '@/components/ui/Select';
 import { reportService } from '@/services/reportService';
 import { ApiPerformanceSummary, ApiPerformanceMetric } from '@/types/domain';
 import { ReportExportMenu } from '@/components/features/reports/ReportExportMenu';
+import { AdminReportNav } from '@/components/features/reports/AdminReportNav';
 import {
   BarChart,
   Bar,
@@ -151,6 +152,9 @@ export default function ApiPerformancePage() {
       }
     >
       <div className="space-y-6">
+        {/* Reports Navigation Bar */}
+        <AdminReportNav />
+
         {/* Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4 bg-white border border-slate-200">

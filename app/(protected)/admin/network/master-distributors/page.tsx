@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { AccessDeniedView } from '@/components/features/auth/AccessDeniedView';
 import { MasterDistributor, AccountStatus } from '@/types/domain';
 import { hierarchyService } from '@/services/hierarchyService';
-import { MasterDistributorFormModal } from '@/components/features/admin/network';
+import { MasterDistributorFormModal, MasterDistributorDetailDrawer } from '@/components/features/admin/network';
 import {
   PageHeader,
   Button,
@@ -18,8 +18,8 @@ import {
   useToast,
 } from '@/components/ui';
 import { ColumnDefinition } from '@/types/common';
-import { formatDate, formatCurrency } from '@/utils/formatters';
-import { Plus, RefreshCw, Building2, Store, Users, Edit, Power } from 'lucide-react';
+import { formatDate } from '@/utils/formatters';
+import { Plus, RefreshCw, Building2, Store, Users, Edit, Power, Eye } from 'lucide-react';
 
 export default function AdminMasterDistributorsPage() {
   const { session, isAuthenticated } = useAuth();
@@ -43,6 +43,10 @@ export default function AdminMasterDistributorsPage() {
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [selectedMd, setSelectedMd] = useState<MasterDistributor | null>(null);
+
+  // Drawer State
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerMd, setDrawerMd] = useState<MasterDistributor | null>(null);
 
   // Status Dialog State
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -99,6 +103,11 @@ export default function AdminMasterDistributorsPage() {
     );
   }
 
+  const handleOpenDetail = (md: MasterDistributor) => {
+    setDrawerMd(md);
+    setDrawerOpen(true);
+  };
+
   const handleOpenCreate = () => {
     setSelectedMd(null);
     setFormMode('create');
@@ -128,7 +137,7 @@ export default function AdminMasterDistributorsPage() {
       };
 
       hierarchyService.addMasterDistributorRecord(newMd);
-      toastSuccess(`Master Distributor "${newMd.code}" created successfully!`);
+      toastSuccess(`Master Distributor "${newMd.code}" created directly as ACTIVE!`);
       loadData();
       return true;
     } else {
@@ -263,7 +272,7 @@ export default function AdminMasterDistributorsPage() {
               onClick={handleOpenCreate}
               leftIcon={<Plus className="w-4 h-4" />}
             >
-              Create Master Distributor
+              Add Master Distributor
             </Button>
           </div>
         }
@@ -348,8 +357,17 @@ export default function AdminMasterDistributorsPage() {
           isLoading={isLoading}
           emptyTitle="No Master Distributors Found"
           emptyDescription="There are no Master Distributors matching your criteria."
+          onRowClick={(row) => handleOpenDetail(row)}
           renderActions={(row) => (
-            <div className="flex items-center justify-end gap-1">
+            <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleOpenDetail(row)}
+                className="p-1.5 h-8 w-8 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50"
+              >
+                <Eye className="w-4 h-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -385,7 +403,14 @@ export default function AdminMasterDistributorsPage() {
         )}
       </div>
 
-      {/* Modal */}
+      {/* Detail Drawer */}
+      <MasterDistributorDetailDrawer
+        md={drawerMd}
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      />
+
+      {/* Form Modal */}
       <MasterDistributorFormModal
         isOpen={formModalOpen}
         onClose={() => setFormModalOpen(false)}
@@ -411,3 +436,4 @@ export default function AdminMasterDistributorsPage() {
     </div>
   );
 }
+

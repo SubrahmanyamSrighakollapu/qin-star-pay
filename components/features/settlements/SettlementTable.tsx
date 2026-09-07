@@ -44,17 +44,17 @@ export const SettlementTable: React.FC<SettlementTableProps> = ({
     },
     {
       key: 'entityName',
-      header: 'Target Entity',
+      header: 'Target Entity & Hierarchy',
       render: (row) => (
-        <div>
-          <div className="font-semibold text-xs text-slate-900">{row.entityName}</div>
+        <div className="text-xs">
+          <div className="font-semibold text-slate-900">{row.entityName}</div>
           <div className="text-[11px] font-semibold text-purple-700">{row.entityType} ({row.entityCode})</div>
         </div>
       ),
     },
     {
       key: 'grossAmount',
-      header: 'Gross Amount',
+      header: 'Principal / Gross',
       align: 'right',
       render: (row) => (
         <span className="font-mono font-semibold text-xs text-slate-700">
@@ -64,14 +64,19 @@ export const SettlementTable: React.FC<SettlementTableProps> = ({
     },
     {
       key: 'charges',
-      header: 'Charges / Tax',
+      header: 'Charges, Tax & Holds',
       align: 'right',
       render: (row) => {
         const totalDeductions = row.charges + row.tax + row.tds + row.holdAmount;
         return (
-          <span className="font-mono text-xs text-rose-600 font-medium">
-            -{formatCurrency(totalDeductions)}
-          </span>
+          <div className="text-right">
+            <span className="font-mono text-xs text-rose-600 font-medium block">
+              -{formatCurrency(totalDeductions)}
+            </span>
+            {row.holdAmount > 0 && (
+              <span className="text-[10px] text-amber-700 font-bold block">Hold: {formatCurrency(row.holdAmount)}</span>
+            )}
+          </div>
         );
       },
     },
@@ -87,9 +92,24 @@ export const SettlementTable: React.FC<SettlementTableProps> = ({
     },
     {
       key: 'status',
-      header: 'Status',
+      header: 'Settlement Status',
       align: 'center',
       render: (row) => <StatusBadge status={row.status} size="sm" />,
+    },
+    {
+      key: 'utr',
+      header: 'Reference (UTR / Bank Ref)',
+      render: (row) => (
+        <div className="font-mono text-xs text-slate-700">
+          {row.utr || row.bankReference ? (
+            <span className="truncate max-w-[130px] block" title={row.utr || row.bankReference}>
+              {row.utr || row.bankReference}
+            </span>
+          ) : (
+            <span className="text-slate-400">—</span>
+          )}
+        </div>
+      ),
     },
     {
       key: 'scheduledAt',

@@ -54,9 +54,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     router.push('/login');
   };
 
-  // Group nav items with category headers
-  let lastCategory: string | null = null;
-
   return (
     <aside
       className={cn(
@@ -66,32 +63,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
     >
       {/* Brand Header with Official Logo Asset */}
-      <div className="h-[64px] px-3.5 border-b border-slate-200/80 flex items-center justify-between shrink-0 bg-white">
+      <div className="h-[70px] px-3.5 border-b border-slate-200/80 flex items-center justify-between shrink-0 bg-white shadow-2xs">
         <Link
           href="/dashboard"
           onClick={onNavigate}
           className={cn(
-            'flex items-center gap-2.5 overflow-hidden cursor-pointer group',
+            'flex items-center gap-3 overflow-hidden cursor-pointer group py-1',
             isCollapsed ? 'mx-auto justify-center' : ''
           )}
         >
-          <div className="w-10 h-10 rounded-lg bg-blue-50/80 p-1 flex items-center justify-center shrink-0 shadow-2xs border border-blue-100 group-hover:border-[var(--primary-200)] transition-colors">
+          <div className="w-11 h-11 rounded-xl bg-slate-50 p-1 flex items-center justify-center shrink-0 shadow-xs border border-slate-200 group-hover:border-[var(--primary-300)] group-hover:bg-blue-50/50 transition-all duration-200">
             <Image
               src="/logo.jpeg"
               alt="Qin Star Pay Logo"
-              width={32}
-              height={32}
-              className="object-contain rounded-xs"
+              width={42}
+              height={42}
+              className="object-contain rounded-lg w-full h-full"
               priority
             />
           </div>
 
           {!isCollapsed && (
             <div className="flex flex-col truncate">
-              <span className="font-extrabold text-sm tracking-wider text-slate-900 leading-tight">
+              <span className="font-extrabold text-sm tracking-wider text-slate-900 leading-tight group-hover:text-[var(--primary)] transition-colors">
                 QIN STAR PAY
               </span>
-              <span className="text-[10px] text-[var(--secondary)] font-extrabold tracking-widest uppercase">
+              <span className="text-[10px] text-[var(--secondary)] font-extrabold tracking-widest uppercase mt-0.5">
                 Fintech Workspace
               </span>
             </div>

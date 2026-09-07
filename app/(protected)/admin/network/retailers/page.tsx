@@ -6,7 +6,7 @@ import { AccessDeniedView } from '@/components/features/auth/AccessDeniedView';
 import { Retailer, AccountStatus, KYCStatus, ApprovalStatus, RetailerPlan } from '@/types/domain';
 import { hierarchyService } from '@/services/hierarchyService';
 import { retailerPlanService } from '@/services/retailerPlanService';
-import { AdminRetailerFormModal, CreateAdminRetailerInput } from '@/components/features/admin/network';
+import { AdminRetailerFormModal, AdminRetailerDetailDrawer, CreateAdminRetailerInput } from '@/components/features/admin/network';
 import {
   PageHeader,
   Button,
@@ -20,7 +20,7 @@ import {
 } from '@/components/ui';
 import { ColumnDefinition } from '@/types/common';
 import { formatDate } from '@/utils/formatters';
-import { Plus, RefreshCw, Store, Edit, Power, Percent, Network } from 'lucide-react';
+import { Plus, RefreshCw, Store, Eye, Edit, Power, Percent, Network } from 'lucide-react';
 
 export default function AdminRetailersPage() {
   const { session, isAuthenticated } = useAuth();
@@ -45,10 +45,13 @@ export default function AdminRetailersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 8;
 
-  // Modal State
+  // Modal & Drawer State
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [selectedRetailer, setSelectedRetailer] = useState<Retailer | null>(null);
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerRetailer, setDrawerRetailer] = useState<Retailer | null>(null);
 
   // Status Dialog
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -78,7 +81,6 @@ export default function AdminRetailersPage() {
   }, [isAuthorized]);
 
   const masterDistributors = hierarchyService.getAllMasterDistributors();
-  const distributors = hierarchyService.getAllDistributors();
 
   // Filtered Retailers
   const filteredRetailers = useMemo(() => {
@@ -116,6 +118,11 @@ export default function AdminRetailersPage() {
     );
   }
 
+  const handleOpenDetail = (r: Retailer) => {
+    setDrawerRetailer(r);
+    setDrawerOpen(true);
+  };
+
   const handleOpenCreate = () => {
     setSelectedRetailer(null);
     setFormMode('create');
@@ -152,7 +159,7 @@ export default function AdminRetailersPage() {
       };
 
       hierarchyService.addRetailerRecord(newRetailer);
-      toastSuccess(`Retailer "${newRetailer.code}" created and approved successfully!`);
+      toastSuccess(`Retailer "${newRetailer.code}" created directly as APPROVED + ACTIVE!`);
       loadData();
       return true;
     } else {
@@ -433,8 +440,17 @@ export default function AdminRetailersPage() {
           isLoading={isLoading}
           emptyTitle="No Retailers Found"
           emptyDescription="There are no retailers matching your query."
+          onRowClick={(row) => handleOpenDetail(row)}
           renderActions={(row) => (
-            <div className="flex items-center justify-end gap-1">
+            <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleOpenDetail(row)}
+                className="p-1.5 h-8 w-8 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50"
+              >
+                <Eye className="w-4 h-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -472,6 +488,13 @@ export default function AdminRetailersPage() {
         )}
       </div>
 
+      {/* Detail Drawer */}
+      <AdminRetailerDetailDrawer
+        retailer={drawerRetailer}
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      />
+
       {/* Modal */}
       <AdminRetailerFormModal
         isOpen={formModalOpen}
@@ -498,3 +521,4 @@ export default function AdminRetailersPage() {
     </div>
   );
 }
+
