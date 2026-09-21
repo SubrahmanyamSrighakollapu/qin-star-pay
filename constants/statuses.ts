@@ -13,13 +13,15 @@ export const TRANSACTION_STATUS = {
 export type TransactionStatus = keyof typeof TRANSACTION_STATUS;
 
 export const KYC_STATUS = {
-  PENDING: 'PENDING',
-  UNDER_REVIEW: 'UNDER_REVIEW',
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED',
+  PROCESSING: 'PROCESSING',
+  BLOCKED: 'BLOCKED',
+  PENDING: 'PROCESSING',
+  UNDER_REVIEW: 'PROCESSING',
 } as const;
 
-export type KYCStatus = keyof typeof KYC_STATUS;
+export type KYCStatus = 'APPROVED' | 'REJECTED' | 'PROCESSING' | 'BLOCKED' | 'PENDING' | 'UNDER_REVIEW';
 
 export const USER_STATUS = {
   ACTIVE: 'ACTIVE',
@@ -66,7 +68,7 @@ export const STATUS_META: Record<string, StatusMeta> = {
   // KYC Statuses
   APPROVED: { label: 'Approved', variant: 'success' },
   REJECTED: { label: 'Rejected', variant: 'danger' },
-  UNDER_REVIEW: { label: 'Under Review', variant: 'warning' },
+  UNDER_REVIEW: { label: 'Processing', variant: 'info' },
 
   // Settlement & Reconciliation Statuses
   ELIGIBLE: { label: 'Eligible', variant: 'purple' },

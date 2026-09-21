@@ -16,6 +16,7 @@ export default function KYCDashboardPage() {
   const [approvalItems, setApprovalItems] = useState<PendingApprovalItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'ALL' | 'DISTRIBUTOR' | 'RETAILER'>('ALL');
+  const [statusTab, setStatusTab] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'BLOCKED'>('ALL');
   const [isLoading, setIsLoading] = useState(false);
 
   // Drawer and modal states
@@ -24,10 +25,10 @@ export default function KYCDashboardPage() {
   const [rejectingItem, setRejectingItem] = useState<PendingApprovalItem | null>(null);
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
 
-  const loadKYCData = () => {
+  const loadKYCData = (tab = statusTab) => {
     setIsLoading(true);
     try {
-      const items = approvalService.getApprovalItems('PENDING', 'ALL');
+      const items = approvalService.getApprovalItems(tab, 'ALL');
       setApprovalItems(items);
     } catch (e) {
       console.error('Failed to load KYC queue:', e);
@@ -37,8 +38,8 @@ export default function KYCDashboardPage() {
   };
 
   useEffect(() => {
-    loadKYCData();
-  }, []);
+    loadKYCData(statusTab);
+  }, [statusTab]);
 
   const handleReviewItem = (item: PendingApprovalItem) => {
     setDetailItem(item);
@@ -103,7 +104,19 @@ export default function KYCDashboardPage() {
     return matchesType && matchesSearch;
   });
 
-  const pendingCount = approvalItems.length;
+  const allItems = approvalService.getApprovalItems('ALL', 'ALL');
+  const pendingCount = allItems.filter(
+    (i) => i.approvalStatus === 'PENDING_APPROVAL' || i.kycStatus === 'PROCESSING' || i.kycStatus === 'PENDING'
+  ).length;
+  const approvedCount = allItems.filter(
+    (i) => i.approvalStatus === 'APPROVED' && i.kycStatus === 'APPROVED' && i.accountStatus !== 'SUSPENDED'
+  ).length;
+  const rejectedCount = allItems.filter(
+    (i) => i.approvalStatus === 'REJECTED' || i.kycStatus === 'REJECTED'
+  ).length;
+  const blockedCount = allItems.filter(
+    (i) => i.kycStatus === 'BLOCKED' || i.accountStatus === 'SUSPENDED'
+  ).length;
 
   return (
     <PageContainer fullWidth className="space-y-6 pb-12">
@@ -128,7 +141,7 @@ export default function KYCDashboardPage() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={loadKYCData}
+            onClick={() => loadKYCData()}
             className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -137,36 +150,64 @@ export default function KYCDashboardPage() {
         </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* KPI Cards — Interactive Filters */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <FinancialMetricCard
-          label="Pending Verification Queue"
-          value={pendingCount}
-          subtext="+3 new today"
-          icon={<Clock className="w-4 h-4 text-amber-600" />}
-          variant="warning"
-        />
-        <FinancialMetricCard
-          label="Approved (This Month)"
-          value="148"
-          subtext="98.2% Approval Rate"
-          icon={<CheckCircle2 className="w-4 h-4 text-emerald-600" />}
-          variant="success"
-        />
-        <FinancialMetricCard
-          label="Rejected / Clarification"
-          value="6"
-          subtext="1.8% Rejection Rate"
-          icon={<XCircle className="w-4 h-4 text-rose-600" />}
-          variant="danger"
-        />
-        <FinancialMetricCard
-          label="Avg Verification SLA"
-          value="14 mins"
-          subtext="SLA Limit: 24 Hours"
-          icon={<UserCheck className="w-4 h-4 text-blue-600" />}
-          variant="primary"
-        />
+        <div
+          onClick={() => setStatusTab('PENDING')}
+          className={`cursor-pointer transition-transform hover:-translate-y-0.5 ${
+            statusTab === 'PENDING' ? 'ring-2 ring-amber-500 rounded-xl' : ''
+          }`}
+        >
+          <FinancialMetricCard
+            label="Processing / Pending"
+            value={pendingCount}
+            subtext="Click to filter pending items"
+            icon={<Clock className="w-4 h-4 text-amber-600" />}
+            variant="warning"
+          />
+        </div>
+        <div
+          onClick={() => setStatusTab('APPROVED')}
+          className={`cursor-pointer transition-transform hover:-translate-y-0.5 ${
+            statusTab === 'APPROVED' ? 'ring-2 ring-emerald-500 rounded-xl' : ''
+          }`}
+        >
+          <FinancialMetricCard
+            label="Approved Records"
+            value={approvedCount}
+            subtext="Click to view active approved"
+            icon={<CheckCircle2 className="w-4 h-4 text-emerald-600" />}
+            variant="success"
+          />
+        </div>
+        <div
+          onClick={() => setStatusTab('REJECTED')}
+          className={`cursor-pointer transition-transform hover:-translate-y-0.5 ${
+            statusTab === 'REJECTED' ? 'ring-2 ring-rose-500 rounded-xl' : ''
+          }`}
+        >
+          <FinancialMetricCard
+            label="Rejected Submissions"
+            value={rejectedCount}
+            subtext="Click to view rejected list"
+            icon={<XCircle className="w-4 h-4 text-rose-600" />}
+            variant="danger"
+          />
+        </div>
+        <div
+          onClick={() => setStatusTab('BLOCKED')}
+          className={`cursor-pointer transition-transform hover:-translate-y-0.5 ${
+            statusTab === 'BLOCKED' ? 'ring-2 ring-slate-700 rounded-xl' : ''
+          }`}
+        >
+          <FinancialMetricCard
+            label="Blocked Entities"
+            value={blockedCount}
+            subtext="Click to view compliance holds"
+            icon={<UserCheck className="w-4 h-4 text-slate-700" />}
+            variant="neutral"
+          />
+        </div>
       </div>
 
       {/* Main Worktable Card */}
@@ -175,7 +216,7 @@ export default function KYCDashboardPage() {
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-[var(--primary)]" />
             <h2 className="text-sm font-bold text-[var(--text-primary)]">
-              Verification Desk ({filteredItems.length})
+              Verification Desk ({filteredItems.length}) — Status Filter: <span className="text-[var(--primary)]">{statusTab}</span>
             </h2>
           </div>
 
@@ -184,7 +225,7 @@ export default function KYCDashboardPage() {
               <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search name, code, email..."
+                placeholder="Search name, code, email, mobile..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[var(--primary)] focus:outline-none"
@@ -194,10 +235,17 @@ export default function KYCDashboardPage() {
             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-xs font-semibold text-slate-600">
               <button
                 type="button"
+                onClick={() => setStatusTab('ALL')}
+                className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${statusTab === 'ALL' ? 'bg-white text-slate-900 shadow-xs' : 'hover:text-slate-900'}`}
+              >
+                All
+              </button>
+              <button
+                type="button"
                 onClick={() => setFilterType('ALL')}
                 className={`px-2.5 py-1 rounded-md cursor-pointer transition-colors ${filterType === 'ALL' ? 'bg-white text-slate-900 shadow-xs' : 'hover:text-slate-900'}`}
               >
-                All ({approvalItems.length})
+                All Types
               </button>
               <button
                 type="button"
