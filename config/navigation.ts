@@ -269,11 +269,113 @@ export const ROLE_NAVIGATION_MAPS: Record<UserRole, NavigationItem[]> = {
     { id: 'ret-notifications', label: 'Notifications', iconName: 'Bell', path: '/retailer/notifications' },
     { id: 'ret-profile', label: 'Profile', iconName: 'User', path: '/retailer/profile' },
   ],
-  OPERATIONS: NAVIGATION_CONFIG,
-  ACCOUNTS: NAVIGATION_CONFIG,
-  KYC: NAVIGATION_CONFIG,
-  SALES: NAVIGATION_CONFIG,
-  SUPPORT: NAVIGATION_CONFIG,
+  OPERATIONS: [
+    { id: 'ops-dashboard', label: 'Dashboard', iconName: 'LayoutDashboard', path: '/operations/dashboard' },
+    {
+      id: 'transactions',
+      label: 'Transactions',
+      iconName: 'ArrowLeftRight',
+      children: [
+        { id: 'payin', label: 'Pay-In', path: '/admin/transactions/payin' },
+        { id: 'payout', label: 'Pay-Out', path: '/admin/transactions/payout' },
+        { id: 'all-txns', label: 'All Transactions', path: '/admin/transactions/all' },
+        { id: 'txn-search', label: 'Transaction Search', path: '/admin/transactions/search' },
+      ],
+    },
+    { id: 'chargebacks', label: 'Chargebacks & Disputes', iconName: 'RotateCcw', path: '/admin/chargebacks' },
+    { id: 'notifications', label: 'Notifications', iconName: 'Bell', path: '/admin/notifications' },
+    {
+      id: 'integrations',
+      label: 'Integrations',
+      iconName: 'Plug',
+      children: [
+        { id: 'providers', label: 'Providers SLA', path: '/admin/integrations/providers' },
+        { id: 'api-config', label: 'API Configuration', path: '/admin/integrations/api-config' },
+        { id: 'routing', label: 'Transaction Routing', path: '/admin/integrations/routing' },
+      ],
+    },
+    {
+      id: 'logs',
+      label: 'System & Audit Logs',
+      iconName: 'Terminal',
+      children: [
+        { id: 'api-logs', label: 'API Logs', path: '/admin/logs/api' },
+        { id: 'callback-logs', label: 'Callback Logs', path: '/admin/logs/callbacks' },
+        { id: 'activity-logs', label: 'Activity Logs', path: '/admin/logs/activity' },
+      ],
+    },
+  ],
+  ACCOUNTS: [
+    { id: 'acc-dashboard', label: 'Dashboard', iconName: 'LayoutDashboard', path: '/accounts/dashboard' },
+    {
+      id: 'wallet',
+      label: 'Wallet & Ledger',
+      iconName: 'Wallet',
+      children: [
+        { id: 'balances', label: 'Available Balances', path: '/admin/wallet/balances' },
+        { id: 'credit-debit', label: 'Credit / Debit', path: '/admin/wallet/credit-debit' },
+        { id: 'debit-requests', label: 'Debit Requests', path: '/admin/wallet/debit-requests' },
+        { id: 'ledger', label: 'Financial Ledger', path: '/admin/wallet/ledger' },
+      ],
+    },
+    { id: 'settlements', label: 'Settlements', iconName: 'Landmark', path: '/admin/settlements' },
+    {
+      id: 'invoices',
+      label: 'Invoices & Tax',
+      iconName: 'Receipt',
+      children: [
+        { id: 'invoices-list', label: 'Invoices', path: '/admin/invoices' },
+        { id: 'tax-summary', label: 'GST & Tax Summary', path: '/admin/invoices/tax-summary' },
+        { id: 'tds', label: 'TDS Management', path: '/admin/invoices/tds' },
+      ],
+    },
+    {
+      id: 'reports',
+      label: 'Financial Reports',
+      iconName: 'BarChart3',
+      children: [
+        { id: 'txn-report', label: 'Transaction Report', path: '/admin/reports/transactions' },
+        { id: 'ledger-report', label: 'Ledger Report', path: '/admin/reports/ledger' },
+        { id: 'settlement-report', label: 'Settlement Report', path: '/admin/reports/settlements' },
+        { id: 'balance-report', label: 'Balance Report', path: '/admin/reports/balance' },
+      ],
+    },
+  ],
+  KYC: [
+    { id: 'kyc-dashboard', label: 'Dashboard', iconName: 'LayoutDashboard', path: '/kyc/dashboard' },
+    { id: 'kyc-desk', label: 'KYC & Onboarding Desk', iconName: 'ShieldCheck', path: '/admin/kyc' },
+    { id: 'kyc-merchants', label: 'Merchant Accounts', iconName: 'Users', path: '/admin/users/merchants' },
+    { id: 'notifications', label: 'Notifications', iconName: 'Bell', path: '/admin/notifications' },
+  ],
+  SALES: [
+    { id: 'sales-dashboard', label: 'Dashboard', iconName: 'LayoutDashboard', path: '/sales/dashboard' },
+    { id: 'sales-approvals', label: 'Approvals Center', iconName: 'ShieldCheck', path: '/admin/network/approvals' },
+    {
+      id: 'users',
+      label: 'Network Users',
+      iconName: 'Users',
+      children: [
+        { id: 'distributors', label: 'Distributors', path: '/admin/users/distributors' },
+        { id: 'retailers', label: 'Retailers', path: '/admin/users/retailers' },
+        { id: 'merchants', label: 'Merchants', path: '/admin/users/merchants' },
+      ],
+    },
+    {
+      id: 'reports',
+      label: 'Sales Reports',
+      iconName: 'BarChart3',
+      children: [
+        { id: 'txn-report', label: 'Transaction Growth', path: '/admin/reports/transactions' },
+        { id: 'balance-report', label: 'Network Balance Summary', path: '/admin/reports/balance' },
+      ],
+    },
+  ],
+  SUPPORT: [
+    { id: 'ops-dashboard', label: 'Dashboard', iconName: 'LayoutDashboard', path: '/operations/dashboard' },
+    { id: 'support-txns', label: 'Transactions Search', iconName: 'ArrowLeftRight', path: '/admin/transactions/search' },
+    { id: 'support-chargebacks', label: 'Support Tickets / Disputes', iconName: 'RotateCcw', path: '/admin/chargebacks' },
+    { id: 'notifications', label: 'Notifications', iconName: 'Bell', path: '/admin/notifications' },
+  ],
   MERCHANT: NAVIGATION_CONFIG,
 };
 

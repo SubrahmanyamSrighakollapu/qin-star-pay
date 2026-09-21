@@ -24,10 +24,27 @@ import { PlatformActivityTimelineCard } from '@/components/features/dashboard/Pl
 import { ApprovalDetailDrawer, RejectionReasonModal } from '@/components/features/admin/network';
 import { useToast } from '@/components/ui/Toast';
 import { useAuth } from '@/context/AuthContext';
+import KYCDashboardPage from '@/app/(protected)/kyc/dashboard/page';
+import SalesDashboardPage from '@/app/(protected)/sales/dashboard/page';
+import AccountsDashboardPage from '@/app/(protected)/accounts/dashboard/page';
+import OperationsDashboardPage from '@/app/(protected)/operations/dashboard/page';
 
 export default function AdminDashboardPage() {
   const { session } = useAuth();
   const { toastSuccess, toastError } = useToast();
+
+  if (session?.role === 'KYC') {
+    return <KYCDashboardPage />;
+  }
+  if (session?.role === 'SALES') {
+    return <SalesDashboardPage />;
+  }
+  if (session?.role === 'ACCOUNTS') {
+    return <AccountsDashboardPage />;
+  }
+  if (session?.role === 'OPERATIONS' || session?.role === 'SUPPORT') {
+    return <OperationsDashboardPage />;
+  }
 
   const [data, setData] = useState<FullDashboardData | null>(null);
   const [filters, setFilters] = useState<DashboardFilters>({});

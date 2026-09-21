@@ -2,11 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Card } from '@/components/ui/Card';
-import { Select } from '@/components/ui/Select';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { StatusBadge } from '@/components/ui/StatusBadge';
+import { Card, Select, Input, Button, StatusBadge, MobileInput } from '@/components/ui';
 import { Wallet, CheckCircle2, AlertTriangle, ArrowRight, ShieldCheck } from 'lucide-react';
 import { walletService } from '@/services/walletService';
 import { transactionService } from '@/services/transactionService';
@@ -256,11 +252,13 @@ export const CreatePayoutForm: React.FC = () => {
                   required
                 />
 
-                <Input
+                <MobileInput
                   label="Mobile Number (Optional)"
-                  placeholder="10-digit mobile"
                   value={formData.mobileNumber || ''}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, mobileNumber: e.target.value }))}
+                  onChange={(e: any) => {
+                    const val = typeof e === 'string' ? e : e?.target?.value || '';
+                    setFormData((prev) => ({ ...prev, mobileNumber: val }));
+                  }}
                 />
               </div>
 

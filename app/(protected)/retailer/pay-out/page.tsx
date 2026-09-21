@@ -6,7 +6,7 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/components/ui';
+import { useToast, MobileInput } from '@/components/ui';
 import { payOutService, PayOutPreviewResult, PayOutExecutionResult } from '@/services/payOutService';
 import { adminService } from '@/services/adminService';
 import { PAY_OUT_SERVICES, PAY_OUT_PAYMENT_MODES } from '@/constants/serviceMasters';
@@ -387,21 +387,11 @@ export default function RetailerPayOutPage() {
                       </div>
 
                       {/* Beneficiary Mobile */}
-                      <div className="space-y-1.5 sm:col-span-1">
-                        <label className="block text-xs font-semibold text-slate-700">
-                          Beneficiary Mobile <span className="text-slate-400 font-normal">(Optional)</span>
-                        </label>
-                        <div className="relative">
-                          <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-                          <input
-                            type="text"
-                            value={beneficiaryMobile}
-                            onChange={(e) => setBeneficiaryMobile(e.target.value)}
-                            placeholder="e.g. 9876543210"
-                            className="w-full pl-10 pr-3.5 py-2.5 text-xs font-mono h-11 border border-slate-300 rounded-xl focus:outline-hidden focus:border-[#F97316] focus:ring-2 focus:ring-orange-100 bg-white transition-all"
-                          />
-                        </div>
-                      </div>
+                      <MobileInput
+                        label="Beneficiary Mobile (Optional)"
+                        value={beneficiaryMobile}
+                        onChange={(e: any) => setBeneficiaryMobile(typeof e === 'string' ? e : e?.target?.value || '')}
+                      />
                     </div>
                   </div>
 

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Menu, RefreshCw, Wallet, Search, Eye, ChevronDown, Check, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Menu, RefreshCw, Wallet } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { walletService } from '@/services/walletService';
 import { formatCurrency } from '@/utils/formatters';
@@ -23,16 +23,12 @@ export const Header: React.FC<HeaderProps> = ({
   onRoleChange,
 }) => {
   const pathname = usePathname();
-  const { session, previewRole, setPreviewRole } = useAuth();
+  const { session } = useAuth();
   const [balance, setBalance] = useState<number | null>(9953681.66);
   const [isRefreshingBalance, setIsRefreshingBalance] = useState(false);
-  const [isPortalMenuOpen, setIsPortalMenuOpen] = useState(false);
-  const portalMenuRef = useRef<HTMLDivElement>(null);
 
   const breadcrumbs = getBreadcrumbsForPath(pathname || '/dashboard');
   const currentPageTitle = breadcrumbs[breadcrumbs.length - 1]?.label || 'Dashboard';
-
-  const isAdmin = session?.role === 'ADMIN' || session?.role === 'SUPER_ADMIN';
 
   const loadBalance = async () => {
     try {
@@ -68,16 +64,6 @@ export const Header: React.FC<HeaderProps> = ({
     loadBalance();
   }, [session]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (portalMenuRef.current && !portalMenuRef.current.contains(event.target as Node)) {
-        setIsPortalMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const handleRefreshBalance = async () => {
     setIsRefreshingBalance(true);
     await loadBalance();
@@ -111,80 +97,8 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right Area: Admin Role Preview Switcher, Wallet Indicator, Notifications & Profile */}
       <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-        {/* Admin Portal Preview Switcher & Banner */}
-        {isAdmin && (
-          <div ref={portalMenuRef} className="relative hidden md:block">
-            <button
-              type="button"
-              onClick={() => setIsPortalMenuOpen((prev) => !prev)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-[var(--radius-md)] text-xs font-medium border transition-all cursor-pointer ${
-                previewRole
-                  ? 'bg-amber-50 text-amber-900 border-amber-300 font-semibold'
-                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-              }`}
-            >
-              <Eye className="w-3.5 h-3.5 text-[var(--primary)] shrink-0" />
-              <span>Viewing as: <strong className="font-semibold">{previewRole || 'Admin'}</strong></span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            </button>
-
-            {isPortalMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white border border-[var(--border)] rounded-[var(--radius-xl)] shadow-popover z-50 py-1 text-xs">
-                <div className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-400 border-b border-slate-100">
-                  Switch Portal View
-                </div>
-                {[
-                  { label: 'Admin Portal (Full Access)', role: null },
-                  { label: 'Master Distributor Portal', role: 'MASTER_DISTRIBUTOR' as UserRole },
-                  { label: 'Distributor Portal', role: 'DISTRIBUTOR' as UserRole },
-                  { label: 'Retailer Portal', role: 'RETAILER' as UserRole },
-                ].map((item) => {
-                  const isSelected = previewRole === item.role || (!previewRole && item.role === null);
-                  return (
-                    <button
-                      key={item.label}
-                      type="button"
-                      onClick={() => {
-                        onRoleChange(item.role || 'ADMIN');
-                        setPreviewRole(item.role);
-                        setIsPortalMenuOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer ${
-                        isSelected ? 'font-bold text-[var(--primary)] bg-blue-50/50' : 'text-slate-700'
-                      }`}
-                    >
-                      <span>{item.label}</span>
-                      {isSelected && <Check className="w-3.5 h-3.5 text-[var(--primary)]" />}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Active Portal Preview Banner */}
-        {previewRole && (
-          <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 border border-amber-300/80 rounded-[var(--radius-md)] text-xs font-semibold text-amber-900 animate-in fade-in duration-150">
-            <Eye className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-            <span>Previewing {previewRole}</span>
-            <button
-              type="button"
-              onClick={() => {
-                onRoleChange('ADMIN');
-                setPreviewRole(null);
-              }}
-              className="ml-1 p-0.5 text-amber-900 hover:text-rose-700 font-bold cursor-pointer"
-              title="Exit Preview"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
-
         {/* Wallet Balance Indicator — STRICTLY for Wallet Roles (Retailer, Distributor, Master Distributor) */}
-        {(previewRole === 'RETAILER' || previewRole === 'DISTRIBUTOR' || previewRole === 'MASTER_DISTRIBUTOR' ||
-          (!previewRole && (session?.role === 'RETAILER' || session?.role === 'DISTRIBUTOR' || session?.role === 'MASTER_DISTRIBUTOR'))) && (
+        {(session?.role === 'RETAILER' || session?.role === 'DISTRIBUTOR' || session?.role === 'MASTER_DISTRIBUTOR') && (
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50/70 border border-blue-200/80 rounded-[var(--radius-md)] text-xs">
             <Wallet className="w-4 h-4 text-[var(--primary)] shrink-0" />
             <div className="flex flex-col">

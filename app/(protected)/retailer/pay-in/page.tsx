@@ -7,7 +7,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/components/ui';
+import { MobileInput, useToast } from '@/components/ui';
 import { payInService, PayInPreviewResult, PayInExecutionResult } from '@/services/payInService';
 import { adminService } from '@/services/adminService';
 import { PAY_IN_SERVICES, PAY_IN_PAYMENT_MODES } from '@/constants/serviceMasters';
@@ -264,36 +264,18 @@ export default function RetailerPayInPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {/* Customer Mobile */}
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-semibold text-slate-700">
-                          Customer Mobile Number <span className="text-rose-500">*</span>
-                        </label>
-                        <div className="relative">
-                          <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-                          <input
-                            type="text"
-                            maxLength={10}
-                            value={customerMobile}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/\D/g, '');
-                              setCustomerMobile(val);
-                              if (val.length === 10) setMobileError('');
-                            }}
-                            onBlur={() => validateMobile(customerMobile)}
-                            placeholder="e.g. 9876543210"
-                            className={`w-full pl-10 pr-3.5 py-2.5 text-xs font-mono h-11 border rounded-xl focus:outline-hidden focus:ring-2 transition-all ${
-                              mobileError
-                                ? 'border-rose-400 focus:ring-rose-100 bg-rose-50/20'
-                                : 'border-slate-300 focus:border-[#0F4C81] focus:ring-indigo-100 bg-white'
-                            }`}
-                          />
-                        </div>
-                        {mobileError && (
-                          <p className="text-[11px] text-rose-600 font-medium flex items-center gap-1">
-                            <AlertTriangle className="w-3 h-3" /> {mobileError}
-                          </p>
-                        )}
-                      </div>
+                      <MobileInput
+                        label="Customer Mobile Number *"
+                        value={customerMobile}
+                        onChange={(e: any) => {
+                          const val = (typeof e === 'string' ? e : e?.target?.value || '').replace(/\D/g, '');
+                          setCustomerMobile(val);
+                          if (val.length === 10) setMobileError('');
+                        }}
+                        onBlur={() => validateMobile(customerMobile)}
+                        placeholder="9346603724"
+                        error={mobileError}
+                      />
 
                       {/* Customer Name */}
                       <div className="space-y-1.5">
@@ -507,22 +489,6 @@ export default function RetailerPayInPage() {
                       </div>
                     </div>
 
-                    {/* Distinct Retailer Earnings Box */}
-                    <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/70 space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
-                          <Sparkles className="w-3.5 h-3.5 text-emerald-600" /> Your Commission
-                        </span>
-                        <span className="text-[10px] font-mono text-emerald-700">{preview.retailerCommissionRate}</span>
-                      </div>
-                      <div className="flex justify-between items-baseline pt-1">
-                        <span className="text-xs text-emerald-800 font-medium">Retailer earnings</span>
-                        <span className="font-mono font-extrabold text-lg text-emerald-700">
-                          +{formatCurrency(preview.retailerCommissionAmount)}
-                        </span>
-                      </div>
-                    </div>
-
                     {/* Assigned Plan Context */}
                     <div className="p-3 rounded-xl border border-slate-200/80 bg-white flex items-center justify-between text-xs">
                       <div>
@@ -610,13 +576,9 @@ export default function RetailerPayInPage() {
                       <span className="text-indigo-200 font-sans">GST (18%):</span>
                       <span>{formatCurrency(preview.gst)}</span>
                     </div>
-                    <div className="flex justify-between py-1.5 text-sm font-bold text-white border-b border-indigo-800">
+                    <div className="flex justify-between py-1.5 text-sm font-bold text-white">
                       <span className="font-sans">Total Customer Paid:</span>
                       <span className="text-indigo-300 font-mono text-base">{formatCurrency(preview.totalAmount)}</span>
-                    </div>
-                    <div className="flex justify-between py-1 text-emerald-400 font-bold">
-                      <span className="font-sans">Your Retailer Commission:</span>
-                      <span>+{formatCurrency(preview.retailerCommissionAmount)}</span>
                     </div>
                   </div>
                 </div>

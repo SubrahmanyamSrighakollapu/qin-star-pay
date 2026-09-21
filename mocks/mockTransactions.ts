@@ -266,7 +266,7 @@ export const mockTransactions: Transaction[] = [
     gst: 2.61,
     tds: 0.0,
     netAmount: 14482.89,
-    status: 'REFUNDED',
+    status: 'REVERSED',
     paymentMode: 'UPI',
     provider: 'Provider A',
     service: 'UPI Collection API',

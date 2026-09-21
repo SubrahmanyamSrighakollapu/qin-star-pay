@@ -235,6 +235,42 @@ export default function LoginPage() {
 
                     <button
                       type="button"
+                      onClick={() => fillDemoAccount('kyc.manager@qinstarpay.com')}
+                      className="p-2 text-left bg-slate-50 hover:bg-amber-50/80 border border-slate-200 rounded-md transition-colors cursor-pointer"
+                    >
+                      <div className="font-bold text-[var(--text-primary)]">KYC & Onboarding Approval</div>
+                      <div className="text-[10px] text-slate-500 font-mono">kyc.manager@qinstarpay.com</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => fillDemoAccount('sales.lead@qinstarpay.com')}
+                      className="p-2 text-left bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 rounded-md transition-colors cursor-pointer"
+                    >
+                      <div className="font-bold text-[var(--text-primary)]">Sales Lead</div>
+                      <div className="text-[10px] text-slate-500 font-mono">sales.lead@qinstarpay.com</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => fillDemoAccount('accountant@qinstarpay.com')}
+                      className="p-2 text-left bg-slate-50 hover:bg-violet-50/80 border border-slate-200 rounded-md transition-colors cursor-pointer"
+                    >
+                      <div className="font-bold text-[var(--text-primary)]">Accountant</div>
+                      <div className="text-[10px] text-slate-500 font-mono">accountant@qinstarpay.com</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => fillDemoAccount('operations@qinstarpay.com')}
+                      className="p-2 text-left bg-slate-50 hover:bg-sky-50/80 border border-slate-200 rounded-md transition-colors cursor-pointer"
+                    >
+                      <div className="font-bold text-[var(--text-primary)]">Operations (Support Tickets)</div>
+                      <div className="text-[10px] text-slate-500 font-mono">operations@qinstarpay.com</div>
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => fillDemoAccount('md001@qinstarpay.com')}
                       className="p-2 text-left bg-slate-50 hover:bg-purple-50/80 border border-slate-200 rounded-md transition-colors cursor-pointer"
                     >
@@ -245,7 +281,7 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => fillDemoAccount('dst001@qinstarpay.com')}
-                      className="p-2 text-left bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 rounded-md transition-colors cursor-pointer"
+                      className="p-2 text-left bg-slate-50 hover:bg-teal-50/80 border border-slate-200 rounded-md transition-colors cursor-pointer"
                     >
                       <div className="font-bold text-[var(--text-primary)]">Distributor</div>
                       <div className="text-[10px] text-slate-500 font-mono">dst001@qinstarpay.com</div>
@@ -254,9 +290,9 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => fillDemoAccount('ret001@qinstarpay.com')}
-                      className="p-2 text-left bg-slate-50 hover:bg-amber-50/80 border border-slate-200 rounded-md transition-colors cursor-pointer"
+                      className="p-2 text-left bg-slate-50 hover:bg-indigo-50/80 border border-slate-200 rounded-md transition-colors cursor-pointer sm:col-span-2"
                     >
-                      <div className="font-bold text-[var(--text-primary)]">Approved Retailer</div>
+                      <div className="font-bold text-[var(--text-primary)]">Retailer (Metro Store #01)</div>
                       <div className="text-[10px] text-slate-500 font-mono">ret001@qinstarpay.com</div>
                     </button>
                   </div>

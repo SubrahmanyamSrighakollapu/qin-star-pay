@@ -2,9 +2,7 @@
 
 import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { Button } from '@/components/ui/Button';
+import { Input, Select, Button, MobileInput } from '@/components/ui';
 import { Role, AdminUser } from '@/types/domain';
 import { UserPlus } from 'lucide-react';
 
@@ -98,11 +96,10 @@ export const CreateAdminUserModal: React.FC<CreateAdminUserModalProps> = ({
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <Input
+          <MobileInput
             label="Mobile Number"
-            placeholder="+91 98765 00000"
             value={mobile}
-            onChange={(e) => setMobile(e.target.value)}
+            onChange={(e: any) => setMobile(typeof e === 'string' ? e : e?.target?.value || '')}
           />
         </div>
 

@@ -194,16 +194,6 @@ ${transaction.utr ? `UTR: ${transaction.utr}` : ''}
             <span>Total Amount Paid:</span>
             <span className="font-mono text-lg text-indigo-700">{formatCurrency(totalAmount)}</span>
           </div>
-
-          {/* Retailer Copy Margin Highlight */}
-          {copyType === 'RETAILER' && isSuccess && (
-            <div className="mt-3 p-3 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-900 flex items-center justify-between text-xs">
-              <span className="font-semibold flex items-center gap-1.5">
-                <ArrowDownLeft className="w-4 h-4 text-emerald-600" /> Retailer Commission Margin:
-              </span>
-              <span className="font-mono font-bold text-emerald-700 text-sm">+{formatCurrency(commission)}</span>
-            </div>
-          )}
         </div>
 
         {/* Footer Guarantee */}

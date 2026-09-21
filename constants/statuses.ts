@@ -8,7 +8,6 @@ export const TRANSACTION_STATUS = {
   PENDING: 'PENDING',
   PROCESSING: 'PROCESSING',
   REVERSED: 'REVERSED',
-  REFUNDED: 'REFUNDED',
 } as const;
 
 export type TransactionStatus = keyof typeof TRANSACTION_STATUS;
@@ -26,6 +25,7 @@ export const USER_STATUS = {
   ACTIVE: 'ACTIVE',
   INACTIVE: 'INACTIVE',
   BLOCKED: 'BLOCKED',
+  SUSPECTED: 'SUSPECTED',
 } as const;
 
 export type UserStatus = keyof typeof USER_STATUS;
@@ -55,12 +55,12 @@ export const STATUS_META: Record<string, StatusMeta> = {
   PENDING: { label: 'Pending', variant: 'warning' },
   PROCESSING: { label: 'Processing', variant: 'info' },
   REVERSED: { label: 'Reversed', variant: 'purple' },
-  REFUNDED: { label: 'Refunded', variant: 'purple' },
 
   // User & Entity Statuses
   ACTIVE: { label: 'Active', variant: 'success' },
   INACTIVE: { label: 'Inactive', variant: 'neutral' },
   BLOCKED: { label: 'Blocked', variant: 'danger' },
+  SUSPECTED: { label: 'Suspected', variant: 'warning' },
   SUSPENDED: { label: 'Suspended', variant: 'danger' },
 
   // KYC Statuses

@@ -22,12 +22,16 @@ export function getDefaultRouteForRole(role: UserRole): string {
   switch (role) {
     case 'ADMIN':
     case 'SUPER_ADMIN':
-    case 'OPERATIONS':
-    case 'ACCOUNTS':
-    case 'KYC':
-    case 'SUPPORT':
-    case 'SALES':
       return '/admin/dashboard';
+    case 'KYC':
+      return '/kyc/dashboard';
+    case 'SALES':
+      return '/sales/dashboard';
+    case 'ACCOUNTS':
+      return '/accounts/dashboard';
+    case 'OPERATIONS':
+    case 'SUPPORT':
+      return '/operations/dashboard';
     case 'MASTER_DISTRIBUTOR':
       return '/master-distributor/dashboard';
     case 'DISTRIBUTOR':
@@ -35,7 +39,7 @@ export function getDefaultRouteForRole(role: UserRole): string {
     case 'RETAILER':
       return '/retailer/dashboard';
     default:
-      return '/dashboard';
+      return '/admin/dashboard';
   }
 }
 

@@ -317,10 +317,6 @@ export const TransactionDetailsView: React.FC<TransactionDetailsViewProps> = ({
                 </div>
                 <div className="space-y-1.5 pl-2 border-l-2 border-slate-200">
                   <div className="flex justify-between items-center text-[11px]">
-                    <span className="text-slate-500">Retailer Commission</span>
-                    <span className="font-mono text-emerald-700">{formatCurrency(+(tx.amount * 0.0025).toFixed(2))}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[11px]">
                     <span className="text-slate-500">Distributor Commission</span>
                     <span className="font-mono text-emerald-700">{formatCurrency(+(tx.amount * 0.0010).toFixed(2))}</span>
                   </div>

@@ -1,11 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { Button } from '@/components/ui/Button';
-import { StatusBadge } from '@/components/ui/StatusBadge';
+import { Card, Input, Select, Button, StatusBadge, MobileInput } from '@/components/ui';
 import { MerchantOnboardingInput } from '@/types/domain';
 import { onboardingService } from '@/services/onboardingService';
 import { CheckCircle2, ArrowRight, ArrowLeft, ShieldCheck, Building2, User, MapPin, FileCheck, Landmark } from 'lucide-react';
@@ -227,11 +223,13 @@ export const MerchantOnboardingWizard: React.FC = () => {
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Input
+                <MobileInput
                   label="Mobile Number *"
-                  placeholder="10-digit mobile number"
                   value={formData.mobile}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, mobile: e.target.value }))}
+                  onChange={(e: any) => {
+                    const val = typeof e === 'string' ? e : e?.target?.value || '';
+                    setFormData((prev) => ({ ...prev, mobile: val }));
+                  }}
                   required
                 />
 
@@ -245,11 +243,13 @@ export const MerchantOnboardingWizard: React.FC = () => {
                 />
               </div>
 
-              <Input
+              <MobileInput
                 label="Alternate Contact Mobile (Optional)"
-                placeholder="10-digit mobile"
                 value={formData.altMobile || ''}
-                onChange={(e) => setFormData((prev) => ({ ...prev, altMobile: e.target.value }))}
+                onChange={(e: any) => {
+                  const val = typeof e === 'string' ? e : e?.target?.value || '';
+                  setFormData((prev) => ({ ...prev, altMobile: val }));
+                }}
               />
             </div>
           )}
