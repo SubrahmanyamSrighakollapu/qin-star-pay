@@ -23,6 +23,7 @@ import {
   Select,
   Pagination,
   useToast,
+  DateRangeDropdown,
 } from '@/components/ui';
 import { formatCurrency } from '@/utils/formatters';
 import {
@@ -62,6 +63,7 @@ export default function MasterDistributorCommissionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [distributorFilter, setDistributorFilter] = useState('ALL');
+  const [dateRange, setDateRange] = useState<any>({ preset: '7d' });
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -280,6 +282,12 @@ export default function MasterDistributorCommissionsPage() {
               />
             </div>
 
+            <DateRangeDropdown
+              value={dateRange}
+              onChange={(val) => setDateRange(val)}
+              size="md"
+            />
+
             {isFiltered && (
               <Button
                 variant="ghost"
@@ -288,6 +296,7 @@ export default function MasterDistributorCommissionsPage() {
                   setSearchQuery('');
                   setStatusFilter('ALL');
                   setDistributorFilter('ALL');
+                  setDateRange({ preset: '7d' });
                 }}
                 className="text-xs text-slate-500 hover:text-slate-900"
               >

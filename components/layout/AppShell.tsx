@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { MOCK_CURRENT_USER, UserContext, UserRole } from '@/config/roles';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { RetailerHeadlineTicker } from './RetailerHeadlineTicker';
 import { Drawer } from '@/components/ui/Drawer';
 import { useAuth } from '@/context/AuthContext';
 
@@ -97,6 +98,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
           currentUser={currentUser}
           onRoleChange={handleRoleChange}
         />
+
+        {/* Global Continuous Headline Alerts Ticker for Retailers */}
+        <RetailerHeadlineTicker />
 
         <main className="flex-1 overflow-y-auto min-h-0 bg-workspace-atmospheric scroll-smooth">{children}</main>
       </div>

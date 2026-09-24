@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { RefreshCw, Clock, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { DateRangeDropdown, DateRangeValue } from '@/components/ui/DateRangeDropdown';
 import { formatDateTime } from '@/utils/formatters';
 
 export interface MasterDistributorHeaderProps {
@@ -23,6 +24,8 @@ export const MasterDistributorHeader: React.FC<MasterDistributorHeaderProps> = (
   onRefresh,
   isLoading = false,
 }) => {
+  const [selectedRange, setSelectedRange] = useState<DateRangeValue>({ preset: 'today' });
+
   return (
     <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all">
       <div className="flex items-start gap-4">
@@ -49,11 +52,8 @@ export const MasterDistributorHeader: React.FC<MasterDistributorHeaderProps> = (
         </div>
       </div>
 
-      <div className="flex items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-        <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
-          <Clock className="w-3.5 h-3.5" />
-          <span>Refreshed: {formatDateTime(lastRefreshedAt)}</span>
-        </div>
+      <div className="flex items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 flex-wrap">
+        <DateRangeDropdown value={selectedRange} onChange={setSelectedRange} size="sm" />
 
         <Button
           variant="outline"

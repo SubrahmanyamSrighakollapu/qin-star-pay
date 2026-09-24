@@ -5,6 +5,7 @@ import { FilterBar } from '@/components/ui/FilterBar';
 import { Select } from '@/components/ui/Select';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { DateRangeDropdown } from '@/components/ui/DateRangeDropdown';
 import { Filter, RotateCcw } from 'lucide-react';
 import { LedgerFilters } from '@/types/domain';
 
@@ -24,6 +25,7 @@ export const LedgerFilterBar: React.FC<LedgerFilterBarProps> = ({
     entryType: 'ALL',
     entityType: 'ALL',
   });
+  const [dateRange, setDateRange] = useState<any>({ preset: '7d' });
 
   const activeCount = Object.values(filters).filter(
     (val) => val && val !== 'ALL' && val !== ''
@@ -90,6 +92,15 @@ export const LedgerFilterBar: React.FC<LedgerFilterBarProps> = ({
           { value: 'MERCHANT', label: 'Merchant' },
         ]}
       />
+
+      <div className="flex flex-col space-y-1">
+        <label className="text-xs font-medium text-slate-700">Date Range</label>
+        <DateRangeDropdown
+          value={dateRange}
+          onChange={(val) => setDateRange(val)}
+          size="md"
+        />
+      </div>
 
       <div className="flex items-end gap-2">
         <Button

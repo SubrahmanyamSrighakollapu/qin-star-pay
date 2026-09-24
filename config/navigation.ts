@@ -156,6 +156,8 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
     children: [
       { id: 'admin-users', label: 'Admin Users', path: '/admin/administration/users' },
       { id: 'roles', label: 'Roles & Permissions', path: '/admin/administration/roles' },
+      { id: 'service-categories', label: 'Service Categories & Products', path: '/admin/administration/service-categories' },
+      { id: 'headlines', label: 'Headline & Ticker Alerts', path: '/admin/administration/headlines' },
       { id: 'retailer-plans', label: 'Retailer Plans', path: '/admin/administration/retailer-plans' },
       { id: 'limits', label: 'Transaction Limits', path: '/admin/administration/limits' },
       { id: 'fees', label: 'Fee & Charge Master', path: '/admin/administration/fees' },

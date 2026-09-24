@@ -22,6 +22,7 @@ import { RetailerAnalyticsSection } from '@/components/features/retailer/Retaile
 import { RetailerRecentTransactions } from '@/components/features/retailer/RetailerRecentTransactions';
 import { RetailerCommissionSummary } from '@/components/features/retailer/RetailerCommissionSummary';
 import { RetailerPaymentMethodDrawer } from '@/components/features/retailer/RetailerPaymentMethodDrawer';
+import { DateRangeDropdown, DateRangeValue } from '@/components/ui/DateRangeDropdown';
 
 import { RefreshCw, Wallet, ShieldCheck } from 'lucide-react';
 
@@ -125,36 +126,20 @@ export default function RetailerDashboardPage() {
           </div>
 
           <div className="flex items-center gap-3 shrink-0 self-start md:self-auto">
-            {/* Time Filter Controls */}
-            <div className="flex items-center bg-slate-100 p-0.5 rounded-lg text-xs font-semibold border border-slate-200/80">
-              <button
-                type="button"
-                onClick={() => setSelectedPeriod('today')}
-                className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
-                  selectedPeriod === 'today' ? 'bg-white text-[var(--primary)] font-extrabold shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Today
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedPeriod('7d')}
-                className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
-                  selectedPeriod === '7d' ? 'bg-white text-[var(--primary)] font-extrabold shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                7 Days
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedPeriod('30d')}
-                className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
-                  selectedPeriod === '30d' ? 'bg-white text-[var(--primary)] font-extrabold shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                30 Days
-              </button>
-            </div>
+            {/* Standardized Date Range Filter Dropdown */}
+            <DateRangeDropdown
+              value={selectedPeriod}
+              onChange={(val) => {
+                if (val.preset === 'today' || val.preset === '7d' || val.preset === '30d') {
+                  setSelectedPeriod(val.preset);
+                } else if (val.preset === 'yesterday') {
+                  setSelectedPeriod('today');
+                } else {
+                  setSelectedPeriod('30d');
+                }
+              }}
+              size="sm"
+            />
 
             {/* Live Available Wallet Balance Pill */}
             <div className="flex items-center gap-2 bg-emerald-50/90 border border-emerald-200/90 px-3 py-1 rounded-lg text-xs">

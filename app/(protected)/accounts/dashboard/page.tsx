@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+import { DateRangeDropdown, DateRangeValue } from '@/components/ui/DateRangeDropdown';
+
 type HourlyWindow = '1h' | '3h' | '6h' | '12h' | '24h';
 type AccountantModule = 'PAY_IN' | 'PAY_OUT' | 'SETTLEMENTS';
 
@@ -75,7 +77,8 @@ export default function AccountsDashboardPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <DateRangeDropdown size="sm" />
           <Link
             href="/admin/invoices"
             className="px-3.5 py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow-xs"

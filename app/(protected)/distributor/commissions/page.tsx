@@ -21,6 +21,7 @@ import {
   StatusBadge,
   Tooltip,
   useToast,
+  DateRangeDropdown,
 } from '@/components/ui';
 import { ColumnDefinition } from '@/types/common';
 import { formatCurrency, formatDateTime } from '@/utils/formatters';
@@ -61,6 +62,7 @@ export default function DistributorCommissionsPage() {
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [dateRange, setDateRange] = useState<any>({ preset: '7d' });
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -343,6 +345,12 @@ export default function DistributorCommissionsPage() {
               />
             </div>
 
+            <DateRangeDropdown
+              value={dateRange}
+              onChange={(val) => setDateRange(val)}
+              size="md"
+            />
+
             {isFiltered && (
               <Button
                 variant="ghost"
@@ -350,6 +358,7 @@ export default function DistributorCommissionsPage() {
                 onClick={() => {
                   setSearchQuery('');
                   setStatusFilter('ALL');
+                  setDateRange({ preset: '7d' });
                 }}
                 className="text-xs text-slate-500 hover:text-slate-900"
               >
