@@ -11,6 +11,11 @@ import { MobileInput, useToast } from '@/components/ui';
 import { payInService, PayInPreviewResult, PayInExecutionResult } from '@/services/payInService';
 import { adminService } from '@/services/adminService';
 import { PAY_IN_SERVICES, PAY_IN_PAYMENT_MODES } from '@/constants/serviceMasters';
+import {
+  serviceCategoryService,
+  ServiceCategoryItem,
+  ServiceProductItem,
+} from '@/services/serviceCategoryService';
 import { PayInReceipt } from '@/components/features/retailer/PayInReceipt';
 import { formatCurrency } from '@/utils/formatters';
 import { normalizeEntityId } from '@/utils/identity';
@@ -40,6 +45,9 @@ import {
   Building2,
   Sparkles,
   Check,
+  Package,
+  ShoppingBag,
+  Tag,
 } from 'lucide-react';
 
 type PayInStep = 1 | 2 | 3 | 4;
@@ -60,6 +68,10 @@ export default function RetailerPayInPage() {
   // Step State
   const [step, setStep] = useState<PayInStep>(1);
 
+  // Dynamic Service Master State
+  const [categories, setCategories] = useState<ServiceCategoryItem[]>([]);
+  const [selectedCategoryObj, setSelectedCategoryObj] = useState<ServiceCategoryItem | null>(null);
+
   // Form State
   const [customerName, setCustomerName] = useState('');
   const [customerMobile, setCustomerMobile] = useState('');
@@ -67,6 +79,7 @@ export default function RetailerPayInPage() {
   const [serviceType, setServiceType] = useState('UPI Pay-In Collection');
   const [paymentMode, setPaymentMode] = useState('UPI');
   const [amountStr, setAmountStr] = useState('1000');
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [remarks, setRemarks] = useState('');
   const [mockScenario, setMockScenario] = useState<'AUTO' | 'SUCCESS' | 'PENDING' | 'FAILED'>('SUCCESS');
 
@@ -81,6 +94,71 @@ export default function RetailerPayInPage() {
   const [preview, setPreview] = useState<PayInPreviewResult | null>(null);
   const [executionResult, setExecutionResult] = useState<PayInExecutionResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Load Admin Configured Service Categories
+  const loadServiceCategories = async () => {
+    const res = await serviceCategoryService.getActiveCategories();
+    if (res.success && res.data) {
+      setCategories(res.data);
+      if (res.data.length > 0) {
+        // Find existing match or fallback to first
+        const match = res.data.find(
+          (c) => c.name.toLowerCase() === serviceType.toLowerCase() || c.code.toLowerCase() === serviceType.toLowerCase()
+        );
+        if (match) {
+          setSelectedCategoryObj(match);
+        } else {
+          setSelectedCategoryObj(res.data[0]);
+          setServiceType(res.data[0].name);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadServiceCategories();
+    const handleStorageUpdate = () => loadServiceCategories();
+    window.addEventListener('qin_service_categories_updated', handleStorageUpdate);
+    return () => window.removeEventListener('qin_service_categories_updated', handleStorageUpdate);
+  }, []);
+
+  // Update selected category object when serviceType changes
+  useEffect(() => {
+    if (categories.length > 0) {
+      const match = categories.find(
+        (c) => c.name.toLowerCase() === serviceType.toLowerCase() || c.code.toLowerCase() === serviceType.toLowerCase()
+      );
+      if (match) {
+        setSelectedCategoryObj(match);
+        // Check if current amount matches any product in this newly selected category
+        const numAmt = parseFloat(amountStr);
+        const matchedProd = match.products.find((p) => p.price === numAmt);
+        setSelectedProductId(matchedProd ? matchedProd.id : null);
+      } else {
+        setSelectedCategoryObj(null);
+        setSelectedProductId(null);
+      }
+    }
+  }, [serviceType, categories]);
+
+  // Sync product selection when amountStr changes manually
+  useEffect(() => {
+    if (selectedCategoryObj) {
+      const numAmt = parseFloat(amountStr);
+      const matchedProd = selectedCategoryObj.products.find((p) => p.price === numAmt);
+      setSelectedProductId(matchedProd ? matchedProd.id : null);
+    }
+  }, [amountStr, selectedCategoryObj]);
+
+  // Handle Product Card Click
+  const handleSelectProduct = (product: ServiceProductItem) => {
+    setSelectedProductId(product.id);
+    setAmountStr(product.price.toString());
+    setAmountError('');
+    if (!remarks || remarks.startsWith('[Product]')) {
+      setRemarks(`[${selectedCategoryObj?.name || serviceType}]: ${product.name} - ${product.description}`);
+    }
+  };
 
   // Resolve active transaction limit dynamically from adminService
   useEffect(() => {
@@ -222,6 +300,7 @@ export default function RetailerPayInPage() {
     setCustomerReference('');
     setAmountStr('1000');
     setRemarks('');
+    setSelectedProductId(null);
     setMobileError('');
     setAmountError('');
     setExecutionResult(null);
@@ -235,7 +314,7 @@ export default function RetailerPayInPage() {
         <TransactionHeader
           type="PAY_IN"
           title="Retailer Pay-In"
-          subtitle="Collect customer payments securely"
+          subtitle="Collect customer payments securely across application categories"
           retailerId={retailerId}
           walletBalance={45350}
           assignedPlan={preview?.planName || 'Standard Retailer Plan'}
@@ -296,14 +375,14 @@ export default function RetailerPayInPage() {
                     </div>
                   </div>
 
-                  {/* SECTION 2: Payment Parameters */}
+                  {/* SECTION 2: Payment & Service Selection */}
                   <div className="space-y-4 pt-2">
                     <div className="flex items-center gap-2 border-b border-slate-100 pb-2.5">
                       <div className="w-7 h-7 rounded-lg bg-indigo-50 text-[#0F4C81] flex items-center justify-center font-bold text-xs">
                         2
                       </div>
                       <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                        Payment & Service
+                        Payment & Service Category
                       </h2>
                     </div>
 
@@ -316,13 +395,19 @@ export default function RetailerPayInPage() {
                         <select
                           value={serviceType}
                           onChange={(e) => setServiceType(e.target.value)}
-                          className="w-full px-3.5 py-2.5 text-xs h-11 border border-slate-300 rounded-xl focus:outline-hidden focus:border-[#0F4C81] focus:ring-2 focus:ring-indigo-100 bg-white transition-all"
+                          className="w-full px-3.5 py-2.5 text-xs h-11 border border-slate-300 rounded-xl focus:outline-hidden focus:border-[#0F4C81] focus:ring-2 focus:ring-indigo-100 bg-white transition-all font-medium"
                         >
-                          {PAY_IN_SERVICES.map((s) => (
-                            <option key={s.id} value={s.name}>
-                              {s.name}
-                            </option>
-                          ))}
+                          {categories.length > 0
+                            ? categories.map((c) => (
+                                <option key={c.id} value={c.name}>
+                                  {c.name}
+                                </option>
+                              ))
+                            : PAY_IN_SERVICES.map((s) => (
+                                <option key={s.id} value={s.name}>
+                                  {s.name}
+                                </option>
+                              ))}
                         </select>
                       </div>
 
@@ -363,8 +448,8 @@ export default function RetailerPayInPage() {
                     </div>
                   </div>
 
-                  {/* SECTION 3: Prominent Amount Field */}
-                  <div className="space-y-3 pt-2">
+                  {/* SECTION 3: COLLECTION AMOUNT (Category Products & Prices + Custom Input) */}
+                  <div className="space-y-4 pt-2">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                       <div className="flex items-center gap-2">
                         <div className="w-7 h-7 rounded-lg bg-indigo-50 text-[#0F4C81] flex items-center justify-center font-bold text-xs">
@@ -381,7 +466,84 @@ export default function RetailerPayInPage() {
                       )}
                     </div>
 
+                    {/* ADMIN CONFIGURED PRODUCT PRICES (BASED ON SELECTED CATEGORY) */}
+                    {selectedCategoryObj && selectedCategoryObj.products.length > 0 && (
+                      <div className="space-y-2.5 p-4 rounded-2xl bg-indigo-50/40 border border-indigo-100">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Package className="w-4 h-4 text-[#0F4C81]" />
+                            <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                              Configured Products & Prices ({selectedCategoryObj.name})
+                            </span>
+                          </div>
+                          <span className="text-[10px] font-mono text-[#0F4C81] bg-indigo-100/70 px-2 py-0.5 rounded font-semibold">
+                            Admin Configured
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          Select a configured product package to auto-fill the collection amount and product details:
+                        </p>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                          {selectedCategoryObj.products.map((product) => {
+                            const isSelected = selectedProductId === product.id;
+                            return (
+                              <div
+                                key={product.id}
+                                onClick={() => handleSelectProduct(product)}
+                                className={`p-3 rounded-xl border text-left cursor-pointer transition-all space-y-1 relative ${
+                                  isSelected
+                                    ? 'bg-white border-[#0F4C81] ring-2 ring-indigo-200 shadow-xs'
+                                    : 'bg-white/80 border-slate-200 hover:border-indigo-300 hover:bg-white'
+                                }`}
+                              >
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="space-y-0.5">
+                                    <div className="flex items-center gap-1.5">
+                                      {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#0F4C81] shrink-0" />}
+                                      <h4 className="text-xs font-bold text-slate-900 leading-tight">
+                                        {product.name}
+                                      </h4>
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 line-clamp-1">
+                                      {product.description}
+                                    </p>
+                                  </div>
+                                  <div className="text-right shrink-0">
+                                    <span className="text-sm font-extrabold font-mono text-[#0F4C81]">
+                                      {formatCurrency(product.price)}
+                                    </span>
+                                    {product.badge && (
+                                      <span className="text-[9px] font-mono font-bold block px-1.5 py-0.2 rounded bg-amber-50 text-amber-800 border border-amber-200 mt-0.5">
+                                        {product.badge}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* COMMON CUSTOM AMOUNT INPUT FIELD */}
                     <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-semibold text-slate-700">
+                          Custom Collection Amount Input (₹) <span className="text-rose-500">*</span>
+                        </label>
+                        {selectedProductId ? (
+                          <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
+                            Product Price Selected
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                            Custom Amount Mode
+                          </span>
+                        )}
+                      </div>
+
                       <div className="relative">
                         <span className="absolute left-4 top-3.5 text-slate-400 font-extrabold text-xl font-mono">
                           ₹
@@ -396,10 +558,12 @@ export default function RetailerPayInPage() {
                             if (parseFloat(e.target.value) > 0) setAmountError('');
                           }}
                           onBlur={() => validateAmount(amountStr)}
-                          placeholder="10,000.00"
+                          placeholder="1,000.00"
                           className={`w-full pl-10 pr-4 h-14 text-2xl font-bold font-mono border rounded-xl focus:outline-hidden focus:ring-2 transition-all ${
                             amountError
                               ? 'border-rose-400 focus:ring-rose-100 bg-rose-50/20 text-rose-900'
+                              : selectedProductId
+                              ? 'border-[#0F4C81] focus:ring-indigo-100 bg-indigo-50/20 text-slate-900'
                               : 'border-slate-300 focus:border-[#0F4C81] focus:ring-indigo-100 bg-slate-50/30 text-slate-900'
                           }`}
                         />
@@ -420,7 +584,7 @@ export default function RetailerPayInPage() {
                         type="text"
                         value={remarks}
                         onChange={(e) => setRemarks(e.target.value)}
-                        placeholder="e.g. Over-the-counter customer payment collection"
+                        placeholder="e.g. Grocery package payment / walk-in collection notes"
                         className="w-full px-3.5 py-2.5 text-xs h-11 border border-slate-300 rounded-xl focus:outline-hidden focus:border-[#0F4C81] focus:ring-2 focus:ring-indigo-100 bg-white transition-all"
                       />
                     </div>

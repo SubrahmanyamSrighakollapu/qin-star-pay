@@ -268,3 +268,23 @@ body {
   animation: slideInFromBottom 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* ==========================================================================
+   CONTINUOUS MARQUEE TICKER ANIMATION
+   ========================================================================== */
+@keyframes marqueeContinuous {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee-scroll {
+  display: flex;
+  width: max-content;
+  animation: marqueeContinuous 38s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-scroll:hover {
+  animation-play-state: paused;
+}
+
+

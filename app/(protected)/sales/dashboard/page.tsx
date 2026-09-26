@@ -25,6 +25,7 @@ import {
   FileSpreadsheet,
 } from 'lucide-react';
 import Link from 'next/link';
+import { DateRangeDropdown } from '@/components/ui/DateRangeDropdown';
 
 type PeriodType = 'MONTHLY' | 'QUARTERLY' | 'HALF_YEARLY' | 'ANNUALLY';
 type RoleTab = 'MASTER_DISTRIBUTORS' | 'DISTRIBUTORS' | 'RETAILERS';
@@ -109,8 +110,9 @@ export default function SalesDashboardPage() {
           </div>
         </div>
 
-        {/* Period Selector Filter */}
+        {/* Period Selector Filter & Universal Date Dropdown */}
         <div className="flex flex-wrap items-center gap-2">
+          <DateRangeDropdown size="sm" />
           <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
             <Calendar className="w-3.5 h-3.5 ml-2 text-slate-400" />
             {(['MONTHLY', 'QUARTERLY', 'HALF_YEARLY', 'ANNUALLY'] as PeriodType[]).map((p) => (

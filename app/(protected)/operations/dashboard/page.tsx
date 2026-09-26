@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { FinancialMetricCard } from '@/components/features/financial/FinancialMetricCard';
 import { useToast } from '@/components/ui/Toast';
@@ -21,7 +22,7 @@ import {
   User,
   Shield,
 } from 'lucide-react';
-import Link from 'next/link';
+import { DateRangeDropdown } from '@/components/ui/DateRangeDropdown';
 
 type TicketStatus = 'Open' | 'Processing' | 'Closed';
 type ViewRoleMode = 'MANAGER' | 'EXECUTIVE';
@@ -136,6 +137,9 @@ export default function OperationsDashboardPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {/* Universal Date Range Filter Dropdown */}
+          <DateRangeDropdown size="sm" />
+
           {/* View Mode Toggle Switcher */}
           <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
             <button
