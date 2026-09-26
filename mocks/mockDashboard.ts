@@ -14,8 +14,9 @@ export const initialMockDashboardData: FullDashboardData = {
     totalTransactions: 13578,
   },
   statusDistribution: [
-    { name: 'Success', value: 12842, count: 12842, percentage: 94.58, color: '#10B981' },
+    { name: 'Success', value: 12042, count: 12042, percentage: 88.69, color: '#10B981' },
     { name: 'Failed', value: 736, count: 736, percentage: 5.42, color: '#EF4444' },
+    { name: 'Pending', value: 800, count: 800, percentage: 5.89, color: '#F59E0B' },
   ],
   payInVsPayOut: [
     { name: 'Pay-In', amount: 4275000.0, count: 8450, color: '#1E40AF' },

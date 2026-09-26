@@ -21,6 +21,7 @@ import { OperationalAlertsCard } from '@/components/features/dashboard/Operation
 import { NetworkHierarchyScaleCard } from '@/components/features/dashboard/NetworkHierarchyScaleCard';
 import { AdminApprovalQueueCard } from '@/components/features/dashboard/AdminApprovalQueueCard';
 import { PlatformActivityTimelineCard } from '@/components/features/dashboard/PlatformActivityTimelineCard';
+import { DailyOnboardedMembersCard } from '@/components/features/dashboard/DailyOnboardedMembersCard';
 import { ApprovalDetailDrawer, RejectionReasonModal } from '@/components/features/admin/network';
 import { useToast } from '@/components/ui/Toast';
 import { useAuth } from '@/context/AuthContext';
@@ -257,6 +258,9 @@ export default function AdminDashboardPage() {
           {data ? (
             <DashboardKPIGrid metrics={data.metrics} isLoading={isLoading} />
           ) : null}
+
+          {/* 4.1 Daily Onboarded Members Summary Widget (Master Distributors, Distributors, Retailers) */}
+          <DailyOnboardedMembersCard onMemberAdded={loadNetworkAndApprovalData} />
 
           {/* 5. Approval Workload Queue & Provider Health Row */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
