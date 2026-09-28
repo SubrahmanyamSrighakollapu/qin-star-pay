@@ -2,12 +2,12 @@
 
 import React from 'react';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { UsersListView } from '@/components/features/users/UsersListView';
+import { CreateUserForm } from '@/components/features/users/CreateUserForm';
 
-export default function AdminUsersPage() {
+export default function AddUserPage() {
   return (
     <PageContainer fullWidth className="pb-12">
-      <UsersListView />
+      <CreateUserForm />
     </PageContainer>
   );
 }

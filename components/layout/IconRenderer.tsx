@@ -15,6 +15,14 @@ import {
   Settings,
   Circle,
   Network,
+  Globe,
+  UserCheck,
+  Radio,
+  Layers,
+  Shield,
+  Percent,
+  CreditCard,
+  FileText,
 } from 'lucide-react';
 
 export interface IconRendererProps {
@@ -37,6 +45,14 @@ const iconMap: Record<string, React.ElementType> = {
   Terminal,
   Settings,
   Network,
+  Globe,
+  UserCheck,
+  Radio,
+  Layers,
+  Shield,
+  Percent,
+  CreditCard,
+  FileText,
 };
 
 export const IconRenderer: React.FC<IconRendererProps> = ({ name, className = 'w-4 h-4' }) => {

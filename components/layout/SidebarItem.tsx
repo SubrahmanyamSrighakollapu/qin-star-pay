@@ -31,17 +31,29 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
     (child: NavigationItem) => {
       if (!child.path) return false;
       const cleanPath = child.path.split('?')[0];
-      if (cleanPath === '/invoices') {
-        return pathname === '/invoices' || pathname === '/invoices/list';
+
+      if (pathname === cleanPath) return true;
+
+      if (cleanPath !== '/dashboard' && pathname.startsWith(`${cleanPath}/`)) {
+        const hasMoreSpecificSiblingMatch = item.children?.some((sibling) => {
+          if (!sibling.path || sibling.id === child.id) return false;
+          const siblingCleanPath = sibling.path.split('?')[0];
+          return (
+            siblingCleanPath.length > cleanPath.length &&
+            (pathname === siblingCleanPath || pathname.startsWith(`${siblingCleanPath}/`))
+          );
+        });
+        return !hasMoreSpecificSiblingMatch;
       }
-      return pathname === cleanPath || (cleanPath !== '/dashboard' && pathname.startsWith(`${cleanPath}/`));
+
+      return false;
     },
-    [pathname]
+    [pathname, item.children]
   );
 
   const isParentActive = !!(hasChildren && item.children?.some(isChildActive));
   const isDirectActive = item.path
-    ? pathname === item.path.split('?')[0] || (item.path !== '/dashboard' && pathname.startsWith(`${item.path.split('?')[0]}/`))
+    ? pathname === item.path.split('?')[0]
     : false;
   const isActive = isDirectActive || isParentActive;
 

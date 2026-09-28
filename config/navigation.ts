@@ -19,18 +19,6 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
     path: '/admin/dashboard',
   },
   {
-    id: 'network-management',
-    label: 'Network Management',
-    iconName: 'Network',
-    roles: ['SUPER_ADMIN', 'ADMIN'],
-    children: [
-      { id: 'admin-mds', label: 'Master Distributors', path: '/admin/network/master-distributors' },
-      { id: 'admin-dsts', label: 'Distributors', path: '/admin/network/distributors' },
-      { id: 'admin-retailers', label: 'Retailers', path: '/admin/network/retailers' },
-      { id: 'admin-approvals', label: 'Approvals Center', path: '/admin/network/approvals' },
-    ],
-  },
-  {
     id: 'transactions',
     label: 'Transactions',
     iconName: 'ArrowLeftRight',
@@ -44,15 +32,25 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
   },
   {
     id: 'users',
-    label: 'Users',
+    label: 'User Management',
     iconName: 'Users',
-    roles: ['SUPER_ADMIN', 'SALES', 'SUPPORT', 'OPERATIONS'],
+    roles: ['SUPER_ADMIN', 'ADMIN', 'SALES', 'SUPPORT', 'OPERATIONS'],
     children: [
-      { id: 'distributors', label: 'Distributors', path: '/admin/users/distributors' },
-      { id: 'retailers', label: 'Retailers', path: '/admin/users/retailers' },
-      { id: 'merchants', label: 'Merchants', path: '/admin/users/merchants' },
-      { id: 'backoffice', label: 'Back Office Users', path: '/admin/users/backoffice' },
-      { id: 'mapping', label: 'User Mapping', path: '/admin/users/mapping' },
+      { id: 'user-list', label: 'User List', path: '/admin/users' },
+      { id: 'add-user', label: 'Add User', path: '/admin/users/add' },
+      { id: 'user-settings', label: 'User Settings', path: '/admin/users/settings' },
+      { id: 'add-wallet', label: 'Add Wallet', path: '/admin/users/add-wallet' },
+      { id: 'hold-funds', label: 'Hold Funds', path: '/admin/users/hold-funds' },
+    ],
+  },
+  {
+    id: 'employees',
+    label: 'Employee Management',
+    iconName: 'UserCheck',
+    roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATIONS'],
+    children: [
+      { id: 'employee-list', label: 'Employees List', path: '/admin/employees' },
+      { id: 'add-employee', label: 'Add Employee', path: '/admin/employees/add' },
     ],
   },
   {
@@ -63,16 +61,11 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
     roles: ['SUPER_ADMIN', 'KYC', 'OPERATIONS'],
   },
   {
-    id: 'wallet',
-    label: 'Wallet & Ledger',
+    id: 'wallet-management',
+    label: 'Wallet Management',
     iconName: 'Wallet',
+    path: '/admin/wallet-management',
     roles: ['SUPER_ADMIN', 'ACCOUNTS', 'OPERATIONS'],
-    children: [
-      { id: 'balances', label: 'Available Balances', path: '/admin/wallet/balances' },
-      { id: 'credit-debit', label: 'Credit / Debit', path: '/admin/wallet/credit-debit' },
-      { id: 'debit-requests', label: 'Debit Requests', path: '/admin/wallet/debit-requests' },
-      { id: 'ledger', label: 'Ledger', path: '/admin/wallet/ledger' },
-    ],
   },
   {
     id: 'settlements',
@@ -115,59 +108,50 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
     ],
   },
   {
+    id: 'integrations',
+    label: 'Integration Module',
+    iconName: 'Plug',
+    roles: ['SUPER_ADMIN', 'ADMIN'],
+    children: [
+      { id: 'add-payment-gateway', label: 'Add Payment Gateway', path: '/admin/integrations' },
+      { id: 'gateway-setup', label: 'Gateway Setup & Mapping', path: '/admin/integrations/setup' },
+      { id: 'charge-configuration', label: 'Charge Configuration', path: '/admin/integrations/charges' },
+    ],
+  },
+  {
+    id: 'administration',
+    label: 'Admin Settings',
+    iconName: 'Settings',
+    roles: ['SUPER_ADMIN', 'ADMIN'],
+    children: [
+      { id: 'roles-management', label: 'Roles Management', path: '/admin/administration/roles' },
+      { id: 'plans-management', label: 'Plans Management', path: '/admin/administration/plans' },
+      { id: 'plan-commissions', label: 'Plan Commission & Config', path: '/admin/administration/commissions' },
+      { id: 'scroll-text', label: 'Scroll Text Manager', path: '/admin/administration/ticker' },
+      { id: 'notice-board', label: 'Notice Board Manager', path: '/admin/administration/notice-board' },
+      { id: 'payout-charges', label: 'Payout Charges Manager', path: '/admin/administration/payout-charges' },
+      { id: 'min-balance', label: 'Min Wallet Balance Req', path: '/admin/administration/balance-requirement' },
+      { id: 'payment-methods', label: 'Payment Methods Manager', path: '/admin/administration/payment-methods' },
+      { id: 'invoice-details', label: 'Invoice Details Setup', path: '/admin/administration/invoice-details' },
+    ],
+  },
+  {
+    id: 'website',
+    label: 'Website Settings',
+    iconName: 'Globe',
+    roles: ['SUPER_ADMIN', 'ADMIN'],
+    children: [
+      { id: 'privacy-policy', label: 'Privacy Policy', path: '/admin/website/privacy-policy' },
+      { id: 'terms-conditions', label: 'Terms & Conditions', path: '/admin/website/terms' },
+      { id: 'refund-policy', label: 'Refund Policy', path: '/admin/website/refund-policy' },
+    ],
+  },
+  {
     id: 'notifications',
     label: 'Notifications',
     iconName: 'Bell',
     path: '/admin/notifications',
     roles: ['SUPER_ADMIN', 'OPERATIONS', 'SUPPORT', 'ACCOUNTS'],
-  },
-  {
-    id: 'integrations',
-    label: 'Integrations',
-    iconName: 'Plug',
-    roles: ['SUPER_ADMIN', 'OPERATIONS'],
-    children: [
-      { id: 'providers', label: 'Providers', path: '/admin/integrations/providers' },
-      { id: 'api-config', label: 'API Configuration', path: '/admin/integrations/api-config' },
-      { id: 'service-config', label: 'Service Configuration', path: '/admin/integrations/service-config' },
-      { id: 'routing', label: 'Transaction Routing', path: '/admin/integrations/routing' },
-      { id: 'webhooks', label: 'Webhooks', path: '/admin/integrations/webhooks' },
-    ],
-  },
-  {
-    id: 'logs',
-    label: 'Logs',
-    iconName: 'Terminal',
-    roles: ['SUPER_ADMIN', 'OPERATIONS', 'SUPPORT'],
-    children: [
-      { id: 'api-logs', label: 'API Logs', path: '/admin/logs/api' },
-      { id: 'client-logs', label: 'Client Logs', path: '/admin/logs/client' },
-      { id: 'callback-logs', label: 'Callback Logs', path: '/admin/logs/callbacks' },
-      { id: 'webhook-logs', label: 'Webhook Logs', path: '/admin/logs/webhooks' },
-      { id: 'login-logs', label: 'Login Logs', path: '/admin/logs/login' },
-      { id: 'activity-logs', label: 'Activity Logs', path: '/admin/logs/activity' },
-    ],
-  },
-  {
-    id: 'administration',
-    label: 'Administration',
-    iconName: 'Settings',
-    roles: ['SUPER_ADMIN', 'ADMIN'],
-    children: [
-      { id: 'admin-users', label: 'Admin Users', path: '/admin/administration/users' },
-      { id: 'roles', label: 'Roles & Permissions', path: '/admin/administration/roles' },
-      { id: 'service-categories', label: 'Service Categories & Products', path: '/admin/administration/service-categories' },
-      { id: 'headlines', label: 'Headline & Ticker Alerts', path: '/admin/administration/headlines' },
-      { id: 'retailer-plans', label: 'Retailer Plans', path: '/admin/administration/retailer-plans' },
-      { id: 'limits', label: 'Transaction Limits', path: '/admin/administration/limits' },
-      { id: 'fees', label: 'Fee & Charge Master', path: '/admin/administration/fees' },
-      { id: 'tax', label: 'Tax Configuration', path: '/admin/administration/tax' },
-      { id: 'payment-masters', label: 'Payment Masters', path: '/admin/administration/config' },
-      { id: 'reason-codes', label: 'Reason Code Master', path: '/admin/administration/reason-codes' },
-      { id: 'settings', label: 'Platform Settings', path: '/admin/administration/settings' },
-      { id: 'branding', label: 'Branding', path: '/admin/administration/branding' },
-      { id: 'security', label: 'Security Settings', path: '/admin/administration/security' },
-    ],
   },
 ];
 
@@ -286,39 +270,14 @@ export const ROLE_NAVIGATION_MAPS: Record<UserRole, NavigationItem[]> = {
     },
     { id: 'chargebacks', label: 'Chargebacks & Disputes', iconName: 'RotateCcw', path: '/admin/chargebacks' },
     { id: 'notifications', label: 'Notifications', iconName: 'Bell', path: '/admin/notifications' },
-    {
-      id: 'integrations',
-      label: 'Integrations',
-      iconName: 'Plug',
-      children: [
-        { id: 'providers', label: 'Providers SLA', path: '/admin/integrations/providers' },
-        { id: 'api-config', label: 'API Configuration', path: '/admin/integrations/api-config' },
-        { id: 'routing', label: 'Transaction Routing', path: '/admin/integrations/routing' },
-      ],
-    },
-    {
-      id: 'logs',
-      label: 'System & Audit Logs',
-      iconName: 'Terminal',
-      children: [
-        { id: 'api-logs', label: 'API Logs', path: '/admin/logs/api' },
-        { id: 'callback-logs', label: 'Callback Logs', path: '/admin/logs/callbacks' },
-        { id: 'activity-logs', label: 'Activity Logs', path: '/admin/logs/activity' },
-      ],
-    },
   ],
   ACCOUNTS: [
     { id: 'acc-dashboard', label: 'Dashboard', iconName: 'LayoutDashboard', path: '/accounts/dashboard' },
     {
-      id: 'wallet',
-      label: 'Wallet & Ledger',
+      id: 'wallet-management',
+      label: 'Wallet Management',
       iconName: 'Wallet',
-      children: [
-        { id: 'balances', label: 'Available Balances', path: '/admin/wallet/balances' },
-        { id: 'credit-debit', label: 'Credit / Debit', path: '/admin/wallet/credit-debit' },
-        { id: 'debit-requests', label: 'Debit Requests', path: '/admin/wallet/debit-requests' },
-        { id: 'ledger', label: 'Financial Ledger', path: '/admin/wallet/ledger' },
-      ],
+      path: '/admin/wallet-management',
     },
     { id: 'settlements', label: 'Settlements', iconName: 'Landmark', path: '/admin/settlements' },
     {
@@ -346,20 +305,16 @@ export const ROLE_NAVIGATION_MAPS: Record<UserRole, NavigationItem[]> = {
   KYC: [
     { id: 'kyc-dashboard', label: 'Dashboard', iconName: 'LayoutDashboard', path: '/kyc/dashboard' },
     { id: 'kyc-desk', label: 'KYC & Onboarding Desk', iconName: 'ShieldCheck', path: '/admin/kyc' },
-    { id: 'kyc-merchants', label: 'Merchant Accounts', iconName: 'Users', path: '/admin/users/merchants' },
     { id: 'notifications', label: 'Notifications', iconName: 'Bell', path: '/admin/notifications' },
   ],
   SALES: [
     { id: 'sales-dashboard', label: 'Dashboard', iconName: 'LayoutDashboard', path: '/sales/dashboard' },
-    { id: 'sales-approvals', label: 'Approvals Center', iconName: 'ShieldCheck', path: '/admin/network/approvals' },
     {
       id: 'users',
       label: 'Network Users',
       iconName: 'Users',
       children: [
-        { id: 'distributors', label: 'Distributors', path: '/admin/users/distributors' },
-        { id: 'retailers', label: 'Retailers', path: '/admin/users/retailers' },
-        { id: 'merchants', label: 'Merchants', path: '/admin/users/merchants' },
+        { id: 'user-list', label: 'User List', path: '/admin/users' },
       ],
     },
     {
@@ -408,4 +363,3 @@ export function filterNavigationByRole(
     })
     .filter((item) => !item.children || item.children.length > 0);
 }
-

@@ -17,81 +17,54 @@ export const FinancialMetricCard: React.FC<FinancialMetricCardProps> = ({
   subtext,
   icon,
   variant = 'neutral',
-  isDominant = false,
 }) => {
-  const variantStyles = {
-    primary: {
-      border: 'border-indigo-200/90',
-      bg: 'bg-white',
-      accentBar: 'bg-[#0F4C81]',
-      label: 'text-slate-600',
-      value: 'text-[#0F4C81]',
-    },
-    payin: {
-      border: 'border-indigo-200/90',
-      bg: 'bg-indigo-50/20',
-      accentBar: 'bg-[#0F4C81]',
-      label: 'text-indigo-900',
-      value: 'text-[#0F4C81]',
-    },
-    payout: {
-      border: 'border-orange-200/90',
-      bg: 'bg-orange-50/20',
-      accentBar: 'bg-[#F97316]',
-      label: 'text-orange-900',
-      value: 'text-[#F97316]',
-    },
-    success: {
-      border: 'border-emerald-200/90',
-      bg: 'bg-emerald-50/20',
-      accentBar: 'bg-emerald-600',
-      label: 'text-emerald-900',
-      value: 'text-emerald-700',
-    },
-    warning: {
-      border: 'border-amber-200/90',
-      bg: 'bg-amber-50/20',
-      accentBar: 'bg-amber-500',
-      label: 'text-amber-900',
-      value: 'text-amber-700',
-    },
-    danger: {
-      border: 'border-rose-200/90',
-      bg: 'bg-rose-50/20',
-      accentBar: 'bg-rose-500',
-      label: 'text-rose-900',
-      value: 'text-rose-700',
-    },
-    neutral: {
-      border: 'border-slate-200/90',
-      bg: 'bg-white',
-      accentBar: 'bg-slate-300',
-      label: 'text-slate-500',
-      value: 'text-slate-900',
-    },
+  // Softly tinted icon background colors for intentional accenting
+  const iconTintStyles = {
+    primary: 'bg-blue-50 text-[#155EEF]',
+    payin: 'bg-emerald-50 text-emerald-600',
+    payout: 'bg-amber-50 text-amber-600',
+    success: 'bg-emerald-50 text-emerald-600',
+    warning: 'bg-amber-50 text-amber-600',
+    danger: 'bg-rose-50 text-rose-600',
+    neutral: 'bg-slate-100 text-slate-600',
   };
 
-  const style = variantStyles[variant];
+  const iconStyle = iconTintStyles[variant] || iconTintStyles.neutral;
 
   return (
-    <div
-      className={`p-4 rounded-xl border ${style.border} ${style.bg} shadow-xs relative overflow-hidden transition-all duration-200 hover:shadow-sm`}
-    >
-      <div className={`absolute top-0 left-0 right-0 h-1 ${style.accentBar}`} />
-      <div className="flex items-center justify-between text-xs mb-1">
-        <span className={`font-bold uppercase tracking-wider ${style.label} flex items-center gap-1.5`}>
-          {icon}
+    <div className="p-5 bg-white border border-[#E5EAF1] rounded-xl shadow-xs flex flex-col justify-between transition-all duration-200 hover:border-slate-300">
+      {/* Top: Icon + Label */}
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[12px] font-semibold uppercase tracking-wider text-[#64748B]">
           {label}
         </span>
+        {icon && (
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${iconStyle}`}>
+            {icon}
+          </div>
+        )}
       </div>
-      <div
-        className={`font-mono font-extrabold tracking-tight tabular-nums ${
-          isDominant ? 'text-2xl md:text-3xl' : 'text-xl md:text-2xl'
-        } ${style.value}`}
-      >
-        {value}
+
+      {/* Middle: Dominant Financial Value */}
+      <div className="mt-3 mb-1">
+        <div className="text-[28px] leading-tight font-extrabold text-[#0F172A] tracking-tight tabular-nums font-mono">
+          {value}
+        </div>
       </div>
-      {subtext && <p className="text-[11px] text-slate-500 mt-1">{subtext}</p>}
+
+      {/* Bottom: Context / Subtext */}
+      {subtext && (
+        <div className="mt-1 flex items-center text-xs text-[#64748B] font-medium">
+          {subtext.startsWith('+') || subtext.includes('Growth') ? (
+            <span className="inline-flex items-center text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+              {subtext}
+            </span>
+          ) : (
+            <span className="text-[12px] text-[#64748B]">{subtext}</span>
+          )}
+        </div>
+      )}
     </div>
   );
 };
+

@@ -2,12 +2,12 @@
 
 import React from 'react';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { UsersListView } from '@/components/features/users/UsersListView';
+import { EmployeesListView } from '@/components/features/employees/EmployeesListView';
 
-export default function AdminUsersPage() {
+export default function EmployeesPage() {
   return (
     <PageContainer fullWidth className="pb-12">
-      <UsersListView />
+      <EmployeesListView />
     </PageContainer>
   );
 }

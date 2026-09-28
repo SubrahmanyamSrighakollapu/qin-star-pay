@@ -2,12 +2,12 @@
 
 import React from 'react';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { UsersListView } from '@/components/features/users/UsersListView';
+import { HoldFundsView } from '@/components/features/users/HoldFundsView';
 
-export default function AdminUsersPage() {
+export default function HoldFundsPage() {
   return (
     <PageContainer fullWidth className="pb-12">
-      <UsersListView />
+      <HoldFundsView />
     </PageContainer>
   );
 }
