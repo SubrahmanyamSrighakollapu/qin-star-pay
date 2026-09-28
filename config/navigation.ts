@@ -124,6 +124,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
     iconName: 'Settings',
     roles: ['SUPER_ADMIN', 'ADMIN'],
     children: [
+      { id: 'service-categories', label: 'Service Categories & Products', path: '/admin/administration/service-categories' },
       { id: 'roles-management', label: 'Roles Management', path: '/admin/administration/roles' },
       { id: 'plans-management', label: 'Plans Management', path: '/admin/administration/plans' },
       { id: 'plan-commissions', label: 'Plan Commission & Config', path: '/admin/administration/commissions' },

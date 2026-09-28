@@ -130,10 +130,23 @@ export default function RetailerPayInPage() {
       );
       if (match) {
         setSelectedCategoryObj(match);
-        // Check if current amount matches any product in this newly selected category
-        const numAmt = parseFloat(amountStr);
-        const matchedProd = match.products.find((p) => p.price === numAmt);
-        setSelectedProductId(matchedProd ? matchedProd.id : null);
+        const mode = match.pricingMode || 'BOTH';
+        if (mode === 'PRESET_ONLY') {
+          const activeProds = match.products.filter((p) => p.status === 'ACTIVE');
+          if (activeProds.length > 0) {
+            setSelectedProductId(activeProds[0].id);
+            setAmountStr(activeProds[0].price.toString());
+            setAmountError('');
+          } else {
+            setSelectedProductId(null);
+          }
+        } else if (mode === 'MANUAL_ONLY') {
+          setSelectedProductId(null);
+        } else {
+          const numAmt = parseFloat(amountStr);
+          const matchedProd = match.products.find((p) => p.price === numAmt);
+          setSelectedProductId(matchedProd ? matchedProd.id : null);
+        }
       } else {
         setSelectedCategoryObj(null);
         setSelectedProductId(null);
@@ -241,6 +254,11 @@ export default function RetailerPayInPage() {
   // Proceed to Step 2 (Review)
   const handleProceedToReview = (e: React.FormEvent) => {
     e.preventDefault();
+    const mode = selectedCategoryObj?.pricingMode || 'BOTH';
+    if (mode === 'PRESET_ONLY' && !selectedProductId) {
+      toastError('Admin Configuration Policy: You must select one of the preset product packages for this category.');
+      return;
+    }
     const isMobValid = validateMobile(customerMobile);
     const isAmtValid = validateAmount(amountStr);
 
@@ -466,114 +484,155 @@ export default function RetailerPayInPage() {
                       )}
                     </div>
 
-                    {/* ADMIN CONFIGURED PRODUCT PRICES (BASED ON SELECTED CATEGORY) */}
-                    {selectedCategoryObj && selectedCategoryObj.products.length > 0 && (
-                      <div className="space-y-2.5 p-4 rounded-2xl bg-indigo-50/40 border border-indigo-100">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Package className="w-4 h-4 text-[#0F4C81]" />
-                            <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                              Configured Products & Prices ({selectedCategoryObj.name})
-                            </span>
-                          </div>
-                          <span className="text-[10px] font-mono text-[#0F4C81] bg-indigo-100/70 px-2 py-0.5 rounded font-semibold">
-                            Admin Configured
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-500">
-                          Select a configured product package to auto-fill the collection amount and product details:
-                        </p>
+                    {/* DERIVED PRICING MODE & DYNAMIC AMOUNT ENTRY */}
+                    {(() => {
+                      const mode = selectedCategoryObj?.pricingMode || 'BOTH';
+                      const isPresetOnly = mode === 'PRESET_ONLY';
+                      const isManualOnly = mode === 'MANUAL_ONLY';
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                          {selectedCategoryObj.products.map((product) => {
-                            const isSelected = selectedProductId === product.id;
-                            return (
-                              <div
-                                key={product.id}
-                                onClick={() => handleSelectProduct(product)}
-                                className={`p-3 rounded-xl border text-left cursor-pointer transition-all space-y-1 relative ${
-                                  isSelected
-                                    ? 'bg-white border-[#0F4C81] ring-2 ring-indigo-200 shadow-xs'
-                                    : 'bg-white/80 border-slate-200 hover:border-indigo-300 hover:bg-white'
-                                }`}
-                              >
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="space-y-0.5">
-                                    <div className="flex items-center gap-1.5">
-                                      {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#0F4C81] shrink-0" />}
-                                      <h4 className="text-xs font-bold text-slate-900 leading-tight">
-                                        {product.name}
-                                      </h4>
-                                    </div>
-                                    <p className="text-[11px] text-slate-500 line-clamp-1">
-                                      {product.description}
-                                    </p>
-                                  </div>
-                                  <div className="text-right shrink-0">
-                                    <span className="text-sm font-extrabold font-mono text-[#0F4C81]">
-                                      {formatCurrency(product.price)}
-                                    </span>
-                                    {product.badge && (
-                                      <span className="text-[9px] font-mono font-bold block px-1.5 py-0.2 rounded bg-amber-50 text-amber-800 border border-amber-200 mt-0.5">
-                                        {product.badge}
-                                      </span>
-                                    )}
-                                  </div>
+                      return (
+                        <>
+                          {/* ADMIN CONFIGURED PRODUCT PRICES (Hidden if MANUAL_ONLY) */}
+                          {!isManualOnly && selectedCategoryObj && selectedCategoryObj.products.length > 0 && (
+                            <div className="space-y-2.5 p-4 rounded-2xl bg-indigo-50/40 border border-indigo-100">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <Package className="w-4 h-4 text-[#0F4C81]" />
+                                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                                    Configured Products & Prices ({selectedCategoryObj.name})
+                                  </span>
                                 </div>
+                                <span
+                                  className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold ${
+                                    isPresetOnly
+                                      ? 'text-amber-800 bg-amber-100/90 border border-amber-200'
+                                      : 'text-[#0F4C81] bg-indigo-100/70'
+                                  }`}
+                                >
+                                  {isPresetOnly ? 'Mandatory Package Selection (Admin Policy)' : 'Admin Configured Presets'}
+                                </span>
                               </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
+                              <p className="text-[11px] text-slate-500">
+                                {isPresetOnly
+                                  ? 'Admin Policy: Manual amount editing is restricted for this category. Please select one of the configured preset packages below:'
+                                  : 'Select a configured product package to auto-fill the collection amount and product details, or type a custom amount below:'}
+                              </p>
 
-                    {/* COMMON CUSTOM AMOUNT INPUT FIELD */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <label className="block text-xs font-semibold text-slate-700">
-                          Custom Collection Amount Input (₹) <span className="text-rose-500">*</span>
-                        </label>
-                        {selectedProductId ? (
-                          <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
-                            Product Price Selected
-                          </span>
-                        ) : (
-                          <span className="text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                            Custom Amount Mode
-                          </span>
-                        )}
-                      </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                                {selectedCategoryObj.products.map((product) => {
+                                  const isSelected = selectedProductId === product.id;
+                                  return (
+                                    <div
+                                      key={product.id}
+                                      onClick={() => handleSelectProduct(product)}
+                                      className={`p-3 rounded-xl border text-left cursor-pointer transition-all space-y-1 relative ${
+                                        isSelected
+                                          ? 'bg-white border-[#0F4C81] ring-2 ring-indigo-200 shadow-xs'
+                                          : 'bg-white/80 border-slate-200 hover:border-indigo-300 hover:bg-white'
+                                      }`}
+                                    >
+                                      <div className="flex items-start justify-between gap-2">
+                                        <div className="space-y-0.5">
+                                          <div className="flex items-center gap-1.5">
+                                            {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#0F4C81] shrink-0" />}
+                                            <h4 className="text-xs font-bold text-slate-900 leading-tight">
+                                              {product.name}
+                                            </h4>
+                                          </div>
+                                          <p className="text-[11px] text-slate-500 line-clamp-1">
+                                            {product.description}
+                                          </p>
+                                        </div>
+                                        <div className="text-right shrink-0">
+                                          <span className="text-sm font-extrabold font-mono text-[#0F4C81]">
+                                            {formatCurrency(product.price)}
+                                          </span>
+                                          {product.badge && (
+                                            <span className="text-[9px] font-mono font-bold block px-1.5 py-0.2 rounded bg-amber-50 text-amber-800 border border-amber-200 mt-0.5">
+                                              {product.badge}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
 
-                      <div className="relative">
-                        <span className="absolute left-4 top-3.5 text-slate-400 font-extrabold text-xl font-mono">
-                          ₹
-                        </span>
-                        <input
-                          type="number"
-                          min="1"
-                          step="1"
-                          value={amountStr}
-                          onChange={(e) => {
-                            setAmountStr(e.target.value);
-                            if (parseFloat(e.target.value) > 0) setAmountError('');
-                          }}
-                          onBlur={() => validateAmount(amountStr)}
-                          placeholder="1,000.00"
-                          className={`w-full pl-10 pr-4 h-14 text-2xl font-bold font-mono border rounded-xl focus:outline-hidden focus:ring-2 transition-all ${
-                            amountError
-                              ? 'border-rose-400 focus:ring-rose-100 bg-rose-50/20 text-rose-900'
-                              : selectedProductId
-                              ? 'border-[#0F4C81] focus:ring-indigo-100 bg-indigo-50/20 text-slate-900'
-                              : 'border-slate-300 focus:border-[#0F4C81] focus:ring-indigo-100 bg-slate-50/30 text-slate-900'
-                          }`}
-                        />
-                      </div>
-                      {amountError && (
-                        <p className="text-[11px] text-rose-600 font-medium flex items-center gap-1 pt-1">
-                          <AlertTriangle className="w-3 h-3" /> {amountError}
-                        </p>
-                      )}
-                    </div>
+                          {/* COLLECTION AMOUNT INPUT FIELD */}
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <label className="block text-xs font-semibold text-slate-700">
+                                Collection Amount (₹) <span className="text-rose-500">*</span>
+                              </label>
+                              {isPresetOnly ? (
+                                <span className="text-[10px] font-mono font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">
+                                  Preset Price Locked (Read-Only)
+                                </span>
+                              ) : isManualOnly ? (
+                                <span className="text-[10px] font-mono font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">
+                                  Custom Amount Mode Only
+                                </span>
+                              ) : selectedProductId ? (
+                                <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
+                                  Preset Package Selected
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-mono font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded">
+                                  Custom Amount Entered
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="relative">
+                              <span className="absolute left-4 top-3.5 text-slate-400 font-extrabold text-xl font-mono">
+                                ₹
+                              </span>
+                              <input
+                                type="number"
+                                min="1"
+                                step="1"
+                                value={amountStr}
+                                readOnly={isPresetOnly}
+                                onChange={(e) => {
+                                  if (isPresetOnly) return;
+                                  setAmountStr(e.target.value);
+                                  if (parseFloat(e.target.value) > 0) setAmountError('');
+                                }}
+                                onBlur={() => validateAmount(amountStr)}
+                                placeholder="1,000.00"
+                                className={`w-full pl-10 pr-4 h-14 text-2xl font-bold font-mono border rounded-xl focus:outline-hidden focus:ring-2 transition-all ${
+                                  amountError
+                                    ? 'border-rose-400 focus:ring-rose-100 bg-rose-50/20 text-rose-900'
+                                    : isPresetOnly
+                                    ? 'border-amber-300 bg-amber-50/30 text-amber-900 font-extrabold cursor-not-allowed'
+                                    : selectedProductId
+                                    ? 'border-[#0F4C81] focus:ring-indigo-100 bg-indigo-50/20 text-slate-900'
+                                    : 'border-slate-300 focus:border-[#0F4C81] focus:ring-indigo-100 bg-slate-50/30 text-slate-900'
+                                }`}
+                              />
+                            </div>
+
+                            {/* Policy Notice helper */}
+                            <p className="text-[11px] text-slate-500 font-medium pt-0.5">
+                              {isPresetOnly
+                                ? `🔒 Admin Policy: Manual custom amount entry is locked for "${selectedCategoryObj?.name}". The collection amount is set by the selected package price.`
+                                : isManualOnly
+                                ? `✏️ Admin Policy: Manual custom amount entry mode enabled for "${selectedCategoryObj?.name}".`
+                                : `💡 Admin Policy: You may choose a preset package above or type a custom collection amount.`}
+                            </p>
+
+                            {amountError && (
+                              <p className="text-[11px] text-rose-600 font-medium flex items-center gap-1 pt-1">
+                                <AlertTriangle className="w-3 h-3" /> {amountError}
+                              </p>
+                            )}
+                          </div>
+                        </>
+                      );
+                    })()}
 
                     {/* Remarks / Notes */}
                     <div className="space-y-1.5 pt-1">
