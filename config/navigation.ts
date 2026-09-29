@@ -1,4 +1,4 @@
-import { UserContext, canAccessRoute, UserRole } from './roles';
+﻿import { UserContext, canAccessRoute, UserRole } from './roles';
 
 export interface NavigationItem {
   id: string;
@@ -65,6 +65,13 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
     label: 'Wallet Management',
     iconName: 'Wallet',
     path: '/admin/wallet-management',
+    roles: ['SUPER_ADMIN', 'ACCOUNTS', 'OPERATIONS'],
+  },
+  {
+    id: 'topup-approvals',
+    label: 'Top-Up Approvals',
+    iconName: 'BadgeIndianRupee',
+    path: '/admin/top-up-requests',
     roles: ['SUPER_ADMIN', 'ACCOUNTS', 'OPERATIONS'],
   },
   {
@@ -239,6 +246,8 @@ export const ROLE_NAVIGATION_MAPS: Record<UserRole, NavigationItem[]> = {
   RETAILER: [
     { id: 'ret-dashboard', label: 'Dashboard', iconName: 'LayoutDashboard', path: '/retailer/dashboard' },
     { id: 'ret-payin', label: 'Pay-In', iconName: 'ArrowDownLeft', path: '/retailer/pay-in' },
+    { id: 'ret-payment-links', label: 'Payment Links & QR', iconName: 'QrCode', path: '/retailer/payment-links' },
+    { id: 'ret-topup', label: 'Top-Up Request', iconName: 'BadgeIndianRupee', path: '/retailer/top-up' },
     { id: 'ret-payout', label: 'Pay-Out', iconName: 'ArrowUpRight', path: '/retailer/pay-out' },
     { id: 'ret-transactions', label: 'Transactions', iconName: 'ArrowLeftRight', path: '/retailer/transactions' },
     {
@@ -252,7 +261,11 @@ export const ROLE_NAVIGATION_MAPS: Record<UserRole, NavigationItem[]> = {
       ],
     },
     { id: 'ret-commissions', label: 'Commissions', iconName: 'Percent', path: '/retailer/commissions' },
-    { id: 'ret-reports', label: 'Reports', iconName: 'BarChart3', path: '/retailer/reports' },
+    { id: 'ret-reports', label: 'Reports', iconName: 'BarChart3', path: '/retailer/reports', children: [
+      { id: 'ret-all-reports', label: 'All Reports', path: '/retailer/reports' },
+      { id: 'ret-unsettled', label: 'Unsettled (T+1)', path: '/retailer/reports/unsettled' },
+      { id: 'ret-chargebacks', label: 'Chargebacks', path: '/retailer/reports/chargebacks' },
+    ] },
     { id: 'ret-notifications', label: 'Notifications', iconName: 'Bell', path: '/retailer/notifications' },
     { id: 'ret-profile', label: 'Profile', iconName: 'User', path: '/retailer/profile' },
   ],
@@ -364,3 +377,4 @@ export function filterNavigationByRole(
     })
     .filter((item) => !item.children || item.children.length > 0);
 }
+
