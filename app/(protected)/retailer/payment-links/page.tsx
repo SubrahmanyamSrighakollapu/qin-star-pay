@@ -1,14 +1,103 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 'use client';
-import { useEffect, useState } from 'react';
-import { Copy, ExternalLink, Link2, Plus, QrCode } from 'lucide-react';
+
+import { useEffect, useState, type FormEvent } from 'react';
+import { Copy, ExternalLink, Link2, Plus, Share2 } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { FinancialPageHeader } from '@/components/features/financial/FinancialPageHeader';
-import { PaymentQr } from '@/components/features/retailer/PaymentQr';
 import { Button, Card, Input, StatusBadge, useToast } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
-import { merchantPaymentService, PaymentLink } from '@/services/merchantPaymentService';
+import { merchantPaymentService, type PaymentLink } from '@/services/merchantPaymentService';
 import { formatCurrency } from '@/utils/formatters';
 
-export default function PaymentLinksPage(){ const {session}=useAuth(); const {toastSuccess,toastError}=useToast(); const retailerId=session?.entityId||'RET001'; const [links,setLinks]=useState<PaymentLink[]>([]); const [description,setDescription]=useState('Customer payment'); const [amount,setAmount]=useState(''); const [expiry,setExpiry]=useState('2027-12-31'); const load=()=>setLinks(merchantPaymentService.getLinks(retailerId)); useEffect(()=>load(),[retailerId]); const url=(token:string)=>typeof window==='undefined'?`/pay/${token}`:`${window.location.origin}/pay/${token}`; const copy=async(value:string)=>{await navigator.clipboard.writeText(value);toastSuccess('Payment link copied.');}; const create=(e:React.FormEvent)=>{e.preventDefault(); if(!description.trim())return toastError('Enter a payment purpose.'); merchantPaymentService.createLink({retailerId,businessName:session?.name||'Metro Store #01',description,fixedAmount:amount?Number(amount):undefined,expiresAt:new Date(`${expiry}T23:59:59`).toISOString()}); setAmount('');load();toastSuccess('Secure payment link created.');}; return <PageContainer><div className="space-y-6 max-w-7xl mx-auto"><FinancialPageHeader title="Payment Links & QR Pay-In" subtitle="Create shareable hosted checkout links so customers can pay without accessing your dashboard." statusBadge={<StatusBadge status="ACTIVE" label="Hosted checkout"/>}/><Card title="Create payment link" subtitle="Use a fixed amount for invoices or leave it blank for an open payment link."><form onSubmit={create} className="grid md:grid-cols-4 gap-4"><Input label="Payment purpose" required value={description} onChange={e=>setDescription(e.target.value)}/><Input label="Fixed amount (optional)" type="number" min="1" value={amount} onChange={e=>setAmount(e.target.value)}/><Input label="Expires on" type="date" required value={expiry} onChange={e=>setExpiry(e.target.value)}/><Button type="submit" className="self-end" leftIcon={<Plus className="w-4 h-4"/>}>Create link</Button></form></Card><div className="grid lg:grid-cols-2 gap-5">{links.map(link=><Card key={link.token} title={link.description} subtitle={link.fixedAmount?`Fixed collection Â· ${formatCurrency(link.fixedAmount)}`:'Customer enters payment amount'} action={<StatusBadge status={link.status}/>}><div className="flex flex-col sm:flex-row gap-5 items-center"><PaymentQr value={url(link.token)}/><div className="min-w-0 flex-1 space-y-3"><div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs font-mono break-all">{url(link.token)}</div><p className="text-xs text-slate-500">Expires {new Date(link.expiresAt).toLocaleDateString('en-IN')} Â· Customer name, mobile and payment mode are collected securely.</p><div className="flex gap-2"><Button size="sm" onClick={()=>copy(url(link.token))} leftIcon={<Copy className="w-4 h-4"/>}>Copy link</Button><a href={`/pay/${link.token}`} target="_blank"><Button size="sm" variant="outline" leftIcon={<ExternalLink className="w-4 h-4"/>}>Open</Button></a></div></div></div></Card>)}{links.length===0&&<Card className="lg:col-span-2"><div className="py-12 text-center text-slate-500"><QrCode className="w-10 h-10 mx-auto mb-3"/><p>No payment links yet.</p></div></Card>}</div><div className="p-4 bg-blue-50 border border-blue-200 rounded-xl flex gap-3 text-xs text-slate-700"><Link2 className="w-5 h-5 text-[#0F4C81] shrink-0"/><p>Production integration note: the hosted form must create a server-side order, redirect to the configured gateway, validate its signed callback, and credit the ledger idempotently. This demo preserves the complete customer journey with local mock state.</p></div></div></PageContainer> }
+export default function PaymentLinksPage() {
+  const { session } = useAuth();
+  const { toastSuccess, toastError } = useToast();
+  const retailerId = session?.entityId || 'RET001';
+  const [links, setLinks] = useState<PaymentLink[]>([]);
+  const [description, setDescription] = useState('Customer payment');
+  const [amount, setAmount] = useState('');
+  const [expiry, setExpiry] = useState('2027-12-31');
 
+  const load = () => setLinks(merchantPaymentService.getLinks(retailerId));
+  useEffect(() => load(), [retailerId]);
+
+  const getUrl = (token: string) => typeof window === 'undefined'
+    ? `/pay/${token}`
+    : `${window.location.origin}/pay/${token}`;
+
+  const copy = async (value: string) => {
+    await navigator.clipboard.writeText(value);
+    toastSuccess('Payment link copied.');
+  };
+
+  const share = async (link: PaymentLink) => {
+    const paymentUrl = getUrl(link.token);
+    const text = `${link.description}${link.fixedAmount ? ` - ${formatCurrency(link.fixedAmount)}` : ''}\nPay securely: ${paymentUrl}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: link.description, text, url: paymentUrl });
+        return;
+      } catch { /* user cancelled or browser rejected; use WhatsApp fallback */ }
+    }
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const create = (event: FormEvent) => {
+    event.preventDefault();
+    if (!description.trim()) return toastError('Enter a payment purpose.');
+    if (amount && Number(amount) <= 0) return toastError('Enter a valid fixed amount.');
+    merchantPaymentService.createLink({
+      retailerId,
+      businessName: session?.name || 'Metro Store #01',
+      description: description.trim(),
+      fixedAmount: amount ? Number(amount) : undefined,
+      expiresAt: new Date(`${expiry}T23:59:59`).toISOString(),
+    });
+    setAmount('');
+    load();
+    toastSuccess('Secure hosted payment link created.');
+  };
+
+  return (
+    <PageContainer>
+      <div className="mx-auto max-w-7xl space-y-6">
+        <FinancialPageHeader
+          title="Payment Links"
+          subtitle="Create and share hosted checkout links. UPI QR collections are managed separately under QR Pay-In."
+          statusBadge={<StatusBadge status="ACTIVE" label="Hosted checkout" />}
+        />
+
+        <Card title="Create payment link" subtitle="Use a fixed amount for an invoice, or leave it blank so the customer can enter the amount.">
+          <form onSubmit={create} className="grid gap-4 md:grid-cols-4">
+            <Input label="Payment purpose" required value={description} onChange={(event) => setDescription(event.target.value)} />
+            <Input label="Fixed amount (optional)" type="number" min="1" value={amount} onChange={(event) => setAmount(event.target.value)} />
+            <Input label="Expires on" type="date" required value={expiry} onChange={(event) => setExpiry(event.target.value)} />
+            <Button type="submit" className="self-end" leftIcon={<Plus className="h-4 w-4" />}>Create Link</Button>
+          </form>
+        </Card>
+
+        <Card title="Active payment links" subtitle="Copy, share through WhatsApp or open the hosted customer checkout." noPadding>
+          {links.length === 0 ? (
+            <div className="py-14 text-center text-slate-500"><Link2 className="mx-auto mb-3 h-10 w-10" /><p>No payment links created yet.</p></div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {links.map((link) => {
+                const paymentUrl = getUrl(link.token);
+                return (
+                  <div key={link.token} className="grid gap-4 p-5 lg:grid-cols-[minmax(220px,0.8fr)_minmax(320px,1.4fr)_auto] lg:items-center">
+                    <div className="min-w-0"><div className="flex items-center gap-2"><b className="truncate text-sm text-slate-900">{link.description}</b><StatusBadge status={link.status} /></div><p className="mt-1 text-xs text-slate-500">{link.fixedAmount ? `Fixed collection · ${formatCurrency(link.fixedAmount)}` : 'Open amount · customer enters value'}</p><p className="mt-1 text-[10px] text-slate-400">Expires {new Date(link.expiresAt).toLocaleDateString('en-IN')}</p></div>
+                    <div className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-mono text-slate-600"><p className="truncate" title={paymentUrl}>{paymentUrl}</p></div>
+                    <div className="flex flex-wrap gap-2"><Button size="sm" onClick={() => copy(paymentUrl)} leftIcon={<Copy className="h-4 w-4" />}>Copy</Button><Button size="sm" variant="outline" onClick={() => share(link)} leftIcon={<Share2 className="h-4 w-4" />}>Share</Button><a href={`/pay/${link.token}`} target="_blank" rel="noreferrer"><Button size="sm" variant="outline" leftIcon={<ExternalLink className="h-4 w-4" />}>Open</Button></a></div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Card>
+
+        <div className="flex gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4 text-xs text-slate-700"><Link2 className="h-5 w-5 shrink-0 text-[#0F4C81]" /><p>A payment link opens the hosted customer checkout and processes payment through the configured gateway. For direct UPI QR scanning, UTR entry and receipt verification, use the separate <b>QR Pay-In</b> module.</p></div>
+      </div>
+    </PageContainer>
+  );
+}

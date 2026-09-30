@@ -245,9 +245,10 @@ export const ROLE_NAVIGATION_MAPS: Record<UserRole, NavigationItem[]> = {
   ],
   RETAILER: [
     { id: 'ret-dashboard', label: 'Dashboard', iconName: 'LayoutDashboard', path: '/retailer/dashboard' },
+    { id: 'ret-bbps', label: 'BBPS', iconName: 'Receipt', path: '/retailer/bbps' },
     { id: 'ret-payin', label: 'Pay-In', iconName: 'ArrowDownLeft', path: '/retailer/pay-in' },
     { id: 'ret-qr-payin', label: 'QR Pay-In', iconName: 'QrCode', path: '/retailer/qr-pay-in' },
-    { id: 'ret-payment-links', label: 'Payment Links & QR', iconName: 'QrCode', path: '/retailer/payment-links' },
+    { id: 'ret-payment-links', label: 'Payment Links', iconName: 'Link2', path: '/retailer/payment-links' },
     { id: 'ret-topup', label: 'Top-Up Request', iconName: 'BadgeIndianRupee', path: '/retailer/top-up' },
     { id: 'ret-payout', label: 'Pay-Out', iconName: 'ArrowUpRight', path: '/retailer/pay-out' },
     { id: 'ret-transactions', label: 'Transactions', iconName: 'ArrowLeftRight', path: '/retailer/transactions' },
