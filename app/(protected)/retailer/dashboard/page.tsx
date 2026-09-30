@@ -22,9 +22,9 @@ import { RetailerAnalyticsSection } from '@/components/features/retailer/Retaile
 import { RetailerRecentTransactions } from '@/components/features/retailer/RetailerRecentTransactions';
 import { RetailerCommissionSummary } from '@/components/features/retailer/RetailerCommissionSummary';
 import { RetailerPaymentMethodDrawer } from '@/components/features/retailer/RetailerPaymentMethodDrawer';
-import { DateRangeDropdown, DateRangeValue } from '@/components/ui/DateRangeDropdown';
+import { DateRangeDropdown } from '@/components/ui/DateRangeDropdown';
 
-import { RefreshCw, Wallet, ShieldCheck } from 'lucide-react';
+import { RefreshCw, Wallet } from 'lucide-react';
 
 export default function RetailerDashboardPage() {
   const { session } = useAuth();
@@ -105,19 +105,19 @@ export default function RetailerDashboardPage() {
     >
       <div className="space-y-5">
         {/* 1. Compact Header / Date Filter / Balance Bar */}
-        <div className="bg-white/95 backdrop-blur-xs border border-slate-200/90 rounded-2xl p-3.5 px-5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+        <div className="relative z-40 bg-white/95 backdrop-blur-xs border border-slate-200/90 rounded-2xl p-3.5 px-5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 rounded-xl bg-[var(--primary)] text-white font-extrabold text-xs flex items-center justify-center shadow-2xs shrink-0">
               QSP
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <h2 className="text-sm sm:text-base font-extrabold text-slate-900 leading-tight truncate">
                   {businessName}
                 </h2>
                 <span className="text-[11px] font-mono font-bold text-slate-500">({retailerCode})</span>
               </div>
-              <p className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-2">
+              <p className="text-[11px] text-slate-500 mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
                 <span>Distributor: <strong className="text-slate-700">{summary?.parentDistributor?.name || 'North Zone'}</strong></span>
                 <span>•</span>
                 <span>Master: <strong className="text-slate-700">{summary?.parentMasterDistributor?.name || 'Apex Network'}</strong></span>
@@ -125,7 +125,7 @@ export default function RetailerDashboardPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0 self-start md:self-auto">
+          <div className="flex flex-wrap items-center gap-2 shrink-0 self-start md:self-auto">
             {/* Standardized Date Range Filter Dropdown */}
             <DateRangeDropdown
               value={selectedPeriod}
@@ -168,7 +168,7 @@ export default function RetailerDashboardPage() {
         </div>
 
         {/* 2. PRIMARY DASHBOARD HERO CONTENT: Pay-In & Pay-Out Analytics Cards (Directly Visible Above Fold) */}
-        <div>
+        <div className="relative z-0">
           <RetailerPayInPayOutOverview
             transactions={transactions.length > 0 ? transactions : (summary?.recentTransactions || [])}
             selectedPeriod={selectedPeriod}
@@ -186,7 +186,7 @@ export default function RetailerDashboardPage() {
 
         {/* 4. NEEDS ATTENTION (65-70%) & QUICK ACTIONS (30-35%) ROW */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          <div className="lg:col-span-8">
+          <div className="lg:col-span-8 h-full">
             {summary && (
               <RetailerAttentionPanel
                 attentionItems={summary.attentionItems}
@@ -194,7 +194,7 @@ export default function RetailerDashboardPage() {
               />
             )}
           </div>
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-4 h-full">
             <RetailerQuickActions />
           </div>
         </div>
@@ -212,7 +212,7 @@ export default function RetailerDashboardPage() {
 
         {/* 6. RECENT TRANSACTIONS TABLE & COMMISSION SUMMARY */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          <div className="lg:col-span-8">
+          <div className="lg:col-span-8 h-full">
             {summary && (
               <RetailerRecentTransactions
                 transactions={summary.recentTransactions}
@@ -221,7 +221,7 @@ export default function RetailerDashboardPage() {
             )}
           </div>
 
-          <div className="lg:col-span-4 space-y-5">
+          <div className="lg:col-span-4 h-full">
             {summary && (
               <RetailerCommissionSummary
                 commissionSummary={summary.commissionSummary}

@@ -23,6 +23,8 @@ import {
   Percent,
   CreditCard,
   FileText,
+  QrCode,
+  BadgeIndianRupee,
 } from 'lucide-react';
 
 export interface IconRendererProps {
@@ -53,6 +55,8 @@ const iconMap: Record<string, React.ElementType> = {
   Percent,
   CreditCard,
   FileText,
+  QrCode,
+  BadgeIndianRupee,
 };
 
 export const IconRenderer: React.FC<IconRendererProps> = ({ name, className = 'w-4 h-4' }) => {

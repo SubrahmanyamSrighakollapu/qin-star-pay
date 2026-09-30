@@ -17,7 +17,7 @@ import {
   ServiceProductItem,
 } from '@/services/serviceCategoryService';
 import { PayInReceipt } from '@/components/features/retailer/PayInReceipt';
-import { formatCurrency } from '@/utils/formatters';
+import { formatAmountInWords, formatCurrency } from '@/utils/formatters';
 import { normalizeEntityId } from '@/utils/identity';
 
 // Shared Transaction Components
@@ -615,6 +615,12 @@ export default function RetailerPayInPage() {
                               />
                             </div>
 
+                            {parseFloat(amountStr) > 0 && (
+                              <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-[#0F4C81]">
+                                {formatAmountInWords(parseFloat(amountStr))}
+                              </div>
+                            )}
+
                             {/* Policy Notice helper */}
                             <p className="text-[11px] text-slate-500 font-medium pt-0.5">
                               {isPresetOnly
@@ -696,19 +702,30 @@ export default function RetailerPayInPage() {
                         <span className="font-bold text-slate-900">{formatCurrency(preview.amount)}</span>
                       </div>
                       <div className="flex justify-between text-slate-500 text-[11px]">
-                        <span>Platform Charges:</span>
-                        <span>{formatCurrency(preview.charges)}</span>
+                        <span>Configured Charge ({preview.chargeRateLabel}):</span>
+                        <span className="text-rose-600">− {formatCurrency(preview.charges)}</span>
                       </div>
                       <div className="flex justify-between text-slate-500 text-[11px]">
                         <span>GST (18%):</span>
-                        <span>{formatCurrency(preview.gst)}</span>
+                        <span className="text-rose-600">− {formatCurrency(preview.gst)}</span>
                       </div>
-
+                      <div className="flex justify-between text-rose-700 text-[11px] font-semibold">
+                        <span>Total Deductions:</span>
+                        <span>− {formatCurrency(preview.totalDeductions)}</span>
+                      </div>
                       <div className="pt-2.5 border-t border-slate-200/80 flex justify-between items-center text-slate-900 font-sans">
-                        <span className="font-bold text-xs uppercase tracking-wider text-slate-700">Customer Pays</span>
+                        <span className="font-bold text-xs uppercase tracking-wider text-slate-700">Net Settlement Credit</span>
                         <span className="font-mono text-base font-extrabold text-[#0F4C81]">
-                          {formatCurrency(preview.totalAmount)}
+                          {formatCurrency(preview.actualCreditAmount)}
                         </span>
+                      </div>
+                      <div className="flex justify-between text-emerald-700 text-[11px]">
+                        <span>Retailer Commission ({preview.retailerCommissionRate}):</span>
+                        <span>+ {formatCurrency(preview.retailerCommissionAmount)}</span>
+                      </div>
+                      <div className="flex justify-between rounded-lg bg-emerald-50 border border-emerald-200 p-2 text-emerald-900">
+                        <span className="font-bold">Final Wallet Credit</span>
+                        <span className="font-bold">{formatCurrency(preview.retailerWalletCredit)}</span>
                       </div>
                     </div>
 
@@ -792,16 +809,28 @@ export default function RetailerPayInPage() {
                       <span className="font-bold text-white">{formatCurrency(preview.amount)}</span>
                     </div>
                     <div className="flex justify-between py-1 border-b border-indigo-800/80">
-                      <span className="text-indigo-200 font-sans">Platform Charges:</span>
-                      <span>{formatCurrency(preview.charges)}</span>
+                      <span className="text-indigo-200 font-sans">Configured Charge ({preview.chargeRateLabel}):</span>
+                      <span className="text-rose-300">− {formatCurrency(preview.charges)}</span>
                     </div>
                     <div className="flex justify-between py-1 border-b border-indigo-800/80">
                       <span className="text-indigo-200 font-sans">GST (18%):</span>
-                      <span>{formatCurrency(preview.gst)}</span>
+                      <span className="text-rose-300">− {formatCurrency(preview.gst)}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-indigo-800/80">
+                      <span className="text-indigo-200 font-sans">Total Deductions:</span>
+                      <span className="text-rose-300">− {formatCurrency(preview.totalDeductions)}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-indigo-800/80">
+                      <span className="text-indigo-200 font-sans">Net Settlement Credit:</span>
+                      <span>{formatCurrency(preview.actualCreditAmount)}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-indigo-800/80">
+                      <span className="text-indigo-200 font-sans">Commission Credit:</span>
+                      <span className="text-emerald-300">+ {formatCurrency(preview.retailerCommissionAmount)}</span>
                     </div>
                     <div className="flex justify-between py-1.5 text-sm font-bold text-white">
-                      <span className="font-sans">Total Customer Paid:</span>
-                      <span className="text-indigo-300 font-mono text-base">{formatCurrency(preview.totalAmount)}</span>
+                      <span className="font-sans">Final Wallet Credit:</span>
+                      <span className="text-emerald-300 font-mono text-base">{formatCurrency(preview.retailerWalletCredit)}</span>
                     </div>
                   </div>
                 </div>
